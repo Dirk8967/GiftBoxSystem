@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <style>
+      /* 這個檔案只包含純粹的 CSS 程式碼 */
+body, html { margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; background-color: #f0f2f5; height: 100%;}
+#app-container { display: flex; flex-direction: column; min-height: 100vh; }
+.main-nav { display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+.nav-links { display: flex; align-items: center; }
+.nav-button { display: flex; align-items: center; justify-content: center; padding: 18px 20px; border: none; background-color: transparent; color: #495057; cursor: pointer; font-size: 16px; font-weight: 500; transition: color 0.2s, border-bottom-color 0.2s; border-bottom: 3px solid transparent; }
+.nav-button .material-symbols-outlined { margin-right: 8px; font-size: 20px; }
+.nav-button:hover { color: #0056b3; }
+.nav-button.active { color: #007bff; border-bottom-color: #007bff; }
+.user-menu { position: relative; }
+.user-info-button { display: flex; align-items: center; background-color: #e9ecef; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s; }
+.user-info-button:hover { background-color: #ced4da; }
+.user-info-button .user-icon { width: 24px; height: 24px; margin-right: 8px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+.user-info-button .user-email { font-size: 14px; font-weight: 500; color: #495057; }
+.dropdown-content { display: none; position: absolute; right: 0; top: 110%; background-color: white; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 4px; overflow: hidden;  }
+.dropdown-content button { display: flex; align-items: center; color: black; padding: 12px 16px; text-decoration: none; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-size: 15px; font-family: 'Noto Sans TC', sans-serif; }
+.dropdown-content button:hover { background-color: #f1f1f1; }
+.user-menu.open .dropdown-content { display: block; }
+.dropdown-content .material-symbols-outlined { color: #555; }
+.main-content { flex-grow: 1; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; }
+.main-content .container { flex-grow: 1; display: flex; flex-direction: column; width: 100%; max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
+.container h2 { margin-top: 0; }
+.profile-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 25px; margin-top: 20px; max-width: 500px;}
+.profile-field { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.profile-field:last-child { border-bottom: none; }
+.profile-label { font-weight: 700; color: #555; width: 100px; }
+.profile-value { font-size: 16px; color: #333; word-break: break-all; }
+.footer-note { margin-top: 20px; font-size: 13px; color: #888; text-align: center; }
+.nav-button-admin { color: #d9a500; }
+.nav-button-admin.hidden { display: none !important; }
+.nav-button-admin:hover { color: #b88d00; }
+.nav-button-admin.active { color: #ffc107; border-bottom-color: #ffc107; }
+.nav-dropdown { position: relative; }
+.nav-dropdown.hidden { display: none !important; }
+.nav-dropdown > .nav-button .material-symbols-outlined:last-child { margin-left: 4px; margin-right: -4px; transition: transform 0.2s; font-size: 24px; }
+.nav-dropdown.open > .nav-button .material-symbols-outlined:last-child { transform: rotate(180deg); }
+.nav-dropdown-content { display: none; position: absolute; left: 0; top: 100%; background-color: white; min-width: 100%; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 0 0 4px 4px; overflow: hidden; border: 1px solid #ddd; border-top: none; }
+.nav-dropdown-content button { display: flex; align-items: center; color: #212529; padding: 12px 16px; text-decoration: none; width: 100%; box-sizing: border-box; text-align: left; background: none; border: none; border-bottom: 1px solid #f1f1f1; cursor: pointer; font-size: 15px; font-family: 'Noto Sans TC', sans-serif; border-radius: 0; }
+.nav-dropdown-content button:last-child { border-bottom: none; }
+.nav-dropdown-content button:hover { background-color: #f1f1f1; }
+.nav-dropdown.open .nav-dropdown-content { display: block; }
+.action-btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 500; color: white; border: none; padding: 10px 18px; border-radius: 5px; font-size: 15px; cursor: pointer; transition: background-color 0.2s; }
+.action-btn:hover { opacity: 0.85; }
+.action-btn .material-symbols-outlined { margin-right: 6px; }
+.btn-save { background-color: #007bff; }
+.btn-cancel { background-color: #6c757d; }
+.order-header-form { border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+.order-header-form.case-order-theme { background-color: #f8f9fa; }
+.order-header-form.loose-order-theme { background-color: #f4f8f7; border-color: #d1e7dd; }
+.order-header-form .form-title { display: flex; align-items: center; font-size: 1.2em; margin-top:0; margin-bottom: 20px; color: #343a40; }
+.order-header-form .form-title .material-symbols-outlined { margin-right: 10px; }
+#page-case-order .form-title .material-symbols-outlined { color: #007bff; }
+#page-loose-order .form-title .material-symbols-outlined { color: #198754; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px 25px; }
+.form-grid-loose { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px 25px; }
+.input-with-button { display: flex; }
+.input-with-button input { flex-grow: 1; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.input-with-button button { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.btn-lookup { background-color: #5a6268; padding: 10px 12px; }
+.btn-lookup:hover { background-color: #4a4f54; }
+.btn-lookup .material-symbols-outlined { margin-right: 0; }
+.form-group { margin-bottom: 0; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; font-size: 14px; }
+.form-group input { width: 100%; padding: 10px; font-size: 15px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
+.table-container { flex-grow: 1; overflow-x: auto; }
+.table-container tbody tr:nth-child(even) { background-color: #f8f9fa; }
+.table-container tbody tr:hover { background-color: #e9ecef; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th, td { padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-size: 14px; vertical-align: middle; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+td.wrap-text, th.wrap-text { white-space: normal; word-break: break-all; }
+th.text-center, td.text-center { text-align: center; }
+th.text-right, td.text-right { text-align: right; padding-right: 15px !important; }
+.product-image-cell img { max-width: 70px; max-height: 70px; object-fit: cover; border-radius: 4px; }
+.ship-option-yes, .ship-option-no { display: flex; align-items: center; gap: 6px; justify-content: center; }
+.ship-option-yes .material-symbols-outlined { color: #28a745; font-weight: bold; }
+.ship-option-no .material-symbols-outlined { color: #dc3545; font-weight: bold; }
+.btn-order { background-color: #17a2b8; padding: 6px 12px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 5px; }
+.btn-order:hover { background-color: #138496; }
+.btn-order .material-symbols-outlined { margin-right: 4px; font-size: 18px; }
+.modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+.modal-content { background: white; padding: 25px 30px; border-radius: 12px; width: 100%; max-width: 500px; text-align: left; box-sizing: border-box; position: relative; animation: modalOpen 0.3s ease-out; margin: 20px auto; }
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+.close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #6c757d; border: none; background: none;}
+.order-modal-section { padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
+.order-modal-section h4 { margin-top: 0; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; color: #333; display:flex; align-items:center; }
+.order-modal-section h4 .material-symbols-outlined { margin-right: 8px; font-size: 22px; }
+.order-modal-header { background-color: #f8f9fa; }
+.order-modal-product { background-color: #e9f5ff; }
+.order-info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 10px; font-size: 14px; }
+.order-info-grid span:nth-child(odd) { font-weight: bold; color: #555; }
+.order-info-grid span:nth-child(even) { color: #333; }
+#caseOrderModal .form-group, #looseOrderModal .form-group { margin-top: 20px; }
+#caseOrderQtySelect, #looseOrderQtySelect { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ced4da; }
+#submitCaseOrderBtn, #submitLooseOrderBtn { background-color: #28a745; }
+#submitCaseOrderBtn:hover, #submitLooseOrderBtn:hover { background-color: #218838; }
+#cancelCaseOrderBtn, #cancelLooseOrderBtn { background-color: #6c757d; }
+#cancelCaseOrderBtn:hover, #cancelLooseOrderBtn:hover { background-color: #5a6268; }
+#siteSelectionModal .modal-content { max-width: 600px; }
+#siteSelectionModal .site-list { max-height: 40vh; overflow-y: auto; border: 1px solid #ddd; padding: 5px;}
+#siteSelectionModal .site-item { display: block; width: 100%; padding: 10px; border-bottom: 1px solid #eee; background: none; border: none; text-align: left; cursor: pointer;}
+#siteSelectionModal .site-item:hover { background-color: #f0f2f5; }
+#siteSelectionModal .site-item:last-child { border-bottom: none; }
+
+@keyframes modalOpen { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 768px) {
+    .main-nav { flex-direction: column; align-items: stretch; padding: 0; }
+    .nav-links { width: 100%; display: flex; justify-content: space-around; border-bottom: 1px solid #dee2e6;}
+    .nav-button { flex-grow: 1; padding: 12px 5px; font-size: 14px;}
+    .user-menu { padding: 10px; background-color: #f8f9fa; }
+    .main-content { padding: 15px; }
+    .main-content .container { padding: 15px; } 
+}
+    </style>
+    
+</head>
+<body>
+    <div id="app-container">
+        <header class="main-nav">
+            <div class="nav-links">
+                <span id="activity-name-display" style="font-weight: bold; align-self: center; margin-right: 20px;"></span>
+                <button id="navCaseOrder" class="nav-button"><span class="material-symbols-outlined">inventory</span>成箱訂購</button>
+                <button id="navLooseOrder" class="nav-button"><span class="material-symbols-outlined">shopping_cart</span>零星訂購</button>
+                <button id="navCaseSummary" class="nav-button"><span class="material-symbols-outlined">assessment</span>成箱彙總表</button>
+                <button id="navLooseSummary" class="nav-button"><span class="material-symbols-outlined">list_alt</span>零星彙總表</button>
+                <button id="navCaseOrderAdmin" class="nav-button nav-button-admin hidden"><span class="material-symbols-outlined">task_alt</span>成箱訂購管理</button>
+                <div id="navLooseOrderAdmin" class="nav-dropdown hidden">
+                    <button class="nav-button nav-button-admin"><span class="material-symbols-outlined">receipt_long</span>零星訂購管理<span class="material-symbols-outlined">arrow_drop_down</span></button>
+                    <div class="nav-dropdown-content">
+                        <button id="navIOManagement"><span class="material-symbols-outlined">import_export</span>進/出貨管理</button>
+                        <button id="navInventoryManagement"><span class="material-symbols-outlined">inventory</span>庫存管理</button>
+                    </div>
+                </div>
+            </div>
+            <div class="user-menu" id="userMenu">
+                <button class="user-info-button" id="userInfoBtn"><div class="user-icon" id="userInitial">?</div><span class="user-email" id="userEmailDisplay">載入中...</span></button>
+                <div class="dropdown-content" id="userDropdown">
+                    <button id="navMyProfile"><span class="material-symbols-outlined">account_circle</span>我的資料</button>
+                    <button id="navOrderHistory"><span class="material-symbols-outlined">history</span>訂購紀錄</button>
+                    <button id="navDeliveryHistory"><span class="material-symbols-outlined">local_shipping</span>派送紀錄</button>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-content-area" class="main-content">
+            </main>
+    </div>
+
+    <div class="modal-overlay" id="caseOrderModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeCaseOrderModalBtn">&times;</button>
+            <h2 class="modal-title" id="caseOrderModalTitle">建立成箱訂購單</h2>
+            <div class="order-modal-section order-modal-header">
+                <h4><span class="material-symbols-outlined">badge</span>訂購資訊</h4>
+                <div class="order-info-grid">
+                    <span>訂購人姓名:</span><span id="modalOrdererName"></span>
+                    <span>寄送地點:</span><span id="modalDeliveryLocation"></span>
+                    <span>訂購人電話:</span><span id="modalOrdererPhone"></span>
+                    <span>寄送日期:</span><span id="modalDeliveryDate"></span>
+                </div>
+            </div>
+            <div class="order-modal-section order-modal-product">
+                <h4><span class="material-symbols-outlined">redeem</span>商品資訊</h4>
+                <div class="order-info-grid">
+                    <span>商品名稱:</span><span id="modalProductName"></span>
+                    <span>售價/盒:</span><span id="modalSellingPrice"></span>
+                    <span>成箱價/盒:</span><span id="modalCasePricePerBox"></span>
+                    <span>成箱總價:</span><span id="modalTotalCasePrice"></span>
+                    <span>最低成箱盒數:</span><span id="modalBoxesPerCase"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="caseOrderQtySelect">選擇訂購數量 (盒)</label>
+                <select id="caseOrderQtySelect"></select>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn btn-cancel" id="cancelCaseOrderBtn">取消</button>
+                <button class="action-btn btn-save" id="submitCaseOrderBtn"><span class="material-symbols-outlined">send</span>送出訂單</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="siteSelectionModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeSiteSelectionModalBtn">&times;</button>
+            <h2 class="modal-title">選擇寄送地點</h2>
+            <div class="site-list" id="siteSelectionList"><p>載入站點資訊中...</p></div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="looseOrderModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeLooseOrderModalBtn">&times;</button>
+            <h2 class="modal-title" id="looseOrderModalTitle">建立零星訂購單</h2>
+            <div class="order-modal-section order-modal-header">
+                <h4><span class="material-symbols-outlined">badge</span>訂購資訊</h4>
+                <div class="order-info-grid">
+                    <span>訂購人姓名:</span><span id="looseModalOrdererName"></span>
+                    <span>訂購人電話:</span><span id="looseModalOrdererPhone"></span>
+                    <span>寄送地點:</span><span id="looseModalDeliveryLocation"></span>
+                </div>
+            </div>
+            <div class="order-modal-section order-modal-product">
+                <h4><span class="material-symbols-outlined">redeem</span>商品資訊</h4>
+                <div class="order-info-grid">
+                    <span>商品名稱:</span><span id="looseModalProductName"></span>
+                    <span>售價/盒:</span><span id="looseModalSellingPrice"></span>
+                    <span>成箱盒數:</span><span id="looseModalBoxesPerCase"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="looseOrderQtySelect">選擇訂購數量 (盒)</label>
+                <select id="looseOrderQtySelect"></select>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn btn-cancel" id="cancelLooseOrderBtn">取消</button>
+                <button class="action-btn btn-save" id="submitLooseOrderBtn"><span class="material-symbols-outlined">send</span>送出訂單</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+      // --- 全域變數 ---
+let allProductsData = [], isProductsLoaded = false;
+let currentOrderingProduct = null;
+let allSiteDataForSelection = [], isSiteDataForSelectionLoaded = false;
+
+// --- 初始載入與事件綁定 ---
+window.addEventListener('load', function() {
+    try {
+        // 為所有靜態按鈕綁定事件
+        document.getElementById('userInfoBtn').addEventListener('click', toggleUserMenu);
+        document.getElementById('closeCaseOrderModalBtn').addEventListener('click', closeCaseOrderModal);
+        document.getElementById('cancelCaseOrderBtn').addEventListener('click', closeCaseOrderModal);
+        document.getElementById('submitCaseOrderBtn').addEventListener('click', submitCaseOrder);
+        document.getElementById('closeLooseOrderModalBtn').addEventListener('click', closeLooseOrderModal);
+        document.getElementById('cancelLooseOrderBtn').addEventListener('click', closeLooseOrderModal);
+        document.getElementById('submitLooseOrderBtn').addEventListener('click', submitLooseOrder);
+        document.getElementById('closeSiteSelectionModalBtn').addEventListener('click', closeSiteSelectionModal);
+
+        // 為導覽按鈕綁定事件
+        document.getElementById('navCaseOrder').addEventListener('click', function(){ showSubPage('Page_CaseOrder', this); });
+        document.getElementById('navLooseOrder').addEventListener('click', function(){ showSubPage('Page_LooseOrder', this); });
+        document.getElementById('navCaseSummary').addEventListener('click', function(){ showSubPage('Page_CaseSummary', this); });
+        document.getElementById('navLooseSummary').addEventListener('click', function(){ showSubPage('Page_LooseSummary', this); });
+        document.getElementById('navCaseOrderAdmin').addEventListener('click', function(){ showSubPage('Page_CaseOrderAdmin', this); });
+        
+        document.getElementById('navMyProfile').addEventListener('click', function(){ showSubPage('Page_MyProfile', this); });
+        document.getElementById('navOrderHistory').addEventListener('click', function(){ showSubPage('Page_OrderHistory', this); });
+        document.getElementById('navDeliveryHistory').addEventListener('click', function(){ showSubPage('Page_DeliveryHistory', this); });
+
+        const looseOrderAdminDropdown = document.getElementById('navLooseOrderAdmin');
+        if (looseOrderAdminDropdown) {
+            looseOrderAdminDropdown.querySelector('.nav-button').addEventListener('click', function(event) {
+                event.stopPropagation();
+                this.parentElement.classList.toggle('open');
+            });
+            document.getElementById('navIOManagement').addEventListener('click', function() { showSubPage('Page_IOManagement', looseOrderAdminDropdown.querySelector('.nav-button')); });
+            document.getElementById('navInventoryManagement').addEventListener('click', function() { showSubPage('Page_InventoryManagement', looseOrderAdminDropdown.querySelector('.nav-button')); });
+        }
+
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            if (userMenu && !userMenu.contains(event.target)) { userMenu.classList.remove('open'); }
+            if (looseOrderAdminDropdown && !looseOrderAdminDropdown.contains(event.target)) { looseOrderAdminDropdown.classList.remove('open'); }
+        });
+
+        // 初始權限檢查和頁面載入
+        google.script.run.withSuccessHandler(handleUserRoles).withFailureHandler(function(e){ console.error("Role check failed:", e); }).checkUserRoles(); 
+        google.script.run.withSuccessHandler(function(info) {
+            const el = document.getElementById('activity-name-display');
+            if (el && info && info.name) { el.textContent = info.name; }
+        }).getPublicInfo();
+
+    } catch (e) {
+        console.error("Error during window.onload event binding:", e);
+        document.body.innerHTML = '<h1>頁面初始化錯誤</h1><p>請檢查瀏覽器控制台以獲取詳細資訊。</p>';
+    }
+});
+
+// --- 通用函式 ---
+        function escapeHtml(unsafe) {
+            if (unsafe === null || typeof unsafe === 'undefined') return '';
+            return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function showSubPage(pageFileName, clickedElement) {
+            try {
+                if (clickedElement) {
+                    document.querySelectorAll('.nav-button, .dropdown-content button').forEach(function(button) { button.classList.remove('active'); });
+                    // 找到主導覽項目並高亮
+                    const mainButton = clickedElement.closest('.nav-dropdown') ? clickedElement.closest('.nav-dropdown').querySelector('.nav-button') :
+                                     clickedElement.closest('.user-menu') ? clickedElement.closest('.user-menu').querySelector('.user-info-button') :
+                                     clickedElement;
+                    if (mainButton) mainButton.classList.add('active');
+                }
+                document.querySelectorAll('.user-menu, .nav-dropdown').forEach(function(menu) { menu.classList.remove('open'); });
+                
+                const contentArea = document.getElementById('main-content-area');
+                if (!contentArea) { return; }
+                contentArea.innerHTML = '<div class="container"><p>載入中...</p></div>';
+
+                // 先檢查零星訂購的檔期
+                if (pageFileName === 'Page_LooseOrder') {
+                    google.script.run
+                        .withSuccessHandler(function(isActive) {
+                            if (isActive) {
+                                loadAndRenderPage(pageFileName, contentArea);
+                            } else {
+                                contentArea.innerHTML = '<div class="container"><h2>零星訂購暫未開放</h2><p>零星訂購已結束或尚未開始，請使用成箱訂購，或期待下次檔期，謝謝！</p></div>';
+                            }
+                        })
+                        .withFailureHandler(function(error) {
+                            contentArea.innerHTML = '<div class="container"><p style="color:red;">檢查零星訂購檔期時發生錯誤。</p></div>';
+                        })
+                        .isLooseOrderPeriodActive();
+                } else {
+                    loadAndRenderPage(pageFileName, contentArea);
+                }
+            } catch(e) {
+                 console.error("Error in showSubPage:", e);
+            }
+        }
+
+        function loadAndRenderPage(pageFileName, contentArea) {
+            google.script.run
+                .withSuccessHandler(function(htmlContent) {
+                    if (htmlContent && !htmlContent.includes("錯誤")) {
+                        contentArea.innerHTML = htmlContent;
+                        bindDynamicButtons(pageFileName);
+                        if (pageFileName === 'Page_MyProfile') { loadMyProfileData(); } 
+                        else if (pageFileName === 'Page_CaseOrder') { loadCaseOrderPageData(); }
+                        else if (pageFileName === 'Page_LooseOrder') { loadLooseOrderPageData(); }
+                    } else {
+                        contentArea.innerHTML = htmlContent || '<div class="container"><p style="color:red;">載入頁面時收到無效內容。</p></div>';
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error("Failed to load page content for " + pageFileName + ": ", error);
+                    contentArea.innerHTML = '<div class="container"><p style="color:red;">頁面內容載入失敗。</p></div>';
+                })
+                .getPartialHtmlFromFile(pageFileName);
+        }
+        
+        function bindDynamicButtons(pageFileName) {
+            try {
+                if (pageFileName === 'Page_LooseOrder') {
+                    const btn = document.getElementById('openSiteSelectionModalBtn');
+                    if (btn) btn.addEventListener('click', openSiteSelectionModal);
+                }
+            } catch(e) {
+                 console.error("Error binding dynamic buttons for " + pageFileName + ":", e);
+            }
+        }
+
+        function toggleUserMenu() {
+            const userMenu = document.getElementById('userMenu');
+            if(userMenu) userMenu.classList.toggle('open');
+        }
+
+        function handleUserRoles(roleInfo) {
+             if (roleInfo && roleInfo.email) {
+                document.getElementById('userEmailDisplay').textContent = roleInfo.email;
+                document.getElementById('userInitial').textContent = roleInfo.email.charAt(0).toUpperCase();
+             }
+             const caseAdminNavButton = document.getElementById('navCaseOrderAdmin');
+             if (caseAdminNavButton && roleInfo.isCaseAdmin === true) { caseAdminNavButton.classList.remove('hidden'); }
+             const looseOrderAdminDropdown = document.getElementById('navLooseOrderAdmin');
+             if (looseOrderAdminDropdown && roleInfo.isMainAdmin === true) { looseOrderAdminDropdown.classList.remove('hidden'); }
+             // 在權限處理完畢後，再觸發預設頁面的載入
+             document.getElementById('navCaseOrder').click();
+        }
+
+
+        function renderTable(tbody, data, rowGenerator, colSpan, noDataMessage) {
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = colSpan;
+                td.textContent = noDataMessage;
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+            const fragment = document.createDocumentFragment();
+            data.forEach(function(item) { fragment.appendChild(rowGenerator(item)); });
+            tbody.appendChild(fragment);
+        }
+
+
+
+        function loadMyProfileData() {
+            const nameEl = document.getElementById('profile-name');
+            const idEl = document.getElementById('profile-employee-id');
+            const emailEl = document.getElementById('profile-email');
+            if (!nameEl || !idEl || !emailEl) { return; }
+            google.script.run
+                .withSuccessHandler(function(profileData){
+                    if (profileData && !profileData.error) {
+                        nameEl.textContent = profileData.name;
+                        idEl.textContent = profileData.employeeId;
+                        emailEl.textContent = profileData.email;
+                    } else {
+                        nameEl.textContent = '資料錯誤'; idEl.textContent = '資料錯誤'; emailEl.textContent = '資料錯誤';
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    nameEl.textContent = '資料載入失敗'; idEl.textContent = '資料載入失敗'; emailEl.textContent = '資料載入失敗';
+                })
+                .getUserProfileData();
+        }
+
+        // --- 成箱訂購函式 ---
+        function loadCaseOrderPageData() {
+            if (isProductsLoaded) { renderCaseOrderTable(allProductsData); return; }
+            google.script.run
+                .withSuccessHandler(function(products) {
+                    allProductsData = products || []; isProductsLoaded = true;
+                    renderCaseOrderTable(allProductsData);
+                })
+                .withFailureHandler(function(err){
+                    const tbody = document.querySelector("#case-order-product-table tbody");
+                    if(tbody) tbody.innerHTML = '<tr><td colspan="9" style="color:red;">商品列表載入失敗！</td></tr>';
+                })
+                .getProductListData();
+        }
+        function renderCaseOrderTable(products) {
+            const tbody = document.querySelector("#case-order-product-table tbody");
+            if (!tbody) { return; }
+            renderTable(tbody, products, function(product) {
+                const tr = document.createElement('tr');
+                function createCell(text, alignClass) { const td = document.createElement('td'); td.textContent = text; if(alignClass) td.className = alignClass; return td; }
+                tr.appendChild(createCell(product.companyName));
+                tr.appendChild(createCell(product.productName));
+                tr.appendChild(createCell(product.sellingPricePerBox, 'text-right'));
+                tr.appendChild(createCell(product.casePricePerBox, 'text-right'));
+                tr.appendChild(createCell(product.totalCasePrice, 'text-right'));
+                tr.appendChild(createCell(product.boxesPerCase, 'text-center')); 
+                const tdCanShip = createCell(''); tdCanShip.className = 'text-center';
+                tdCanShip.innerHTML = product.canShipAboveCase ? '<div class="ship-option-yes"><span class="material-symbols-outlined">check_circle</span>是</div>' : '<div class="ship-option-no"><span class="material-symbols-outlined">cancel</span>否</div>';
+                tr.appendChild(tdCanShip);
+                const tdImage = createCell(''); tdImage.className = 'product-image-cell text-center';
+                if (product.imageId) {
+                    const link = document.createElement('a'); link.href = "https://drive.google.com/file/d/" + product.imageId + "/view?usp=sharing";
+                    link.target = '_blank';
+                    const img = document.createElement('img'); img.src = "https://drive.google.com/thumbnail?id=" + product.imageId + "&sz=w80-h80-c";
+                    img.alt = escapeHtml(product.productName);
+                    link.appendChild(img); tdImage.appendChild(link);
+                } else {
+                    const span = document.createElement('span'); span.className = 'no-image'; span.textContent = '無圖片';
+                    tdImage.appendChild(span);
+                }
+                tr.appendChild(tdImage);
+                const tdActions = createCell(''); tdActions.className = 'text-center';
+                const orderBtn = document.createElement('button'); orderBtn.className = 'action-btn btn-order';
+                orderBtn.innerHTML = '<span class="material-symbols-outlined">add_shopping_cart</span>訂購';
+                orderBtn.addEventListener('click', function() { openCaseOrderModal(product); });
+                tdActions.appendChild(orderBtn); tr.appendChild(tdActions);
+                return tr;
+            }, 9, '目前無可訂購的商品。');
+        }
+        function openCaseOrderModal(product) {
+            currentOrderingProduct = product;
+            const ordererName = document.getElementById('ordererName').value.trim();
+            const ordererPhone = document.getElementById('ordererPhone').value.trim();
+            const deliveryLocation = document.getElementById('deliveryLocation').value.trim();
+            const deliveryDate = document.getElementById('deliveryDate').value;
+            if(!ordererName || !ordererPhone || !deliveryLocation || !deliveryDate) { alert("請先填寫頁面上方的訂購人姓名、電話、寄送地點和寄送日期！"); return; }
+            const modal = document.getElementById('caseOrderModal');
+            if (!modal) { return; }
+            document.getElementById('modalOrdererName').textContent = ordererName;
+            document.getElementById('modalOrdererPhone').textContent = ordererPhone;
+            document.getElementById('modalDeliveryLocation').textContent = deliveryLocation;
+            document.getElementById('modalDeliveryDate').textContent = deliveryDate;
+            document.getElementById('modalProductName').textContent = product.productName;
+            document.getElementById('modalSellingPrice').textContent = product.sellingPricePerBox;
+            document.getElementById('modalCasePricePerBox').textContent = product.casePricePerBox;
+            document.getElementById('modalTotalCasePrice').textContent = product.totalCasePrice;
+            document.getElementById('modalBoxesPerCase').textContent = product.boxesPerCase;
+            document.querySelector('#caseOrderModal .modal-title').textContent = '訂購: ' + product.productName;
+            const qtySelect = document.getElementById('caseOrderQtySelect');
+            qtySelect.innerHTML = ''; 
+            const minQty = product.boxesPerCase;
+            if (!minQty || minQty <= 0) {
+                 const option = new Option("此商品無效的成箱數", ""); option.disabled = true;
+                 qtySelect.add(option); document.getElementById('submitCaseOrderBtn').disabled = true; 
+                 modal.style.display = 'flex'; return; 
+            }
+            document.getElementById('submitCaseOrderBtn').disabled = false;
+            if (product.canShipAboveCase === true) {
+                for (let i = 0; i <= 50; i++) { const qty = minQty + i; qtySelect.add(new Option(qty + ' 盒', qty)); }
+            } else {
+                for (let i = 1; i <= 10; i++) { const qty = minQty * i; qtySelect.add(new Option(qty + ' 盒 (' + i + ' 箱)', qty)); }
+            }
+            modal.style.display = 'flex';
+        }
+        function closeCaseOrderModal() { document.getElementById('caseOrderModal').style.display = 'none'; }
+        function submitCaseOrder() {
+            const selectedQty = parseInt(document.getElementById('caseOrderQtySelect').value);
+            if (!selectedQty || isNaN(selectedQty)) { alert("請選擇有效的訂購數量！"); return; }
+            if (!currentOrderingProduct) { alert("發生錯誤：找不到目前的商品資訊。請關閉視窗後重試。"); return; }
+            const pricePerBox = (currentOrderingProduct.casePricePerBox > 0) ? currentOrderingProduct.casePricePerBox : currentOrderingProduct.sellingPricePerBox;
+            const totalPrice = pricePerBox * selectedQty;
+            const caseCount = (selectedQty / currentOrderingProduct.boxesPerCase).toFixed(2);
+            const ordererName = document.getElementById('modalOrdererName').textContent;
+            const deliveryDate = document.getElementById('modalDeliveryDate').textContent;
+            const confirmationMessage = "請確認訂單資訊：\n-------------------------------------\n訂購人姓名: " + ordererName + "\n寄送日期: " + deliveryDate + "\n商品名稱: " + currentOrderingProduct.productName + "\n訂購數量: " + selectedQty + " 盒\n-------------------------------------\n總計金額: " + totalPrice + " 元\n\n確認無誤後請點擊「確定」送出訂單。";
+            if (confirm(confirmationMessage)) {
+                const submitBtn = document.getElementById('submitCaseOrderBtn');
+                submitBtn.disabled = true; submitBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span>訂單傳送中...';
+                const orderData = {
+                    name: ordererName, phone: document.getElementById('modalOrdererPhone').textContent,
+                    productName: currentOrderingProduct.productName, quantity: selectedQty, totalPrice: totalPrice,
+                    location: document.getElementById('modalDeliveryLocation').textContent, date: deliveryDate,
+                    caseCount: parseFloat(caseCount)
+                };
+                google.script.run
+                    .withSuccessHandler(function(response) {
+                        if (response.success) { alert("訂單已成功送出！"); closeCaseOrderModal(); } 
+                        else { alert("訂單送出失敗：\n" + response.error); }
+                        submitBtn.disabled = false; submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
+                    })
+                    .withFailureHandler(function(error) {
+                        alert("與伺服器連線失敗，無法送出訂單：\n" + error.message);
+                        submitBtn.disabled = false; submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
+                    })
+                    .submitCaseOrderToServer(orderData);
+            }
+        }
+
+        // --- 零星訂購頁面 ---
+        function loadLooseOrderPageData() {
+            if (isProductsLoaded) { renderLooseOrderTable(allProductsData); return; }
+            showProductStatus('載入商品列表中...', false);
+            google.script.run
+                .withSuccessHandler(function(products) {
+                    allProductsData = products || []; isProductsLoaded = true;
+                    showProductStatus('', false);
+                    renderLooseOrderTable(allProductsData);
+                })
+                .withFailureHandler(function(err){
+                    showErrorStatusMessage('loose-order-status-msg', err, '載入商品列表');
+                })
+                .getProductListData();
+        }
+        // --- 【已更新】零星訂購頁面表格渲染函式 ---
+        function renderLooseOrderTable(products) {
+            const tbody = document.querySelector("#loose-order-product-table tbody");
+            if (!tbody) { 
+                console.error("在 renderLooseOrderTable 中找不到 #loose-order-product-table 的 tbody");
+                return; 
+            }
+            // 零星訂購表格的表頭有：公司名稱, 商品名稱, 售價/盒, 成箱盒數, 圖片, 訂購操作 (共6欄)
+            renderTable(tbody, products, function(product) {
+                const tr = document.createElement('tr');
+                
+                function createCell(text, alignClass) { 
+                    const td = document.createElement('td'); 
+                    td.textContent = text; 
+                    if(alignClass) td.className = alignClass; 
+                    return td; 
+                }
+
+                // 【修正】根據零星訂購的表頭，渲染對應的欄位和對齊
+                tr.appendChild(createCell(product.companyName, 'text-left'));
+                tr.appendChild(createCell(product.productName, 'text-left'));
+                tr.appendChild(createCell(product.sellingPricePerBox, 'text-right'));
+                tr.appendChild(createCell(product.boxesPerCase, 'text-center')); 
+                
+                const tdImage = createCell('', 'text-center');
+                if (product.imageId) {
+                    const link = document.createElement('a');
+                    link.href = "https://drive.google.com/file/d/" + product.imageId + "/view?usp=sharing";
+                    link.target = '_blank';
+                    link.title = '點擊預覽';
+                    const img = document.createElement('img');
+                    img.src = "https://drive.google.com/thumbnail?id=" + product.imageId + "&sz=w80-h80-c";
+                    img.alt = escapeHtml(product.productName);
+                    link.appendChild(img); 
+                    tdImage.appendChild(link);
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'no-image'; 
+                    span.textContent = '無圖片';
+                    tdImage.appendChild(span);
+                }
+                tr.appendChild(tdImage);
+
+                const tdActions = createCell('', 'text-center');
+                const orderBtn = document.createElement('button');
+                orderBtn.className = 'action-btn btn-order';
+                orderBtn.innerHTML = '<span class="material-symbols-outlined">add_shopping_cart</span>訂購';
+                orderBtn.addEventListener('click', function() { openLooseOrderModal(product); });
+                
+                if(product.boxesPerCase <= 1){ 
+                    orderBtn.disabled = true;
+                    orderBtn.title = '此商品無法零星訂購';
+                }
+                tdActions.appendChild(orderBtn); 
+                tr.appendChild(tdActions);
+                
+                return tr;
+            }, 6, '目前無可零星訂購的商品。');
+        }
+        function openSiteSelectionModal() {
+            const modal = document.getElementById('siteSelectionModal');
+            if (!modal) return;
+            const listDiv = document.getElementById('siteSelectionList');
+            listDiv.innerHTML = '<p>載入站點資訊中...</p>';
+            modal.style.display = 'flex';
+            if (isSiteDataForSelectionLoaded) {
+                populateSiteList(allSiteDataForSelection);
+            } else {
+                 google.script.run
+                    .withSuccessHandler(function(sites) {
+                        allSiteDataForSelection = sites || []; isSiteDataForSelectionLoaded = true;
+                        populateSiteList(allSiteDataForSelection);
+                    })
+                    .withFailureHandler(function(err){ listDiv.innerHTML = '<p style="color:red">無法載入站點列表。</p>'; })
+                    .getSiteInfoListData(); 
+            }
+        }
+        function populateSiteList(sites) {
+            const listDiv = document.getElementById('siteSelectionList');
+            listDiv.innerHTML = '';
+            if(!sites || sites.length === 0){ listDiv.innerHTML = '<p>沒有可用的站點。</p>'; return; }
+            sites.forEach(function(site) {
+                const siteBtn = document.createElement('button');
+                siteBtn.className = 'site-item';
+                siteBtn.textContent = site.siteName + '(' + site.siteCode + ')';
+                siteBtn.addEventListener('click', function() { selectSite(site.siteName, site.siteCode); });
+                listDiv.appendChild(siteBtn);
+            });
+        }
+        function selectSite(siteName, siteCode) {
+            const locationInput = document.getElementById('looseDeliveryLocation');
+            if (locationInput) { locationInput.value = siteName + '(' + siteCode + ')'; }
+            closeSiteSelectionModal();
+        }
+        function closeSiteSelectionModal() {
+            const modal = document.getElementById('siteSelectionModal');
+            if (modal) modal.style.display = 'none';
+        }
+        function openLooseOrderModal(product) {
+            currentLooseOrderingProduct = product;
+            const ordererName = document.getElementById('looseOrdererName').value.trim();
+            const ordererPhone = document.getElementById('looseOrdererPhone').value.trim();
+            const deliveryLocation = document.getElementById('looseDeliveryLocation').value.trim();
+            if(!ordererName || !ordererPhone || !deliveryLocation) { alert("請先填寫訂購人姓名、電話和寄送地點！"); return; }
+            const modal = document.getElementById('looseOrderModal');
+            if (!modal) return;
+            document.getElementById('looseModalOrdererName').textContent = ordererName;
+            document.getElementById('looseModalOrdererPhone').textContent = ordererPhone;
+            document.getElementById('looseModalDeliveryLocation').textContent = deliveryLocation;
+            document.getElementById('looseModalProductName').textContent = product.productName;
+            document.getElementById('looseModalSellingPrice').textContent = product.sellingPricePerBox;
+            document.getElementById('looseModalBoxesPerCase').textContent = product.boxesPerCase;
+            document.querySelector('#looseOrderModal .modal-title').textContent = '零星訂購: ' + product.productName;
+            const qtySelect = document.getElementById('looseOrderQtySelect');
+            qtySelect.innerHTML = ''; 
+            const maxLooseQty = product.boxesPerCase - 1;
+            if (maxLooseQty < 1) {
+                 const option = new Option("此商品無法零星訂購", ""); option.disabled = true;
+                 qtySelect.add(option); document.getElementById('submitLooseOrderBtn').disabled = true;
+            } else {
+                document.getElementById('submitLooseOrderBtn').disabled = false;
+                for (let i = 1; i <= maxLooseQty; i++) {
+                    const option = new Option(String(i) + ' 盒', i); qtySelect.add(option);
+                }
+            }
+            modal.style.display = 'flex';
+        }
+        function closeLooseOrderModal() { document.getElementById('looseOrderModal').style.display = 'none'; }
+        function submitLooseOrder() {
+            const selectedQty = parseInt(document.getElementById('looseOrderQtySelect').value);
+            if (!selectedQty || isNaN(selectedQty)) { alert("請選擇有效的訂購數量！"); return; }
+            if (!currentLooseOrderingProduct) { alert("發生錯誤：找不到目前的商品資訊。"); return; }
+            const totalPrice = currentLooseOrderingProduct.sellingPricePerBox * selectedQty;
+            const ordererName = document.getElementById('looseModalOrdererName').textContent;
+            const confirmationMessage = "請確認零星訂購資訊：\n" +
+                "-------------------------------------\n" +
+                "訂購人: " + ordererName + "\n" +
+                "寄送地點: " + document.getElementById('looseModalDeliveryLocation').textContent + "\n" +
+                "商品: " + currentLooseOrderingProduct.productName + "\n" +
+                "訂購數量: " + selectedQty + " 盒\n" +
+                "-------------------------------------\n" +
+                "總計金額: " + totalPrice + " 元\n\n" +
+                "確認無誤後請點擊「確定」送出訂單。";
+            if (confirm(confirmationMessage)) {
+                const submitBtn = document.getElementById('submitLooseOrderBtn');
+                submitBtn.disabled = true; submitBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span>訂單傳送中...';
+                const orderData = {
+                    name: ordererName,
+                    phone: document.getElementById('looseModalOrdererPhone').textContent,
+                    productName: currentLooseOrderingProduct.productName,
+                    quantity: selectedQty,
+                    totalPrice: totalPrice,
+                    location: document.getElementById('looseModalDeliveryLocation').textContent,
+                    date: null
+                };
+                google.script.run
+                    .withSuccessHandler(function(response) {
+                        if (response.success) { alert("零星訂單已成功送出！"); closeLooseOrderModal(); } 
+                        else { alert("訂單送出失敗：\n" + response.error); }
+                        submitBtn.disabled = false; submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
+                    })
+                    .withFailureHandler(function(error) {
+                        alert("與伺服器連線失敗，無法送出訂單：\n" + error.message);
+                        submitBtn.disabled = false; submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
+                    })
+                    .submitLooseOrderToServer(orderData);
+            }
+        }
+    </script>
+</body>
+</html>
