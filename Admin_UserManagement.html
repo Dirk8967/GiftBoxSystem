@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <div class="container">
+    <div class="section-header">
+        <h1>使用者授權列表</h1>
+        <div class="header-actions">
+            <button id="addUserBtn" class="action-btn btn-add">新增使用者</button>
+            <button id="saveStatusBtn" class="action-btn btn-save">儲存審核狀態</button>
+            <span id="user-status-msg" class="status-message"></span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="applicants-table">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>員工編號</th>
+                    <th>Email</th>
+                    <th style="width: 80px;">授權</th>
+                    <th class="remarks-col">備註</th>
+                    <th style="width: 150px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="6">資料載入中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+  </body>
+</html>
