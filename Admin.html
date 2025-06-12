@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f8f9fa; 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+        }
+
+        /* --- 導覽列樣式 --- */
+        .admin-nav {
+            display: flex;
+            background-color: #343a40; 
+            padding: 0 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-wrap: wrap; 
+        }
+        .nav-button {
+            display: flex; align-items: center; justify-content: center;
+            padding: 15px 20px;
+            border: none;
+            background-color: transparent; 
+            color: #adb5bd; 
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            border-bottom: 3px solid transparent; 
+        }
+        .nav-button .material-symbols-outlined { margin-right: 8px; font-size: 20px; }
+        .nav-button:hover {
+            color: #f8f9fa; 
+            background-color: #495057;
+        }
+        .nav-button.active {
+            color: #ffffff; 
+            border-bottom: 3px solid #007bff; 
+        }
+
+        /* --- 主要內容區域 --- */
+        .admin-main-container { 
+            flex-grow: 1; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        /* --- 子頁面區塊 Placeholder (已移除 .admin-section) --- */
+        
+        /* --- 通用 Header 樣式 --- */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #dee2e6; padding-bottom: 15px; flex-wrap: wrap; gap: 15px; }
+        .section-header h1, .section-header h2 { font-size: 22px; color: #343a40; margin: 0; flex-grow: 1; }
+        .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        
+        /* --- 通用按鈕樣式 --- */
+        .action-btn { color: white; border: none; padding: 10px 18px; border-radius: 5px; font-size: 15px; cursor: pointer; transition: background-color 0.2s; }
+        .action-btn:hover { opacity: 0.85; }
+        .action-btn:disabled { background-color: #cccccc !important; color: #666 !important; cursor: not-allowed; opacity: 1;}
+        
+        .btn-save { background-color: #007bff; }
+        .btn-add { background-color: #28a745; }
+        .btn-edit { background-color: #ffc107; color: #212529; font-size: 13px; padding: 5px 10px; margin-right: 5px;}
+        .btn-delete { background-color: #dc3545; font-size: 13px; padding: 5px 10px; }
+        .btn-cancel { background-color: #6c757d; }
+        
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #dee2e6; font-size: 14px; white-space: nowrap; }
+        th.remarks-col, td.remarks-col { min-width: 150px; white-space: normal; word-break: break-word;} 
+        th:last-child, td:last-child { text-align: center; } 
+        #applicants-table td:nth-child(1), #applicants-table td:nth-child(2), #applicants-table td:nth-child(3),
+        #case-admin-table td:nth-child(1), #case-admin-table td:nth-child(2), #case-admin-table td:nth-child(3),
+        #product-table td:nth-child(1), #product-table td:nth-child(2),
+        #site-info-table td:nth-child(1), #site-info-table td:nth-child(2), #site-info-table td:nth-child(3)
+        { white-space: normal; word-break: break-all; } 
+
+        th { background-color: #f2f2f2; font-weight: 700; font-size: 15px; }
+        .status-checkbox { width: 18px; height: 18px; cursor: pointer; vertical-align: middle; }
+        .status-message { font-size: 14px; font-weight: 500; } 
+        .msg-success { color: #28a745; }
+        .msg-error { color: #dc3545; }
+
+        /* Modal styles */
+        .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background: white; padding: 25px 30px; border-radius: 12px; width: 100%; max-width: 500px; text-align: left; box-sizing: border-box; position: relative; animation: modalOpen 0.3s ease-out; margin: 20px auto; }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #6c757d; border: none; background: none;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; font-size: 14px; }
+        .form-group input[type="text"], .form-group input[type="email"], .form-group input[type="number"], .form-group textarea { width: 100%; padding: 10px; font-size: 15px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
+        .form-group textarea { resize: vertical; min-height: 80px;}
+        .form-group input[type="checkbox"] { width: auto; margin-right: 8px; vertical-align: middle;}
+        .modal-actions { margin-top: 25px; text-align: right; display: flex; gap: 10px; justify-content: flex-end; }
+        
+        /* 商品管理相關特定樣式 */
+        .product-image-cell img, #productModalImagePreview { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; padding: 2px; }
+         #productModalImagePreview { max-width: 100%; max-height: 200px; margin-top: 10px; display: none; }
+        .product-image-cell span.no-image { color: #888; font-style: italic; font-size: 13px; }
+        #productModalCurrentImageView { font-size: 13px; color: #555; margin-top:5px; min-height: 20px; }
+        #productModalCurrentImageView a { color: #007bff; text-decoration: none; }
+        #productModalCurrentImageView a:hover { text-decoration: underline; }
+        button.remove-image-button { font-size: 12px; padding: 3px 8px; margin-left: 10px; background-color: #ffc107; color: #212529; border: none; border-radius: 3px; cursor: pointer; }
+         button.remove-image-button:hover { background-color: #e0a800; }
+
+
+        @keyframes modalOpen { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) {
+            .admin-nav { padding: 0; justify-content: space-around; } 
+            .nav-button { padding: 12px 10px; font-size: 14px; flex-grow:1; text-align:center; }
+            .admin-main-container { padding: 15px; }
+            .container { padding: 15px; }
+            #admin-active-section-placeholder .section-header { flex-direction: column; align-items: flex-start; } /* 確保動態載入的內容也套用 */
+            #admin-active-section-placeholder .header-actions { width: 100%; flex-direction: column; align-items: stretch; }
+            #admin-active-section-placeholder .header-actions .action-btn, 
+            #admin-active-section-placeholder .header-actions .status-message { width: 100%; margin-bottom:10px; text-align: center;}
+            #admin-active-section-placeholder .header-actions .status-message { margin-left:0 !important;}
+
+            .modal-content { padding: 20px; margin: 10px auto;} 
+            .modal-title {font-size: 18px;}
+            th, td { font-size: 13px; padding: 8px 10px; }
+            table {min-width: auto;} 
+            #applicants-table, #product-table, #site-info-table { min-width: 600px; } 
+        }
+
+        /* 【新增】設定頁面的樣式 */
+        .settings-form { margin-top: 20px; }
+        .form-note { font-size: 13px; color: #6c757d; margin-top: 15px; background-color: #f8f9fa; padding: 10px; border-radius: 4px;}
+
+        /* 【新增】設定頁面美化樣式 */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 在較小螢幕上為單欄 */
+            gap: 25px;
+        }
+        .setting-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .setting-card-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #212529;
+        }
+        .setting-card-title .material-symbols-outlined {
+            margin-right: 10px;
+            color: #007bff;
+        }
+        .setting-card-description {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 0;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .form-grid-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* 讓設定頁在較大螢幕上並排顯示 */
+        @media (min-width: 992px) {
+            .settings-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+         @media (max-width: 576px) {
+            .form-grid-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-nav">
+      <button id="navUserManagement" class="nav-button"><span class="material-symbols-outlined">manage_accounts</span>使用者權限管理</button>
+      <button id="navCaseAdminManagement" class="nav-button"><span class="material-symbols-outlined">supervisor_account</span>成箱管理員權限</button>
+      <button id="navProductManagement" class="nav-button"><span class="material-symbols-outlined">inventory_2</span>商品管理系統</button>
+      <button id="navSiteInfoManagement" class="nav-button"><span class="material-symbols-outlined">pin_drop</span>站點資訊管理</button>
+      <button id="navSettings" class="nav-button"><span class="material-symbols-outlined">tune</span>設定</button>
+  </div>
+
+  <div class="admin-main-container">
+      <div id="admin-active-section-placeholder" class="admin-content">
+          </div>
+  </div>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-content">
+            <button id="closeUserModalBtn" class="close-btn">&times;</button>
+            <h2 class="modal-title" id="userModalTitle">使用者資料</h2>
+            <input type="hidden" id="userModalRowNumber">
+            <div class="form-group"><label for="userModalName">姓名</label><input type="text" id="userModalName" placeholder="必填"></div>
+            <div class="form-group"><label for="userModalEmployeeId">員工編號</label><input type="text" id="userModalEmployeeId" placeholder="必填"></div>
+            <div class="form-group"><label for="userModalEmail">Email</label><input type="email" id="userModalEmail" placeholder="必填"></div>
+            <div class="form-group"><input type="checkbox" id="userModalIsApproved"><label for="userModalIsApproved" style="font-weight:normal;">已授權</label></div>
+            <div class="form-group"><label for="userModalRemarks">備註</label><textarea id="userModalRemarks" rows="3"></textarea></div>
+            <div class="modal-actions"><button id="cancelUserModalBtn" class="action-btn btn-cancel">取消</button><button id="userModalSaveBtn" class="action-btn btn-save">儲存</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="caseAdminModal">
+        <div class="modal-content">
+            <button id="closeCaseAdminModalBtn" class="close-btn">&times;</button>
+            <h2 class="modal-title" id="caseAdminModalTitle">成箱管理員資料</h2>
+            <input type="hidden" id="caseAdminModalRowNumber">
+            <div class="form-group"><label for="caseAdminModalName">姓名</label><input type="text" id="caseAdminModalName" placeholder="必填"></div>
+            <div class="form-group"><label for="caseAdminModalEmployeeId">員工編號</label><input type="text" id="caseAdminModalEmployeeId" placeholder="必填"></div>
+            <div class="form-group"><label for="caseAdminModalEmail">Email</label><input type="email" id="caseAdminModalEmail" placeholder="必填"></div>
+            <div class="form-group"><input type="checkbox" id="caseAdminModalIsApproved"><label for="caseAdminModalIsApproved" style="font-weight:normal;">已授權</label></div>
+            <div class="form-group"><label for="caseAdminModalRemarks">備註</label><textarea id="caseAdminModalRemarks" rows="3"></textarea></div>
+            <div class="modal-actions"><button id="cancelCaseAdminModalBtn" class="action-btn btn-cancel">取消</button><button id="caseAdminModalSaveBtn" class="action-btn btn-save">儲存</button></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-content">
+            <button id="closeProductModalBtn" class="close-btn">&times;</button> 
+            <h2 class="modal-title" id="productModalTitle">商品資料</h2>
+            <input type="hidden" id="productModalRowNumber"><input type="hidden" id="productModalExistingImageId">
+            <div class="form-group"><label for="productModalCompanyName">公司名稱(全銜)</label><input type="text" id="productModalCompanyName" placeholder="必填"></div>
+            <div class="form-group"><label for="productModalProductName">商品名稱</label><input type="text" id="productModalProductName" placeholder="必填"></div>
+            <div class="form-group"><label for="productModalSellingPrice">售價/盒</label><input type="number" id="productModalSellingPrice" placeholder="必填" step="any"></div>
+            <div class="form-group"><label for="productModalCasePricePerBox">成箱價/盒</label><input type="number" id="productModalCasePricePerBox" placeholder="可選" step="any"></div>
+            <div class="form-group"><label for="productModalTotalCasePrice">成箱總價</label><input type="number" id="productModalTotalCasePrice" placeholder="可選" step="any"></div>
+            <div class="form-group"><label for="productModalBoxesPerCase">成箱盒數</label><input type="number" id="productModalBoxesPerCase" placeholder="必填" step="1"></div>
+            <div class="form-group"><input type="checkbox" id="productModalCanShipAboveCase"><label for="productModalCanShipAboveCase" style="font-weight:normal;">是 (成箱盒數以上可送)</label></div>
+            <div class="form-group"><label for="productModalImageFile">商品圖片</label><input type="file" id="productModalImageFile" accept="image/*"><div id="productModalCurrentImageView"></div><img id="productModalImagePreview" src="#" alt="圖片預覽"></div>
+            <div class="modal-actions"><button id="cancelProductModalBtn" class="action-btn btn-cancel">取消</button><button id="productModalSaveBtn" class="action-btn btn-save">儲存</button> </div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="siteInfoModal">
+        <div class="modal-content">
+            <button id="closeSiteInfoModalBtn" class="close-btn">&times;</button> 
+            <h2 class="modal-title" id="siteInfoModalTitle">站點資料</h2>
+            <input type="hidden" id="siteInfoModalRowNumber">
+            <div class="form-group"><label for="siteInfoModalSiteCode">站代號</label><input type="text" id="siteInfoModalSiteCode" placeholder="必填"></div>
+            <div class="form-group"><label for="siteInfoModalSiteName">站名</label><input type="text" id="siteInfoModalSiteName" placeholder="必填"></div>
+            <div class="form-group"><label for="siteInfoModalAddress">地址</label><input type="text" id="siteInfoModalAddress"></div>
+            <div class="form-group"><label for="siteInfoModalPhone">電話</label><input type="text" id="siteInfoModalPhone"></div>
+            <div class="modal-actions"><button id="cancelSiteInfoModalBtn" class="action-btn btn-cancel">取消</button><button id="siteInfoModalSaveBtn" class="action-btn btn-save">儲存</button> </div>
+        </div>
+    </div>
+
+    <script>
+      // --- 全域變數 ---
+        let allApplicantsData = [], currentUserEditMode = 'add';
+        let allCaseAdminData = [], currentCaseAdminEditMode = 'add';
+        let allProductsData = [], currentProductEditMode = 'add', newProductImageFile = null; 
+        let allSiteInfoData = [], currentSiteEditMode = 'add';
+
+        // --- 初始載入與事件綁定 ---
+        window.addEventListener('load', function() { 
+            try {
+                // 為導覽列按鈕綁定事件
+                document.getElementById('navUserManagement').addEventListener('click', function() { showSection('user-management-section', 'Admin_UserManagement', this); });
+                document.getElementById('navCaseAdminManagement').addEventListener('click', function() { showSection('case-admin-management-section', 'Admin_CaseAdminManagement', this); });
+                document.getElementById('navProductManagement').addEventListener('click', function() { showSection('product-management-section', 'Admin_ProductManagement', this); });
+                document.getElementById('navSiteInfoManagement').addEventListener('click', function() { showSection('site-info-management-section', 'Admin_SiteInfoManagement', this); });
+                document.getElementById('navSettings').addEventListener('click', function() { showSection('settings-section', 'Admin_Settings', this); });
+            
+                // 為所有靜態 Modal 的按鈕綁定事件
+                bindAllModalButtonListeners();
+            
+                // 預設載入第一個頁面
+                document.getElementById('navUserManagement').click();
+            } catch (e) {
+                document.body.innerHTML = '<h1>頁面初始化錯誤</h1><p>請檢查瀏覽器控制台以獲取詳細資訊。</p><pre>' + e.stack + '</pre>';
+            }
+        });
+
+        function bindAllModalButtonListeners() {
+            // User Modal
+            document.getElementById('closeUserModalBtn').addEventListener('click', closeUserModal);
+            document.getElementById('cancelUserModalBtn').addEventListener('click', closeUserModal);
+            document.getElementById('userModalSaveBtn').addEventListener('click', saveUserData);
+            // Case Admin Modal
+            document.getElementById('closeCaseAdminModalBtn').addEventListener('click', closeCaseAdminModal);
+            document.getElementById('cancelCaseAdminModalBtn').addEventListener('click', closeCaseAdminModal);
+            document.getElementById('caseAdminModalSaveBtn').addEventListener('click', saveCaseAdminData);
+            // Product Modal
+            document.getElementById('closeProductModalBtn').addEventListener('click', closeProductModal);
+            document.getElementById('cancelProductModalBtn').addEventListener('click', closeProductModal);
+            document.getElementById('productModalSaveBtn').addEventListener('click', saveProductData);
+            document.getElementById('productModalImageFile').addEventListener('change', handleProductImagePreview);
+            // Site Info Modal
+            document.getElementById('closeSiteInfoModalBtn').addEventListener('click', closeSiteInfoModal);
+            document.getElementById('cancelSiteInfoModalBtn').addEventListener('click', closeSiteInfoModal);
+            document.getElementById('siteInfoModalSaveBtn').addEventListener('click', saveSiteInfoData);
+        }
+
+        // --- 通用函式 ---
+        function showSection(sectionId, htmlFileName, clickedButton) {
+            try {
+                document.querySelectorAll('.admin-nav .nav-button').forEach(function(b) { b.classList.remove('active'); });
+                if (clickedButton) clickedButton.classList.add('active');
+
+                const contentPlaceholder = document.getElementById('admin-active-section-placeholder');
+                if (!contentPlaceholder) { return; }
+                contentPlaceholder.innerHTML = '<div class="container"><p>載入中...</p></div>';
+
+                google.script.run
+                    .withSuccessHandler(function(htmlContent) {
+                        if (htmlContent && !htmlContent.includes("錯誤")) {
+                            contentPlaceholder.innerHTML = htmlContent;
+                            bindSectionButtons(sectionId); // 綁定該區塊內的「新增」按鈕
+                            
+                            // 呼叫對應的資料載入函式
+                            if (sectionId === 'user-management-section') { loadUserData(); } 
+                            else if (sectionId === 'case-admin-management-section') { loadCaseAdminData(); } 
+                            else if (sectionId === 'product-management-section') { loadProductData(); } 
+                            else if (sectionId === 'site-info-management-section') { loadSiteInfoData(); }
+                            else if (sectionId === 'settings-section') { loadSettingsData(); }
+                        } else {
+                            contentPlaceholder.innerHTML = htmlContent || '<div class="container"><p style="color:red;">載入頁面時收到無效內容。</p></div>';
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        contentPlaceholder.innerHTML = '<div class="container"><p style="color:red;">載入頁面內容失敗。</p></div>';
+                    })
+                    .getPartialHtmlFromFile(htmlFileName); 
+            } catch (error) {
+                console.error("Error in showSection:", error);
+            }
+        }
+        
+        function bindSectionButtons(sectionId) {
+             try {
+                if (sectionId === 'user-management-section') { document.getElementById('addUserBtn').addEventListener('click', function(){ openUserModal('add'); }); document.getElementById('saveStatusBtn').addEventListener('click', saveApprovalStatusChanges); } 
+                else if (sectionId === 'case-admin-management-section') { document.getElementById('addCaseAdminBtn').addEventListener('click', function(){ openCaseAdminModal('add'); }); }
+                else if (sectionId === 'product-management-section') { document.getElementById('addProductBtn').addEventListener('click', function(){ openProductModal('add'); }); } 
+                else if (sectionId === 'site-info-management-section') { document.getElementById('addSiteInfoBtn').addEventListener('click', function(){ openSiteInfoModal('add'); }); }
+                else if (sectionId === 'settings-section') { document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings); }
+             } catch(e) { console.error("Error binding buttons for section " + sectionId + ":", e); }
+        }
+        
+        function showStatusMessage(elementId, message, isSuccess) {
+            const statusMsgEl = document.getElementById(elementId); 
+            if (!statusMsgEl) { console.error("Status message element not found: " + elementId); return; }
+            statusMsgEl.textContent = message;
+            statusMsgEl.className = 'status-message ' + (isSuccess ? 'msg-success' : (message.includes('錯誤') || message.includes('失敗') || message.includes('Error') ? 'msg-error' : ''));
+            if(isSuccess && !message.includes('載入')) {
+                setTimeout(function() { if (statusMsgEl.textContent === message) { statusMsgEl.textContent = ''; statusMsgEl.className = 'status-message'; }}, 3000);
+            }
+        }
+        function showErrorStatusMessage(elementId, error, context) {
+            console.error(context + " 錯誤 Raw Object:", error); 
+            const statusMsgEl = document.getElementById(elementId);
+            if(!statusMsgEl) return;
+            const errorMessage = (typeof error === 'object' && error !== null && error.message) ? error.message : (error ? String(error) : '未知錯誤');
+            statusMsgEl.textContent = context + "時發生錯誤: " + escapeHtml(errorMessage);
+            statusMsgEl.className = 'status-message msg-error';
+        }
+
+        // --- 狀態顯示包裝函式 ---
+        function showUserStatus(message, isSuccess) { showStatusMessage('user-status-msg', message, isSuccess); }
+        function showUserError(error, context) { showErrorStatusMessage('user-status-msg', error, context); }
+        function showCaseAdminStatus(message, isSuccess) { showStatusMessage('case-admin-status-msg', message, isSuccess); }
+        function showCaseAdminError(error, context) { showErrorStatusMessage('case-admin-status-msg', error, context); }
+        function showProductStatus(message, isSuccess) { showStatusMessage('product-status-msg', message, isSuccess); }
+        function showProductError(error, context) { showErrorStatusMessage('product-status-msg', error, context); }
+        function showSiteInfoStatus(message, isSuccess) { showStatusMessage('site-info-status-msg', message, isSuccess); }
+        function showSiteInfoError(error, context) { showErrorStatusMessage('site-info-status-msg', error, context); }
+        function showSettingsStatus(message, isSuccess) { showStatusMessage('settings-status-msg', message, isSuccess); }
+        function showSettingsError(error, context) { showErrorStatusMessage('settings-status-msg', error, context); }
+
+        // --- 表格渲染通用函式 ---
+        function renderTable(tbody, data, rowGenerator, colSpan, noDataMessage) {
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = colSpan;
+                td.textContent = noDataMessage;
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+            const fragment = document.createDocumentFragment();
+            data.forEach(function(item) { fragment.appendChild(rowGenerator(item)); });
+            tbody.appendChild(fragment);
+        }
+        
+        // ========================================================== //
+        //                  使用者權限管理函式
+        // ========================================================== //
+        function loadUserData() {
+            showUserStatus('載入使用者資料中...', false);
+            google.script.run
+                .withSuccessHandler(function(data) { 
+                    allApplicantsData = data || []; 
+                    renderUserTable(allApplicantsData);
+                    showUserStatus(allApplicantsData.length > 0 ? '使用者資料已載入' : '目前無使用者申請資料', false);
+                    isUserDataLoaded = true; 
+                })
+                .withFailureHandler(function(err) { showUserError(err, '載入使用者資料'); isUserDataLoaded = false; })
+                .getApplicantsData();
+        }
+
+        function renderUserTable(data) {
+            const tbody = document.querySelector("#applicants-table tbody");
+            if (!tbody) { return; }
+            renderTable(tbody, data, function(applicant) {
+                const tr = document.createElement('tr');
+                tr.dataset.rowNumber = applicant.rowNumber;
+                
+                function createCell(text) { const td = document.createElement('td'); td.textContent = text; return td; }
+
+                tr.appendChild(createCell(applicant.name));
+                tr.appendChild(createCell(applicant.employeeId));
+                tr.appendChild(createCell(applicant.email));
+
+                const tdApproved = createCell('');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox'; checkbox.className = 'status-checkbox';
+                checkbox.checked = applicant.isApproved; checkbox.dataset.row = String(applicant.rowNumber);
+                tdApproved.appendChild(checkbox); tr.appendChild(tdApproved);
+
+                const tdRemarks = createCell(applicant.remarks); tdRemarks.className = 'remarks-col';
+                tr.appendChild(tdRemarks);
+
+                const tdActions = document.createElement('td');
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn btn-edit user-edit-btn'; editBtn.textContent = '編輯';
+                editBtn.dataset.rowNumber = String(applicant.rowNumber);
+                tdActions.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn btn-delete user-delete-btn'; deleteBtn.textContent = '刪除';
+                deleteBtn.dataset.rowNumber = String(applicant.rowNumber); deleteBtn.dataset.name = applicant.name; 
+                tdActions.appendChild(deleteBtn); tr.appendChild(tdActions);
+                
+                return tr;
+            }, 6, '目前沒有任何申請記錄。');
+            
+            tbody.querySelectorAll('.user-edit-btn').forEach(function(b){ b.addEventListener('click', function() { openUserModal('edit', parseInt(this.dataset.rowNumber)); }); });
+            tbody.querySelectorAll('.user-delete-btn').forEach(function(b){ b.addEventListener('click', function() { deleteUser(parseInt(this.dataset.rowNumber), this.dataset.name); }); });
+        }
+        
+        function openUserModal(mode, rowNumber){
+            currentUserEditMode = mode;
+            const modal = document.getElementById('userModal');
+            if (!modal) { return; }
+            
+            try {
+                document.getElementById('userModalRowNumber').value = '';
+                document.getElementById('userModalName').value = '';
+                document.getElementById('userModalEmployeeId').value = '';
+                document.getElementById('userModalEmail').value = '';
+                document.getElementById('userModalIsApproved').checked = false;
+                document.getElementById('userModalRemarks').value = ''; 
+                const saveBtn = document.getElementById('userModalSaveBtn');
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '儲存';}
+
+                if (mode === 'edit' && rowNumber) {
+                    const userData = allApplicantsData.find(function(item){ return item.rowNumber === rowNumber; });
+                    if (userData) {
+                        document.getElementById('userModalTitle').textContent = '編輯使用者資料';
+                        document.getElementById('userModalRowNumber').value = userData.rowNumber;
+                        document.getElementById('userModalName').value = userData.name;
+                        document.getElementById('userModalEmployeeId').value = userData.employeeId;
+                        document.getElementById('userModalEmail').value = userData.email;
+                        document.getElementById('userModalIsApproved').checked = userData.isApproved;
+                        document.getElementById('userModalRemarks').value = userData.remarks || ''; 
+                    } else {
+                        showUserError({message: '找不到要編輯的資料 (row ' + rowNumber + ')'}, '開啟編輯'); return;
+                    }
+                } else {
+                    document.getElementById('userModalTitle').textContent = '新增使用者';
+                }
+                modal.style.display = 'flex';
+            } catch(e) {
+                console.error("Error in openUserModal trying to set values:", e);
+            }
+        }
+        
+        function closeUserModal(){ document.getElementById('userModal').style.display = 'none'; }
+        
+        function saveUserData(){
+            const modalSaveBtn = document.getElementById('userModalSaveBtn');
+            if(!modalSaveBtn) { return;}
+            try {
+                modalSaveBtn.disabled = true; modalSaveBtn.textContent = '儲存中...';
+                const userData = {
+                    rowNumber: document.getElementById('userModalRowNumber').value ? parseInt(document.getElementById('userModalRowNumber').value) : null,
+                    name: document.getElementById('userModalName').value.trim(),
+                    employeeId: document.getElementById('userModalEmployeeId').value.trim(),
+                    email: document.getElementById('userModalEmail').value.trim(),
+                    isApproved: document.getElementById('userModalIsApproved').checked,
+                    remarks: document.getElementById('userModalRemarks').value.trim()
+                };
+                if (!userData.name || !userData.employeeId || !userData.email) {
+                    alert('姓名、員工編號和Email為必填欄位！');
+                    modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; return;
+                }
+                if (!/^\S+@\S+\.\S+$/.test(userData.email)) {
+                    alert("Email 格式無效。");
+                    modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; return;
+                }
+                const operation = currentUserEditMode === 'add' ? 'addUserData' : 'updateUserData';
+                const successMsg = currentUserEditMode === 'add' ? '使用者新增成功！' : '使用者更新成功！'; 
+                const context = currentUserEditMode === 'add' ? '新增使用者' : '更新使用者';
+                google.script.run
+                    .withSuccessHandler(function(response){ handleUserCUDResponse(response, successMsg, modalSaveBtn); })
+                    .withFailureHandler(function(err){ handleUserCUDError(err, context, modalSaveBtn); })
+                    [operation](userData);
+            } catch(e) {
+                 console.error("Error in saveUserData:", e);
+                 if(modalSaveBtn) { modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存';}
+            }
+        }
+        
+        function deleteUser(rowNumber, name) {
+            if (confirm("確定要刪除使用者 \"" + escapeHtml(name) + "\" (列號: " + rowNumber + ") 嗎？此操作無法復原。")) {
+                showUserStatus('刪除中...', false);
+                google.script.run
+                    .withSuccessHandler(function(response){ handleUserCUDResponse(response, '使用者刪除成功！'); })
+                    .withFailureHandler(function(err){ handleUserCUDError(err, '刪除使用者'); })
+                    .deleteUserData({ rowNumber: rowNumber });
+            }
+        }
+
+        function handleUserCUDResponse(response, successMsg, buttonElement = null) { 
+            if (response && response.success) { 
+                closeUserModal(); isUserDataLoaded = false; loadUserData(); showUserStatus(successMsg, true);
+            } else {
+                showUserError({ message: (response ? response.error : null) || '發生未知錯誤' }, '使用者操作');
+            }
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存'; }
+        }
+
+        function handleUserCUDError(error, context, buttonElement = null) {
+            showUserError(error, context);
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存';}
+        }
+        
+        function saveApprovalStatusChanges() {
+            const saveBtn = document.getElementById('saveStatusBtn');
+            if(!saveBtn) { return;}
+            saveBtn.disabled = true; showUserStatus('儲存審核狀態中...', false);
+            const dataToUpdate = [];
+            document.querySelectorAll("#applicants-table tbody tr").forEach(function(row) {
+                if (row.dataset.rowNumber) {
+                    const rowNumber = parseInt(row.dataset.rowNumber);
+                    const checkbox = row.querySelector('.status-checkbox');
+                    if (checkbox) { 
+                        const originalApplicant = allApplicantsData.find(function(app){ return app.rowNumber === rowNumber; });
+                        if (originalApplicant && originalApplicant.isApproved !== checkbox.checked) {
+                            dataToUpdate.push({ rowNumber: rowNumber, isApproved: checkbox.checked });
+                        } 
+                    }
+                }
+            });
+             if (dataToUpdate.length === 0) {
+                showUserStatus('沒有審核狀態需要更新。', false);
+                saveBtn.disabled = false; return;
+             }
+            google.script.run
+                .withSuccessHandler(function(response) { 
+                    if (response && response.success) { 
+                        showUserStatus(response.message || '審核狀態更新成功！', true);
+                        isUserDataLoaded = false; loadUserData(); 
+                    } else { 
+                        showUserError({message: (response ? response.error : null) || '更新審核狀態失敗'}, '儲存審核狀態');
+                    }
+                    saveBtn.disabled = false;
+                })
+                .withFailureHandler(function(err) { 
+                    showUserError(err, '儲存審核狀態');
+                    saveBtn.disabled = false; 
+                })
+                .updateApprovalStatus(dataToUpdate);
+        }
+
+        // --- 成箱管理員權限管理函式 ---
+        function loadCaseAdminData() {
+            showCaseAdminStatus('載入成箱管理員資料中...', false);
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    allCaseAdminData = data || [];
+                    renderCaseAdminTable(allCaseAdminData);
+                    showCaseAdminStatus(allCaseAdminData.length > 0 ? '成箱管理員資料已載入' : '目前無成箱管理員資料', false);
+                    isCaseAdminDataLoaded = true;
+                })
+                .withFailureHandler(function(err){ showCaseAdminError(err, '載入成箱管理員資料'); isCaseAdminDataLoaded = false; })
+                .getCaseAdminListData();
+        }
+
+        function renderCaseAdminTable(data) {
+            const tbody = document.querySelector("#case-admin-table tbody");
+            if (!tbody) return;
+            renderTable(tbody, data, function(admin) {
+                const tr = document.createElement('tr');
+                tr.dataset.rowNumber = admin.rowNumber;
+                function createCell(text) { const td = document.createElement('td'); td.textContent = text; return td; }
+                tr.appendChild(createCell(admin.name));
+                tr.appendChild(createCell(admin.employeeId));
+                tr.appendChild(createCell(admin.email));
+                const tdApproved = createCell('');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox'; checkbox.className = 'status-checkbox';
+                checkbox.checked = admin.isApproved; checkbox.disabled = true; 
+                tdApproved.appendChild(checkbox); tr.appendChild(tdApproved);
+                const tdRemarks = createCell(admin.remarks); tdRemarks.className = 'remarks-col';
+                tr.appendChild(tdRemarks);
+                const tdActions = document.createElement('td');
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn btn-edit case-admin-edit-btn'; editBtn.textContent = '編輯';
+                editBtn.dataset.rowNumber = String(admin.rowNumber); tdActions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn btn-delete case-admin-delete-btn'; deleteBtn.textContent = '刪除';
+                deleteBtn.dataset.rowNumber = String(admin.rowNumber); deleteBtn.dataset.name = admin.name; 
+                tdActions.appendChild(deleteBtn); tr.appendChild(tdActions);
+                return tr;
+            }, 6, '目前沒有任何成箱管理員。');
+            
+            tbody.querySelectorAll('.case-admin-edit-btn').forEach(function(b){ b.addEventListener('click', function() { openCaseAdminModal('edit', parseInt(this.dataset.rowNumber)); }); });
+            tbody.querySelectorAll('.case-admin-delete-btn').forEach(function(b){ b.addEventListener('click', function() { deleteCaseAdmin(parseInt(this.dataset.rowNumber), this.dataset.name); }); });
+        }
+        function openCaseAdminModal(mode, rowNumber) {
+             currentCaseAdminEditMode = mode;
+            const modal = document.getElementById('caseAdminModal');
+            if (!modal) return;
+            document.getElementById('caseAdminModalRowNumber').value = '';
+            document.getElementById('caseAdminModalName').value = '';
+            document.getElementById('caseAdminModalEmployeeId').value = '';
+            document.getElementById('caseAdminModalEmail').value = '';
+            document.getElementById('caseAdminModalIsApproved').checked = false;
+            document.getElementById('caseAdminModalRemarks').value = '';
+            const saveBtn = document.getElementById('caseAdminModalSaveBtn');
+            if(saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '儲存'; }
+            const titleEl = document.getElementById('caseAdminModalTitle');
+            if (mode === 'edit' && rowNumber) {
+                const admin = allCaseAdminData.find(function(item){ return item.rowNumber === rowNumber; });
+                if (admin) {
+                    if(titleEl) titleEl.textContent = '編輯成箱管理員';
+                    document.getElementById('caseAdminModalRowNumber').value = admin.rowNumber;
+                    document.getElementById('caseAdminModalName').value = admin.name;
+                    document.getElementById('caseAdminModalEmployeeId').value = admin.employeeId;
+                    document.getElementById('caseAdminModalEmail').value = admin.email;
+                    document.getElementById('caseAdminModalIsApproved').checked = admin.isApproved;
+                    document.getElementById('caseAdminModalRemarks').value = admin.remarks || '';
+                } else { showCaseAdminError({ message: '找不到要編輯的資料 (row ' + rowNumber + ')' }, '開啟編輯'); return; }
+            } else { if(titleEl) titleEl.textContent = '新增成箱管理員'; }
+            modal.style.display = 'flex';
+        }
+        function closeCaseAdminModal() { document.getElementById('caseAdminModal').style.display = 'none'; }
+        function saveCaseAdminData() {
+            const saveBtn = document.getElementById('caseAdminModalSaveBtn');
+            if(!saveBtn) return;
+            saveBtn.disabled = true; saveBtn.textContent = '儲存中...';
+            const adminData = {
+                rowNumber: document.getElementById('caseAdminModalRowNumber').value ? parseInt(document.getElementById('caseAdminModalRowNumber').value) : null,
+                name: document.getElementById('caseAdminModalName').value.trim(),
+                employeeId: document.getElementById('caseAdminModalEmployeeId').value.trim(),
+                email: document.getElementById('caseAdminModalEmail').value.trim(),
+                isApproved: document.getElementById('caseAdminModalIsApproved').checked,
+                remarks: document.getElementById('caseAdminModalRemarks').value.trim()
+            };
+            if (!adminData.name || !adminData.employeeId || !adminData.email) {
+                alert('姓名、員工編號和Email為必填欄位！');
+                saveBtn.disabled = false; saveBtn.textContent = '儲存'; return;
+            }
+            const operation = currentCaseAdminEditMode === 'add' ? 'addCaseAdminData' : 'updateCaseAdminData';
+            const successMsg = currentCaseAdminEditMode === 'add' ? '成箱管理員新增成功！' : '成箱管理員更新成功！'; 
+            const context = currentCaseAdminEditMode === 'add' ? '新增成箱管理員' : '更新成箱管理員';
+            google.script.run
+                .withSuccessHandler(function(response){ handleCaseAdminCUDResponse(response, successMsg, saveBtn); })
+                .withFailureHandler(function(err){ handleCaseAdminCUDError(err, context, saveBtn); })
+                [operation](adminData); 
+        }
+        function deleteCaseAdmin(rowNumber, name) {
+            if (confirm("確定要刪除成箱管理員 \"" + escapeHtml(name) + "\" (列號: " + rowNumber + ") 嗎？")) {
+                showCaseAdminStatus('刪除中...', false);
+                google.script.run
+                    .withSuccessHandler(function(response){ handleCaseAdminCUDResponse(response, '成箱管理員刪除成功！'); })
+                    .withFailureHandler(function(err){ handleCaseAdminCUDError(err, '刪除成箱管理員'); })
+                    .deleteCaseAdminData({ rowNumber: rowNumber }); 
+            }
+        }
+        function handleCaseAdminCUDResponse(response, successMsg, buttonElement) {
+            if (response && response.success) { 
+                closeCaseAdminModal(); isCaseAdminDataLoaded = false; loadCaseAdminData(); showCaseAdminStatus(successMsg, true);
+            } else {
+                showCaseAdminError({ message: (response ? response.error : null) || '發生未知錯誤' }, '操作');
+            }
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存'; }
+        }
+        function handleCaseAdminCUDError(error, context, buttonElement) {
+            showCaseAdminError(error, context);
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存';}
+        }
+
+        // --- 商品管理系統函式 ---
+        function loadProductData() {
+            showProductStatus('載入商品資料中...', false);
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    allProductsData = data || []; renderProductTable(allProductsData);
+                    showProductStatus(allProductsData.length > 0 ? '商品資料已載入' : '目前無商品資料', false);
+                    isProductDataLoaded = true;
+                })
+                .withFailureHandler(function(err) { showProductError(err, '載入商品資料'); isProductDataLoaded = false; })
+                .getProductListData();
+        }
+
+        function renderProductTable(data) {
+            const tbody = document.querySelector("#product-table tbody");
+            if (!tbody) return;
+            renderTable(tbody, data, function(product) {
+                const tr = document.createElement('tr');
+                tr.dataset.rowNumber = product.rowNumber;
+                function createCell(text) { const td = document.createElement('td'); td.textContent = text; return td; }
+                tr.appendChild(createCell(product.companyName));
+                tr.appendChild(createCell(product.productName));
+                tr.appendChild(createCell(product.sellingPricePerBox));
+                tr.appendChild(createCell(product.casePricePerBox));
+                tr.appendChild(createCell(product.totalCasePrice));
+                tr.appendChild(createCell(product.boxesPerCase)); 
+                const tdCanShip = createCell('');
+                const canShipCheckbox = document.createElement('input');
+                canShipCheckbox.type = 'checkbox'; canShipCheckbox.className = 'status-checkbox';
+                canShipCheckbox.checked = product.canShipAboveCase; canShipCheckbox.disabled = true;
+                tdCanShip.appendChild(canShipCheckbox); tr.appendChild(tdCanShip);
+                const tdImage = document.createElement('td'); tdImage.className = 'product-image-cell';
+                if (product.imageId) {
+                    const link = document.createElement('a');
+                    link.href = "https://drive.google.com/file/d/" + product.imageId + "/view?usp=sharing";
+                    link.target = '_blank'; link.title = '點擊預覽';
+                    const img = document.createElement('img');
+                    img.src = "https://drive.google.com/thumbnail?id=" + product.imageId + "&sz=w80-h80-c";
+                    img.alt = escapeHtml(product.productName);
+                    link.appendChild(img); tdImage.appendChild(link);
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'no-image'; span.textContent = '無圖片';
+                    tdImage.appendChild(span);
+                }
+                tr.appendChild(tdImage);
+                const tdActions = document.createElement('td');
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn btn-edit product-edit-btn'; editBtn.textContent = '編輯';
+                editBtn.dataset.rowNumber = String(product.rowNumber); tdActions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn btn-delete product-delete-btn'; deleteBtn.textContent = '刪除';
+                deleteBtn.dataset.rowNumber = String(product.rowNumber);
+                deleteBtn.dataset.name = product.productName; 
+                deleteBtn.dataset.imageId = product.imageId || '';
+                tdActions.appendChild(deleteBtn); tr.appendChild(tdActions);
+                return tr;
+            }, 9, '目前沒有任何商品。');
+
+            tbody.querySelectorAll('.product-edit-btn').forEach(function(b){ b.addEventListener('click', function() { openProductModal('edit', parseInt(this.dataset.rowNumber)); }); });
+            tbody.querySelectorAll('.product-delete-btn').forEach(function(b){ b.addEventListener('click', function() { deleteProduct(parseInt(this.dataset.rowNumber), this.dataset.name, this.dataset.imageId); }); });
+        }
+        
+        function openProductModal(mode, rowNumber) {
+            currentProductEditMode = mode; newProductImageFile = null; 
+            const modal = document.getElementById('productModal');
+            if (!modal) return;
+            document.getElementById('productModalRowNumber').value = '';
+            document.getElementById('productModalExistingImageId').value = '';
+            document.getElementById('productModalExistingImageId').dataset.deleteMarked = "false";
+            document.getElementById('productModalCompanyName').value = '';
+            document.getElementById('productModalProductName').value = '';
+            document.getElementById('productModalSellingPrice').value = '';
+            document.getElementById('productModalCasePricePerBox').value = '';
+            document.getElementById('productModalTotalCasePrice').value = '';
+            document.getElementById('productModalBoxesPerCase').value = '';
+            document.getElementById('productModalCanShipAboveCase').checked = false;
+            document.getElementById('productModalImageFile').value = ''; 
+            const preview = document.getElementById('productModalImagePreview');
+            const currentImageView = document.getElementById('productModalCurrentImageView');
+            if(preview) { preview.style.display = 'none'; preview.src = '#'; }
+            if(currentImageView) currentImageView.innerHTML = '';
+            const modalTitleEl = document.getElementById('productModalTitle');
+
+            if (mode === 'edit' && rowNumber) {
+                const product = allProductsData.find(function(item){ return item.rowNumber === rowNumber; });
+                if (product) {
+                    if(modalTitleEl) modalTitleEl.textContent = '編輯商品資料';
+                    document.getElementById('productModalRowNumber').value = product.rowNumber;
+                    document.getElementById('productModalCompanyName').value = product.companyName;
+                    document.getElementById('productModalProductName').value = product.productName;
+                    document.getElementById('productModalSellingPrice').value = product.sellingPricePerBox;
+                    document.getElementById('productModalCasePricePerBox').value = product.casePricePerBox === null ? '' : product.casePricePerBox;
+                    document.getElementById('productModalTotalCasePrice').value = product.totalCasePrice === null ? '' : product.totalCasePrice;
+                    document.getElementById('productModalBoxesPerCase').value = product.boxesPerCase || '';
+                    document.getElementById('productModalCanShipAboveCase').checked = product.canShipAboveCase;
+                    document.getElementById('productModalExistingImageId').value = product.imageId || '';
+                    if (product.imageId && currentImageView) { 
+                        currentImageView.innerHTML = ''; 
+                        currentImageView.appendChild(document.createTextNode('目前圖片: '));
+                        const link = document.createElement('a');
+                        link.href = "https://drive.google.com/file/d/" + product.imageId + "/view?usp=sharing";
+                        link.target = '_blank'; link.title = '點擊預覽';
+                        link.textContent = (product.imageId || '').substring(0,10) + "...";
+                        currentImageView.appendChild(link);
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button'; removeBtn.className = 'remove-image-button'; 
+                        removeBtn.textContent = '移除';
+                        removeBtn.onclick = function(event) { markImageForRemoval(event); };
+                        currentImageView.appendChild(removeBtn);
+                        if(preview) { preview.src = "https://drive.google.com/thumbnail?id=" + product.imageId + "&sz=w150-h150"; preview.style.display = 'block';}
+                    }
+                } else { showProductError({ message: '找不到要編輯的商品資料 (row ' + rowNumber + ')' }, '開啟編輯'); return; }
+            } else { if(modalTitleEl) modalTitleEl.textContent = '新增商品'; }
+            const modalSaveBtn = document.getElementById('productModalSaveBtn');
+            if(modalSaveBtn){ modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; }
+            modal.style.display = 'flex';
+        }
+
+        function closeProductModal() { document.getElementById('productModal').style.display = 'none'; }
+        
+        function handleProductImagePreview(event) { 
+            const preview = document.getElementById('productModalImagePreview');
+            const file = event.target.files[0];
+            const currentImageView = document.getElementById('productModalCurrentImageView');
+            const existingImageIdInput = document.getElementById('productModalExistingImageId');
+            if (!preview || !currentImageView || !existingImageIdInput) { return; }
+            currentImageView.innerHTML = ''; 
+            if (file) {
+                newProductImageFile = file; 
+                const reader = new FileReader();
+                reader.onload = function(e) { if(preview) { preview.src = e.target.result; preview.style.display = 'block';} }
+                reader.readAsDataURL(file);
+                currentImageView.appendChild(document.createTextNode('新選擇: ' + escapeHtml(file.name)));
+                existingImageIdInput.dataset.deleteMarked = "false";
+            } else { 
+                newProductImageFile = null;
+                const existingImageId = existingImageIdInput.value;
+                const isMarkedForDelete = existingImageIdInput.dataset.deleteMarked === "true";
+                if(existingImageId && !isMarkedForDelete){
+                    if(preview) { preview.src = "https://drive.google.com/thumbnail?id=" + existingImageId + "&sz=w150-h150"; preview.style.display = 'block'; }
+                    currentImageView.appendChild(document.createTextNode('目前圖片: '));
+                    const link = document.createElement('a');
+                    link.href = "https://drive.google.com/file/d/" + existingImageId + "/view?usp=sharing";
+                    link.target = '_blank'; link.textContent = (existingImageId || '').substring(0,10) + "...";
+                    currentImageView.appendChild(link);
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button'; removeBtn.className = 'remove-image-button';
+                    removeBtn.textContent = '移除'; removeBtn.onclick = function(event) { markImageForRemoval(event); };
+                    currentImageView.appendChild(removeBtn);
+                } else if (isMarkedForDelete) {
+                     if(preview) { preview.style.display = 'none'; preview.src = '#'; }
+                     const span = document.createElement('span'); span.style.color = 'red';
+                     span.textContent = '目前圖片將被移除 (儲存後生效)'; currentImageView.appendChild(span);
+                } else { if(preview) { preview.style.display = 'none'; preview.src = '#'; } }
+            }
+        }
+        
+        function markImageForRemoval(event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+            const existingImageIdInput = document.getElementById('productModalExistingImageId');
+            const currentImageView = document.getElementById('productModalCurrentImageView');
+            const preview = document.getElementById('productModalImagePreview');
+            const fileInput = document.getElementById('productModalImageFile');
+            if (existingImageIdInput && currentImageView && preview && fileInput) {
+                existingImageIdInput.dataset.deleteMarked = "true"; 
+                currentImageView.innerHTML = ''; 
+                const span = document.createElement('span'); span.style.color = 'red';
+                span.textContent = '目前圖片將被移除 (儲存後生效)'; currentImageView.appendChild(span);
+                preview.style.display = 'none'; preview.src = '#'; fileInput.value = ''; newProductImageFile = null;
+            }
+        }
+
+        function saveProductData() { 
+            const modalSaveBtn = document.getElementById('productModalSaveBtn');
+            if(!modalSaveBtn) { return;}
+            try { 
+                modalSaveBtn.disabled = true; modalSaveBtn.textContent = '儲存中...';
+                const existingImageIdInput = document.getElementById('productModalExistingImageId');
+                const productData = {
+                    rowNumber: document.getElementById('productModalRowNumber').value ? parseInt(document.getElementById('productModalRowNumber').value) : null,
+                    companyName: document.getElementById('productModalCompanyName').value.trim(),
+                    productName: document.getElementById('productModalProductName').value.trim(),
+                    sellingPricePerBox: document.getElementById('productModalSellingPrice').value.trim(),
+                    casePricePerBox: document.getElementById('productModalCasePricePerBox').value.trim(),
+                    totalCasePrice: document.getElementById('productModalTotalCasePrice').value.trim(),
+                    boxesPerCase: document.getElementById('productModalBoxesPerCase').value.trim(),
+                    canShipAboveCase: document.getElementById('productModalCanShipAboveCase').checked,
+                    existingImageId: existingImageIdInput ? existingImageIdInput.value : '',
+                    deleteCurrentImage: existingImageIdInput ? (existingImageIdInput.dataset.deleteMarked === "true") : false
+                };
+                if (!productData.companyName || !productData.productName || productData.sellingPricePerBox === '' || productData.boxesPerCase === '') {
+                    alert('公司名稱、商品名稱、售價/盒和成箱盒數為必填欄位！');
+                    modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; return;
+                }
+                if (isNaN(parseFloat(productData.sellingPricePerBox)) || 
+                    (productData.casePricePerBox !== '' && isNaN(parseFloat(productData.casePricePerBox))) ||
+                    (productData.totalCasePrice !== '' && isNaN(parseFloat(productData.totalCasePrice))) ||
+                    isNaN(parseInt(productData.boxesPerCase)) ) { 
+                    alert('價格與數量相關欄位（售價/盒、成箱盒數為必填數字，成箱價/總價若填寫也需為數字）！');
+                    modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; return;
+                }
+                if (newProductImageFile) { 
+                    const reader = new FileReader();
+                    reader.onloadend = function() { 
+                        const imageInfo = { base64Data: reader.result, fileName: newProductImageFile.name, mimeType: newProductImageFile.type };
+                        executeSaveProductData(productData, imageInfo, modalSaveBtn);
+                    };
+                    reader.onerror = function() {
+                        alert("讀取圖片檔案失敗！"); modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存';
+                    };
+                    reader.readAsDataURL(newProductImageFile);
+                } else { 
+                    executeSaveProductData(productData, null, modalSaveBtn);
+                }
+            } catch (e) {
+                console.error("Error in saveProductData:", e);
+                if(modalSaveBtn) { modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存';}
+            }
+        }
+        
+        function executeSaveProductData(productData, imageInfo, buttonElement) {
+            const operation = currentProductEditMode === 'add' ? 'addProductData' : 'updateProductData';
+            const successMsg = currentProductEditMode === 'add' ? '商品新增成功！' : '商品更新成功！'; 
+            const context = currentProductEditMode === 'add' ? '新增商品' : '更新商品';
+            google.script.run
+                .withSuccessHandler(function(response) { handleProductCUDResponse(response, successMsg, buttonElement);})
+                .withFailureHandler(function(err) { handleProductCUDError(err, context, buttonElement);})
+                [operation](productData, imageInfo); 
+        }
+
+        function deleteProduct(rowNumber, name, imageId) {
+            if (confirm("確定要刪除商品 \"" + escapeHtml(name) + "\" (列號: " + rowNumber + ") 嗎？此操作會一併刪除關聯圖片且無法復原。")) {
+                showProductStatus('刪除商品中...', false);
+                google.script.run
+                    .withSuccessHandler(function(response){ handleProductCUDResponse(response, '商品刪除成功！');})
+                    .withFailureHandler(function(err){ handleProductCUDError(err, '刪除商品');})
+                    .deleteProductData({ rowNumber: rowNumber, imageId: imageId });
+            }
+        }
+
+        function handleProductCUDResponse(response, successMsg, buttonElement = null) { 
+            if (response && response.success) { 
+                closeProductModal(); isProductDataLoaded = false; loadProductData(); showProductStatus(successMsg, true);
+            } else {
+                showProductError({ message: (response ? response.error : null) || '發生未知錯誤' }, '商品操作');
+            }
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存';}
+        }
+        
+        function handleProductCUDError(error, context, buttonElement = null) {
+            showProductError(error, context);
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存';}
+        }
+
+        // --- 站點資訊管理函式 ---
+        function loadSiteInfoData() {
+            showSiteInfoStatus('載入站點資料中...', false);
+            google.script.run
+                .withSuccessHandler(function(data) { 
+                    allSiteInfoData = data || [];
+                    renderSiteInfoTable(allSiteInfoData);
+                    showSiteInfoStatus(allSiteInfoData.length > 0 ? '站點資料已載入' : '目前無站點資料', false);
+                    isSiteInfoDataLoaded = true;
+                })
+                .withFailureHandler(function(err) { 
+                    showSiteInfoError(err, '載入站點資料');
+                    isSiteInfoDataLoaded = false;
+                })
+                .getSiteInfoListData(); 
+        }
+
+        function renderSiteInfoTable(data) {
+            const tbody = document.querySelector("#site-info-table tbody");
+            if (!tbody) return;
+            renderTable(tbody, data, function(site) {
+                const tr = document.createElement('tr');
+                tr.dataset.rowNumber = site.rowNumber;
+                function createCell(text) { const td = document.createElement('td'); td.textContent = text; return td; }
+                tr.appendChild(createCell(site.siteCode));
+                tr.appendChild(createCell(site.siteName));
+                tr.appendChild(createCell(site.address));
+                tr.appendChild(createCell(site.phone));
+                const tdActions = document.createElement('td');
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn btn-edit site-info-edit-btn'; editBtn.textContent = '編輯';
+                editBtn.dataset.rowNumber = String(site.rowNumber); tdActions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn btn-delete site-info-delete-btn'; deleteBtn.textContent = '刪除';
+                deleteBtn.dataset.rowNumber = String(site.rowNumber); deleteBtn.dataset.name = site.siteName; 
+                tdActions.appendChild(deleteBtn); tr.appendChild(tdActions);
+                return tr;
+            }, 5, '目前沒有任何站點資訊。');
+            
+            tbody.querySelectorAll('.site-info-edit-btn').forEach(function(b){ b.addEventListener('click', function() { openSiteInfoModal('edit', parseInt(this.dataset.rowNumber)); }); });
+            tbody.querySelectorAll('.site-info-delete-btn').forEach(function(b){ b.addEventListener('click', function() { deleteSiteInfo(parseInt(this.dataset.rowNumber), this.dataset.name); }); });
+        }
+
+        function openSiteInfoModal(mode = 'add', rowNumber = null) {
+            currentSiteEditMode = mode; 
+            const modal = document.getElementById('siteInfoModal');
+            if (!modal) return;
+            document.getElementById('siteInfoModalRowNumber').value = '';
+            document.getElementById('siteInfoModalSiteCode').value = '';
+            document.getElementById('siteInfoModalSiteName').value = '';
+            document.getElementById('siteInfoModalAddress').value = '';
+            document.getElementById('siteInfoModalPhone').value = '';
+            const modalTitleEl = document.getElementById('siteInfoModalTitle');
+            const modalSaveBtn = document.getElementById('siteInfoModalSaveBtn');
+
+            if (mode === 'edit' && rowNumber) {
+                const site = allSiteInfoData.find(function(item){ return item.rowNumber === rowNumber; });
+                if (site) {
+                    if(modalTitleEl) modalTitleEl.textContent = '編輯站點資料';
+                    document.getElementById('siteInfoModalRowNumber').value = site.rowNumber;
+                    document.getElementById('siteInfoModalSiteCode').value = site.siteCode;
+                    document.getElementById('siteInfoModalSiteName').value = site.siteName;
+                    document.getElementById('siteInfoModalAddress').value = site.address || '';
+                    document.getElementById('siteInfoModalPhone').value = site.phone || '';
+                } else {
+                    showSiteInfoError({ message: '找不到要編輯的站點資料 (row ' + rowNumber + ')' }, '開啟編輯'); return;
+                }
+            } else {
+                 if(modalTitleEl) modalTitleEl.textContent = '新增站點資料';
+            }
+            if(modalSaveBtn){ modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; }
+            modal.style.display = 'flex';
+        }
+
+        function closeSiteInfoModal() { 
+            const modal = document.getElementById('siteInfoModal');
+            if(modal) modal.style.display = 'none';
+        }
+
+        function saveSiteInfoData() { 
+            const modalSaveBtn = document.getElementById('siteInfoModalSaveBtn');
+            if(!modalSaveBtn) return;
+            try { 
+                modalSaveBtn.disabled = true; modalSaveBtn.textContent = '儲存中...';
+                const siteData = {
+                    rowNumber: document.getElementById('siteInfoModalRowNumber').value ? parseInt(document.getElementById('siteInfoModalRowNumber').value) : null,
+                    siteCode: document.getElementById('siteInfoModalSiteCode').value.trim(),
+                    siteName: document.getElementById('siteInfoModalSiteName').value.trim(),
+                    address: document.getElementById('siteInfoModalAddress').value.trim(),
+                    phone: document.getElementById('siteInfoModalPhone').value.trim()
+                };
+                if (!siteData.siteCode || !siteData.siteName) {
+                    alert('站代號和站名為必填欄位！');
+                    modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存'; return;
+                }
+                const operation = currentSiteEditMode === 'add' ? 'addSiteInfoData' : 'updateSiteInfoData';
+                const successMsg = currentSiteEditMode === 'add' ? '站點新增成功！' : '站點更新成功！'; 
+                const context = currentSiteEditMode === 'add' ? '新增站點' : '更新站點';
+                google.script.run
+                    .withSuccessHandler(function(response){ handleSiteInfoCUDResponse(response, successMsg, modalSaveBtn); })
+                    .withFailureHandler(function(err){ handleSiteInfoCUDError(err, context, modalSaveBtn); })
+                    [operation](siteData); 
+            } catch (e) {
+                console.error("CRITICAL ERROR in saveSiteInfoData:", e);
+                if(modalSaveBtn) { modalSaveBtn.disabled = false; modalSaveBtn.textContent = '儲存';}
+            }
+        }
+        
+        function deleteSiteInfo(rowNumber, name) {
+            if (confirm("確定要刪除站點 \"" + escapeHtml(name) + "\" (列號: " + rowNumber + ") 嗎？此操作無法復原。")) {
+                showSiteInfoStatus('刪除站點中...', false);
+                google.script.run
+                    .withSuccessHandler(function(response){ handleSiteInfoCUDResponse(response, '站點刪除成功！'); })
+                    .withFailureHandler(function(err){ handleSiteInfoCUDError(err, '刪除站點'); })
+                    .deleteSiteInfoData({ rowNumber: rowNumber }); 
+            }
+        }
+
+        function handleSiteInfoCUDResponse(response, successMsg, buttonElement = null) { 
+            if (response && response.success) { 
+                closeSiteInfoModal(); isSiteInfoDataLoaded = false; loadSiteInfoData(); showSiteInfoStatus(successMsg, true);
+            } else {
+                showSiteInfoError({ message: (response ? response.error : null) || '發生未知錯誤' }, '站點操作');
+            }
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存'; }
+        }
+
+        function handleSiteInfoCUDError(error, context, buttonElement = null) {
+            showSiteInfoError(error, context);
+            if(buttonElement) { buttonElement.disabled = false; buttonElement.textContent = '儲存'; }
+        }
+
+
+        // 【修改】為 loadSettingsData 和 saveSettings 加入新的欄位處理
+        function loadSettingsData() {
+            if (isSettingsDataLoaded) { return; } 
+            showSettingsStatus('載入目前設定...', false);
+            google.script.run
+                .withSuccessHandler(function(settings) {
+                    if(settings.error) {
+                        showSettingsError({message: settings.error}, '載入設定');
+                        return;
+                    }
+                    // 填入所有設定欄位
+                    document.getElementById('activityNameInput').value = settings.activityName || '';
+                    document.getElementById('activityStartTimeInput').value = settings.activityStartTime || '';
+                    document.getElementById('activityEndTimeInput').value = settings.activityEndTime || '';
+                    document.getElementById('looseOrderStartTimeInput').value = settings.looseOrderStartTime || '';
+                    document.getElementById('looseOrderEndTimeInput').value = settings.looseOrderEndTime || '';
+
+                    showSettingsStatus('設定已載入。', true);
+                    isSettingsDataLoaded = true;
+                })
+                .withFailureHandler(function(err) { showSettingsError(err, '載入設定'); })
+                .getSettings(); // 呼叫新的 getSettings 函式
+        }
+
+        function saveSettings() {
+            const saveBtn = document.getElementById('saveSettingsBtn');
+            saveBtn.disabled = true;
+            showSettingsStatus('儲存中...', false);
+
+            const settings = {
+                activityName: document.getElementById('activityNameInput').value.trim(),
+                activityStartTime: document.getElementById('activityStartTimeInput').value,
+                activityEndTime: document.getElementById('activityEndTimeInput').value,
+                looseOrderStartTime: document.getElementById('looseOrderStartTimeInput').value,
+                looseOrderEndTime: document.getElementById('looseOrderEndTimeInput').value
+            };
+            
+            // 只需要驗證全站檔期的必填
+            if (!settings.activityStartTime || !settings.activityEndTime) {
+                alert("全站檔期的開始和結束時間為必填欄位。");
+                saveBtn.disabled = false;
+                showSettingsStatus('儲存失敗', false);
+                return;
+            }
+             // 驗證零星訂購時間的邏輯：要嘛都填，要嘛都留空
+            if ((settings.looseOrderStartTime && !settings.looseOrderEndTime) || (!settings.looseOrderStartTime && settings.looseOrderEndTime)) {
+                alert("零星訂購的開始和結束時間必須同時設定或同時留空。");
+                saveBtn.disabled = false;
+                showSettingsStatus('儲存失敗', false);
+                return;
+            }
+
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    if (response.success) {
+                        showSettingsStatus('設定已成功儲存！', true);
+                    } else {
+                        showSettingsError({message: response.error}, '儲存設定');
+                    }
+                    saveBtn.disabled = false;
+                })
+                .withFailureHandler(function(err) {
+                    showSettingsError(err, '儲存設定');
+                    saveBtn.disabled = false;
+                })
+                .saveSettings(settings); // 呼叫新的 saveSettings 函式
+        }
+    </script>
+</body>
+</html>
