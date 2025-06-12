@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <div class="container">
+    <div class="section-header">
+        <h1>全站與活動設定</h1>
+        <div class="header-actions">
+            <button id="saveSettingsBtn" class="action-btn btn-save"><span class="material-symbols-outlined">save</span>儲存所有設定</button>
+            <span id="settings-status-msg" class="status-message"></span>
+        </div>
+    </div>
+    
+    <div class="settings-grid">
+        <div class="setting-card">
+            <h3 class="setting-card-title"><span class="material-symbols-outlined">calendar_month</span>全站檔期設定</h3>
+            <p class="setting-card-description">設定整個訂購系統的總開放時間。若目前時間不在這個區間內，所有使用者將無法訪問訂購頁面。</p>
+            <div class="form-group">
+                <label for="activityNameInput">檔期名稱 (將顯示於訂購頁面)</label>
+                <input type="text" id="activityNameInput" placeholder="例如：2025年端午節預購">
+            </div>
+            <div class="form-grid-inner">
+                <div class="form-group">
+                    <label for="activityStartTimeInput">開始時間 (必填)</label>
+                    <input type="datetime-local" id="activityStartTimeInput">
+                </div>
+                <div class="form-group">
+                    <label for="activityEndTimeInput">結束時間 (必填)</label>
+                    <input type="datetime-local" id="activityEndTimeInput">
+                </div>
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <h3 class="setting-card-title"><span class="material-symbols-outlined">schedule</span>零星訂購開放時間設定</h3>
+            <p class="setting-card-description">您可以為「零星訂購」頁面設定一個獨立的、更短的開放時間。若留空，則零星訂購的開放時間將等同於全站檔期。</p>
+            <div class="form-grid-inner">
+                <div class="form-group">
+                    <label for="looseOrderStartTimeInput">零星訂購開始時間 (可選)</label>
+                    <input type="datetime-local" id="looseOrderStartTimeInput">
+                </div>
+                <div class="form-group">
+                    <label for="looseOrderEndTimeInput">零星訂購結束時間 (可選)</label>
+                    <input type="datetime-local" id="looseOrderEndTimeInput">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  </body>
+</html>
