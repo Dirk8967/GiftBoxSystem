@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f2f5;
+            display: grid;
+            place-items: center;
+            padding: 15px; /* 增加一些邊距，避免內容貼邊 */
+            box-sizing: border-box;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px; /* 稍微調整內邊距 */
+            text-align: center;
+            width: 100%; /* 寬度改為100%以適應父容器的padding */
+            max-width: 420px;
+            animation: fadeIn 0.5s ease-in-out;
+            box-sizing: border-box;
+        }
+        .icon {
+            width: 60px; /* 略微調整圖示大小 */
+            height: 60px;
+            margin: 0 auto 20px;
+            color: #dc3545; /* 錯誤/禁止的紅色 */
+        }
+        .title {
+            font-size: 22px; /* 略微調整字體大小 */
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        .message {
+            font-size: 15px; /* 略微調整字體大小 */
+            color: #666;
+            line-height: 1.6;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+            </svg>
+        </div>
+        <h1 class="title">權限不足</h1>
+        <p class="message">抱歉，您的 Google 帳號並非系統管理員，無法存取此後台管理頁面。</p>
+    </div>
+</body>
+</html>
