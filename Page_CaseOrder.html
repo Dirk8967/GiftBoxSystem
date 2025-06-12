@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <div class="container">
+    <div class="section-header">
+        <h2>成箱訂購</h2>
+        <span id="case-order-status-msg" class="status-message"></span>
+    </div>
+
+    <div class="order-header-form">
+        <h3 class="form-title">
+            <span class="material-symbols-outlined">person</span>
+            訂購資訊
+        </h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="ordererName">訂購人姓名</label>
+                <input type="text" id="ordererName" placeholder="請輸入姓名">
+            </div>
+            <div class="form-group">
+                <label for="ordererPhone">訂購人電話</label>
+                <input type="text" id="ordererPhone" placeholder="請輸入電話">
+            </div>
+            <div class="form-group">
+                <label for="deliveryLocation">寄送地點</label>
+                <input type="text" id="deliveryLocation" placeholder="請輸入寄送地點">
+            </div>
+            <div class="form-group">
+                <label for="deliveryDate">寄送日期</label>
+                <input type="date" id="deliveryDate">
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container" style="margin-top: 25px;">
+        <table id="case-order-product-table">
+            <thead>
+                <tr>
+                    <th>公司名稱</th>
+                    <th>商品名稱</th>
+                    <th style="width: 100px;">售價/盒</th>
+                    <th style="width: 110px;">成箱價/盒</th>
+                    <th style="width: 110px;">成箱總價</th>
+                    <th style="width: 120px;">最低成箱盒數</th>
+                    <th style="width: 200px;">超過成箱盒數後是否可散出</th>
+                    <th style="width: 100px;">圖片</th>
+                    <th style="width: 120px;">訂購操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                 <tr><td colspan="9">商品資料載入中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+  </body>
+</html>
