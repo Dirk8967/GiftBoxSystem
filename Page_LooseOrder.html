@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+    <div class="container">
+    <div class="section-header">
+        <h2>零星訂購</h2>
+        <span id="loose-order-status-msg" class="status-message"></span>
+    </div>
+
+    <div class="order-header-form loose-order-theme">
+        <h3 class="form-title">
+            <span class="material-symbols-outlined">edit_note</span>
+            訂購資訊
+        </h3>
+        <div class="form-grid-loose">
+            <div class="form-group">
+                <label for="looseOrdererName">訂購人姓名</label>
+                <input type="text" id="looseOrdererName" placeholder="請輸入姓名">
+            </div>
+            <div class="form-group">
+                <label for="looseOrdererPhone">訂購人電話</label>
+                <input type="text" id="looseOrdererPhone" placeholder="請輸入電話">
+            </div>
+            <div class="form-group">
+                <label for="looseDeliveryLocation">寄送地點</label>
+                <div class="input-with-button">
+                    <input type="text" id="looseDeliveryLocation" placeholder="點擊右側按鈕選擇站點" readonly>
+                    <button id="openSiteSelectionModalBtn" class="action-btn btn-lookup"><span class="material-symbols-outlined">search</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container" style="margin-top: 25px;">
+        <table id="loose-order-product-table">
+            <thead>
+                <tr>
+                    <th>公司名稱</th>
+                    <th>商品名稱</th>
+                    <th style="width: 100px;">售價/盒</th>
+                    <th style="width: 120px;">成箱盒數</th>
+                    <th style="width: 100px;">圖片</th>
+                    <th style="width: 120px;">訂購操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                 <tr><td colspan="6">商品資料載入中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+  </body>
+</html>
