@@ -7,120 +7,288 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    
     <style>
-      /* 這個檔案只包含純粹的 CSS 程式碼 */
-body, html { margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; background-color: #f0f2f5; height: 100%;}
-#app-container { display: flex; flex-direction: column; min-height: 100vh; }
-.main-nav { display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-.nav-links { display: flex; align-items: center; }
-.nav-button { display: flex; align-items: center; justify-content: center; padding: 18px 20px; border: none; background-color: transparent; color: #495057; cursor: pointer; font-size: 16px; font-weight: 500; transition: color 0.2s, border-bottom-color 0.2s; border-bottom: 3px solid transparent; }
-.nav-button .material-symbols-outlined { margin-right: 8px; font-size: 20px; }
-.nav-button:hover { color: #0056b3; }
-.nav-button.active { color: #007bff; border-bottom-color: #007bff; }
-.user-menu { position: relative; }
-.user-info-button { display: flex; align-items: center; background-color: #e9ecef; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s; }
-.user-info-button:hover { background-color: #ced4da; }
-.user-info-button .user-icon { width: 24px; height: 24px; margin-right: 8px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
-.user-info-button .user-email { font-size: 14px; font-weight: 500; color: #495057; }
-.dropdown-content { display: none; position: absolute; right: 0; top: 110%; background-color: white; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 4px; overflow: hidden;  }
-.dropdown-content button { display: flex; align-items: center; color: black; padding: 12px 16px; text-decoration: none; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-size: 15px; font-family: 'Noto Sans TC', sans-serif; }
-.dropdown-content button:hover { background-color: #f1f1f1; }
-.user-menu.open .dropdown-content { display: block; }
-.dropdown-content .material-symbols-outlined { color: #555; }
-.main-content { flex-grow: 1; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; }
-.main-content .container { flex-grow: 1; display: flex; flex-direction: column; width: 100%; max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); box-sizing: border-box; }
-.container h2 { margin-top: 0; }
-.profile-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 25px; margin-top: 20px; max-width: 500px;}
-.profile-field { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-.profile-field:last-child { border-bottom: none; }
-.profile-label { font-weight: 700; color: #555; width: 100px; }
-.profile-value { font-size: 16px; color: #333; word-break: break-all; }
-.footer-note { margin-top: 20px; font-size: 13px; color: #888; text-align: center; }
-.nav-button-admin { color: #d9a500; }
-.nav-button-admin.hidden { display: none !important; }
-.nav-button-admin:hover { color: #b88d00; }
-.nav-button-admin.active { color: #ffc107; border-bottom-color: #ffc107; }
-.nav-dropdown { position: relative; }
-.nav-dropdown.hidden { display: none !important; }
-.nav-dropdown > .nav-button .material-symbols-outlined:last-child { margin-left: 4px; margin-right: -4px; transition: transform 0.2s; font-size: 24px; }
-.nav-dropdown.open > .nav-button .material-symbols-outlined:last-child { transform: rotate(180deg); }
-.nav-dropdown-content { display: none; position: absolute; left: 0; top: 100%; background-color: white; min-width: 100%; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 0 0 4px 4px; overflow: hidden; border: 1px solid #ddd; border-top: none; }
-.nav-dropdown-content button { display: flex; align-items: center; color: #212529; padding: 12px 16px; text-decoration: none; width: 100%; box-sizing: border-box; text-align: left; background: none; border: none; border-bottom: 1px solid #f1f1f1; cursor: pointer; font-size: 15px; font-family: 'Noto Sans TC', sans-serif; border-radius: 0; }
-.nav-dropdown-content button:last-child { border-bottom: none; }
-.nav-dropdown-content button:hover { background-color: #f1f1f1; }
-.nav-dropdown.open .nav-dropdown-content { display: block; }
-.action-btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 500; color: white; border: none; padding: 10px 18px; border-radius: 5px; font-size: 15px; cursor: pointer; transition: background-color 0.2s; }
-.action-btn:hover { opacity: 0.85; }
-.action-btn .material-symbols-outlined { margin-right: 6px; }
-.btn-save { background-color: #007bff; }
-.btn-cancel { background-color: #6c757d; }
-.order-header-form { border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
-.order-header-form.case-order-theme { background-color: #f8f9fa; }
-.order-header-form.loose-order-theme { background-color: #f4f8f7; border-color: #d1e7dd; }
-.order-header-form .form-title { display: flex; align-items: center; font-size: 1.2em; margin-top:0; margin-bottom: 20px; color: #343a40; }
-.order-header-form .form-title .material-symbols-outlined { margin-right: 10px; }
-#page-case-order .form-title .material-symbols-outlined { color: #007bff; }
-#page-loose-order .form-title .material-symbols-outlined { color: #198754; }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px 25px; }
-.form-grid-loose { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px 25px; }
-.input-with-button { display: flex; }
-.input-with-button input { flex-grow: 1; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-.input-with-button button { border-top-left-radius: 0; border-bottom-left-radius: 0; }
-.btn-lookup { background-color: #5a6268; padding: 10px 12px; }
-.btn-lookup:hover { background-color: #4a4f54; }
-.btn-lookup .material-symbols-outlined { margin-right: 0; }
-.form-group { margin-bottom: 0; }
-.form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; font-size: 14px; }
-.form-group input { width: 100%; padding: 10px; font-size: 15px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
-.table-container { flex-grow: 1; overflow-x: auto; }
-.table-container tbody tr:nth-child(even) { background-color: #f8f9fa; }
-.table-container tbody tr:hover { background-color: #e9ecef; }
-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-th, td { padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-size: 14px; vertical-align: middle; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-td.wrap-text, th.wrap-text { white-space: normal; word-break: break-all; }
-th.text-center, td.text-center { text-align: center; }
-th.text-right, td.text-right { text-align: right; padding-right: 15px !important; }
-.product-image-cell img { max-width: 70px; max-height: 70px; object-fit: cover; border-radius: 4px; }
-.ship-option-yes, .ship-option-no { display: flex; align-items: center; gap: 6px; justify-content: center; }
-.ship-option-yes .material-symbols-outlined { color: #28a745; font-weight: bold; }
-.ship-option-no .material-symbols-outlined { color: #dc3545; font-weight: bold; }
-.btn-order { background-color: #17a2b8; padding: 6px 12px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 5px; }
-.btn-order:hover { background-color: #138496; }
-.btn-order .material-symbols-outlined { margin-right: 4px; font-size: 18px; }
-.modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
-.modal-content { background: white; padding: 25px 30px; border-radius: 12px; width: 100%; max-width: 500px; text-align: left; box-sizing: border-box; position: relative; animation: modalOpen 0.3s ease-out; margin: 20px auto; }
-.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-.close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #6c757d; border: none; background: none;}
-.order-modal-section { padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
-.order-modal-section h4 { margin-top: 0; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; color: #333; display:flex; align-items:center; }
-.order-modal-section h4 .material-symbols-outlined { margin-right: 8px; font-size: 22px; }
-.order-modal-header { background-color: #f8f9fa; }
-.order-modal-product { background-color: #e9f5ff; }
-.order-info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 10px; font-size: 14px; }
-.order-info-grid span:nth-child(odd) { font-weight: bold; color: #555; }
-.order-info-grid span:nth-child(even) { color: #333; }
-#caseOrderModal .form-group, #looseOrderModal .form-group { margin-top: 20px; }
-#caseOrderQtySelect, #looseOrderQtySelect { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ced4da; }
-#submitCaseOrderBtn, #submitLooseOrderBtn { background-color: #28a745; }
-#submitCaseOrderBtn:hover, #submitLooseOrderBtn:hover { background-color: #218838; }
-#cancelCaseOrderBtn, #cancelLooseOrderBtn { background-color: #6c757d; }
-#cancelCaseOrderBtn:hover, #cancelLooseOrderBtn:hover { background-color: #5a6268; }
-#siteSelectionModal .modal-content { max-width: 600px; }
-#siteSelectionModal .site-list { max-height: 40vh; overflow-y: auto; border: 1px solid #ddd; padding: 5px;}
-#siteSelectionModal .site-item { display: block; width: 100%; padding: 10px; border-bottom: 1px solid #eee; background: none; border: none; text-align: left; cursor: pointer;}
-#siteSelectionModal .site-item:hover { background-color: #f0f2f5; }
-#siteSelectionModal .site-item:last-child { border-bottom: none; }
+      body, html { 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f0f2f5; 
+            /* height: 100vh; 將高度設為視窗的 100% */
+            /* overflow: hidden; 防止整個頁面產生捲軸 */
+        }
+        /* 【核心修正】讓 #app-container 成為一個佔滿整個畫面的 flex 容器 */
+        #app-container { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; /* 高度設為視窗的 100% */
+        }
+        .main-nav { 
+            /* 導覽列樣式保持不變 */
+            flex-shrink: 0; /* 防止導覽列被壓縮 */
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background-color: #ffffff; 
+            padding: 0 20px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000;
+        }
+        .nav-links { display: flex; align-items: center; }
+        .nav-button { display: flex; align-items: center; justify-content: center; padding: 18px 20px; border: none; background-color: transparent; color: #495057; cursor: pointer; font-size: 16px; font-weight: 500; transition: color 0.2s, border-bottom-color 0.2s; border-bottom: 3px solid transparent; }
+        .nav-button:hover { color: #0056b3; }
+        .nav-button.active { color: #007bff; border-bottom-color: #007bff; }
 
-@keyframes modalOpen { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 768px) {
-    .main-nav { flex-direction: column; align-items: stretch; padding: 0; }
-    .nav-links { width: 100%; display: flex; justify-content: space-around; border-bottom: 1px solid #dee2e6;}
-    .nav-button { flex-grow: 1; padding: 12px 5px; font-size: 14px;}
-    .user-menu { padding: 10px; background-color: #f8f9fa; }
-    .main-content { padding: 15px; }
-    .main-content .container { padding: 15px; } 
-}
+        .user-menu { position: relative; }
+        .user-info-button { display: flex; align-items: center; background-color: #e9ecef; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s; }
+        .user-info-button:hover { background-color: #ced4da; }
+        .user-info-button .user-icon { width: 24px; height: 24px; margin-right: 8px; background-color: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        .user-info-button .user-email { font-size: 14px; font-weight: 500; color: #495057; }
+        .dropdown-content { display: none; position: absolute; right: 0; top: 110%; background-color: white; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 4px; overflow: hidden;  }
+        .dropdown-content button { display: flex; align-items: center; color: black; padding: 12px 16px; text-decoration: none; width: 100%; text-align: left; background: none; border: none; cursor: pointer; font-size: 15px; font-family: 'Noto Sans TC', sans-serif; }
+        .dropdown-content button:hover { background-color: #f1f1f1; }
+        .user-menu.open .dropdown-content { display: block; }
+        .dropdown-content .material-symbols-outlined { color: #555; }
+        /* --- 【核心修正】主內容與容器佈局 --- */
+        .main-content { 
+            padding: 20px; 
+            box-sizing: border-box;
+        }
+        .container { 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            box-sizing: border-box;
+        }
+        .container h2 { margin-top: 0; }
+        .profile-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 25px; margin-top: 20px; max-width: 500px;}
+        .profile-field { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .profile-field:last-child { border-bottom: none; }
+        .profile-label { font-weight: 700; color: #555; width: 100px; }
+        .profile-value { font-size: 16px; color: #333; word-break: break-all; }
+        .footer-note { margin-top: 20px; font-size: 13px; color: #888; text-align: center; }
+        .nav-button-admin { color: #d9a500; }
+        .nav-button-admin.hidden { display: none !important; }
+        .nav-button-admin:hover { color: #b88d00; }
+        .nav-button-admin.active { color: #ffc107; border-bottom-color: #ffc107; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown.hidden { display: none !important; }
+        .nav-dropdown > .nav-button .material-symbols-outlined:last-child { margin-left: 4px; margin-right: -4px; transition: transform 0.2s; font-size: 24px; }
+        .nav-dropdown.open > .nav-button .material-symbols-outlined:last-child { transform: rotate(180deg); }
+        .nav-dropdown-content { display: none; position: absolute; left: 0; top: 100%; background-color: white; min-width: 100%; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1; border-radius: 0 0 4px 4px; overflow: hidden; border: 1px solid #ddd; border-top: none; }
+        .nav-dropdown-content button { display: flex; align-items: center; color: #212529; padding: 12px 16px; text-decoration: none; width: 100%; box-sizing: border-box; text-align: left; background: none; border: none; border-bottom: 1px solid #f1f1f1; cursor: pointer; font-size: 15px; font-family: 'Noto Sans TC', sans-serif; border-radius: 0; }
+        .nav-dropdown-content button:last-child { border-bottom: none; }
+        .nav-dropdown-content button:hover { background-color: #f1f1f1; }
+        .nav-dropdown.open .nav-dropdown-content { display: block; }
+        .action-btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 500; color: white; border: none; padding: 10px 18px; border-radius: 5px; font-size: 15px; cursor: pointer; transition: background-color 0.2s; }
+        .action-btn:hover { opacity: 0.85; }
+        .action-btn .material-symbols-outlined { margin-right: 6px; }
+        .btn-save { background-color: #007bff; }
+        .btn-cancel { background-color: #6c757d; }
+        .order-header-form { border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+        .order-header-form.case-order-theme { background-color: #f8f9fa; }
+        .order-header-form.loose-order-theme { background-color: #f4f8f7; border-color: #d1e7dd; }
+        .order-header-form .form-title { display: flex; align-items: center; font-size: 1.2em; margin-top:0; margin-bottom: 20px; color: #343a40; }
+        .order-header-form .form-title .material-symbols-outlined { margin-right: 10px; }
+        #page-case-order .form-title .material-symbols-outlined { color: #007bff; }
+        #page-loose-order .form-title .material-symbols-outlined { color: #198754; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px 25px; }
+        .form-grid-loose { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px 25px; }
+        .input-with-button { display: flex; }
+        .input-with-button input { flex-grow: 1; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .input-with-button button { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .btn-lookup { background-color: #5a6268; padding: 10px 12px; }
+        .btn-lookup:hover { background-color: #4a4f54; }
+        .btn-lookup .material-symbols-outlined { margin-right: 0; }
+        .form-group { margin-bottom: 0; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; font-size: 14px; }
+        .form-group input { width: 100%; padding: 10px; font-size: 15px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; }
+        /* --- 【核心修正】表格容器樣式 --- */
+        /* 表格樣式 */
+        .table-container { 
+            overflow: auto; /* 讓容器自身可以滾動 */
+            max-height: calc(100vh - 250px); /* 【核心】計算並設定表格容器的最大高度 */
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        .table-container tbody tr:nth-child(even) { background-color: #f8f9fa; }
+        .table-container tbody tr:hover { background-color: #e9ecef; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th, td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #dee2e6; 
+            font-size: 14px; 
+            vertical-align: middle;
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
+        }
+        th:last-child, td:last-child {
+            border-right: none; /* 最後一欄不需要右邊框 */
+        }
+        td.wrap-text, th.wrap-text { white-space: normal; word-break: break-all; }
+        th.text-center, td.text-center { text-align: center; }
+        th.text-right, td.text-right { text-align: right; }
+        
+        /* 【核心修正】通用的凍結表頭樣式 */
+        .table-container thead th {
+            position: -webkit-sticky; /* for Safari */
+            position: sticky;
+            top: 0; /* 【核心】讓表頭在滾動時黏在容器頂部 */
+            background-color: #f2f2f2;
+            z-index: 1;
+        }
+
+        .product-image-cell img { max-width: 70px; max-height: 70px; object-fit: cover; border-radius: 4px; }
+        .ship-option-yes, .ship-option-no { display: flex; align-items: center; gap: 6px; justify-content: center; }
+        .ship-option-yes .material-symbols-outlined { color: #28a745; font-weight: bold; }
+        .ship-option-no .material-symbols-outlined { color: #dc3545; font-weight: bold; }
+        .btn-order { background-color: #17a2b8; padding: 6px 12px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 5px; }
+        .btn-order:hover { background-color: #138496; }
+        .btn-order .material-symbols-outlined { margin-right: 4px; font-size: 18px; }
+        .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background: white; padding: 25px 30px; border-radius: 12px; width: 100%; max-width: 500px; text-align: left; box-sizing: border-box; position: relative; animation: modalOpen 0.3s ease-out; margin: 20px auto; }
+        .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #6c757d; border: none; background: none;}
+        .order-modal-section { padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .order-modal-section h4 { margin-top: 0; border-bottom: 1px solid #dee2e6; padding-bottom: 8px; color: #333; display:flex; align-items:center; }
+        .order-modal-section h4 .material-symbols-outlined { margin-right: 8px; font-size: 22px; }
+        .order-modal-header { background-color: #f8f9fa; }
+        .order-modal-product { background-color: #e9f5ff; }
+        .order-info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 10px; font-size: 14px; }
+        .order-info-grid span:nth-child(odd) { font-weight: bold; color: #555; }
+        .order-info-grid span:nth-child(even) { color: #333; }
+        #caseOrderModal .form-group, #looseOrderModal .form-group { margin-top: 20px; }
+        #caseOrderQtySelect, #looseOrderQtySelect { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ced4da; }
+        #submitCaseOrderBtn, #submitLooseOrderBtn { background-color: #28a745; }
+        #submitCaseOrderBtn:hover, #submitLooseOrderBtn:hover { background-color: #218838; }
+        #cancelCaseOrderBtn, #cancelLooseOrderBtn { background-color: #6c757d; }
+        #cancelCaseOrderBtn:hover, #cancelLooseOrderBtn:hover { background-color: #5a6268; }
+        #siteSelectionModal .modal-content { max-width: 600px; }
+        #siteSelectionModal .site-list { max-height: 40vh; overflow-y: auto; border: 1px solid #ddd; padding: 5px;}
+        #siteSelectionModal .site-item { display: block; width: 100%; padding: 10px; border-bottom: 1px solid #eee; background: none; border: none; text-align: left; cursor: pointer;}
+        #siteSelectionModal .site-item:hover { background-color: #f0f2f5; }
+        #siteSelectionModal .site-item:last-child { border-bottom: none; }
+        
+        /* 【核心修正】彙總表特定樣式 */
+        #case-summary-table-container {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        #summary-table th {
+            position: sticky;
+            top: 0;
+            background-color: #e9ecef; 
+            z-index: 2;
+            white-space: normal; /* 允許表頭文字換行 */
+            word-break: break-word;
+            min-width: 120px; /* 給予每個商品欄一個最小寬度 */
+            height: 40px; /* 設定一個建議的高度，大概是兩行文字的高度 */
+        }
+        #summary-table td:first-child, 
+        #summary-table th:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #f8f9fa; 
+            z-index: 1;
+            font-weight: bold;
+            border-right: 2px solid #ccc; 
+            min-width: 120px; /* 給予第一欄最小寬度 */
+        }
+        #summary-table thead th:first-child {
+            z-index: 3; /* 確保左上角單元格在最上層 */
+            background-color: #e2e6ea;
+        }
+        /* 【新增】彙總表儲存格的滑鼠懸停效果 */
+        #summary-table tbody td {
+            transition: background-color 0.2s ease-in-out;
+        }
+        #summary-table tbody td:hover {
+            background-color: #d1e7ff; /* 淺藍色凸顯 */
+            cursor: pointer;
+        }
+        /* 當整列懸停時，保持固定欄的顏色一致 */
+        #summary-table tbody tr:hover td:first-child {
+            background-color: #e2e6ea;
+        }
+        /* 當懸停在固定欄的儲存格時，使用凸顯顏色 */
+        #summary-table tbody td:first-child:hover {
+            background-color: #d1e7ff;
+        }
+        /* 【修改】將彙總表的特定樣式改為通用的 class */
+        .summary-table-container {
+            flex-grow: 1;
+            overflow: auto; 
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        .summary-table { /* 新增一個 class 給彙總表本身 */
+            border-spacing: 0;
+        }
+        .summary-table thead th {
+            position: sticky; top: 0;
+            background-color: #e9ecef; z-index: 2;
+        }
+        .summary-table tbody td:first-child, 
+        .summary-table thead th:first-child {
+            position: sticky; left: 0;
+            background-color: #f8f9fa; z-index: 1;
+            font-weight: bold;
+            border-right: 2px solid #ccc;
+            min-width: 120px;
+        }
+        .summary-table thead th:first-child {
+            z-index: 3;
+            background-color: #e2e6ea;
+        }
+        /* 檔期關閉提示頁面的美化樣式 */
+        .period-closed-card { padding: 20px; text-align: center; }
+        .period-closed-card .icon { width: 64px; height: 64px; margin: 0 auto 20px; color: #17a2b8; }
+        .period-closed-card .icon .material-symbols-outlined { font-size: 64px; font-variation-settings: 'FILL' 1; }
+        .period-closed-card .title { font-size: 24px; font-weight: 700; margin-bottom: 12px; color: #333; }
+        .period-closed-card .message { font-size: 16px; color: #666; line-height: 1.6; }
+        .period-closed-card .date-info { margin-top: 25px; padding: 15px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; font-size: 14px; color: #495057; line-height: 1.7; }
+        .period-closed-card .date-info p { margin: 5px 0; }
+        .modal-actions { 
+            margin-top: 25px; 
+            text-align: right; 
+            display: flex; 
+            gap: 10px; 
+            justify-content: flex-end; 
+            align-items: center; /* 【新增】讓 flex item 垂直置中 */
+        }
+        .action-btn { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 500; 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 5px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            transition: background-color 0.2s; 
+        }
+        @keyframes modalOpen { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) {
+             .main-nav { flex-direction: column; align-items: stretch; padding: 0; }
+            .nav-links { width: 100%; display: flex; justify-content: space-around; border-bottom: 1px solid #dee2e6;}
+            .nav-button { flex-grow: 1; padding: 12px 5px; font-size: 14px;}
+            .user-menu { padding: 10px; background-color: #f8f9fa; }
+            .main-content { padding: 15px; }
+            .main-content .container { padding: 15px; } 
+        }
     </style>
     
 </head>
@@ -298,11 +466,8 @@ window.addEventListener('load', function() {
         function showSubPage(pageFileName, clickedElement) {
             try {
                 if (clickedElement) {
-                    document.querySelectorAll('.nav-button, .dropdown-content button').forEach(function(button) { button.classList.remove('active'); });
-                    // 找到主導覽項目並高亮
-                    const mainButton = clickedElement.closest('.nav-dropdown') ? clickedElement.closest('.nav-dropdown').querySelector('.nav-button') :
-                                     clickedElement.closest('.user-menu') ? clickedElement.closest('.user-menu').querySelector('.user-info-button') :
-                                     clickedElement;
+                    document.querySelectorAll('.main-nav .nav-button, .dropdown-content button').forEach(function(button) { button.classList.remove('active'); });
+                    const mainButton = clickedElement.closest('.nav-dropdown, .user-menu') ? clickedElement.closest('.nav-dropdown, .user-menu').querySelector('.nav-button, .user-info-button') : clickedElement;
                     if (mainButton) mainButton.classList.add('active');
                 }
                 document.querySelectorAll('.user-menu, .nav-dropdown').forEach(function(menu) { menu.classList.remove('open'); });
@@ -311,26 +476,93 @@ window.addEventListener('load', function() {
                 if (!contentArea) { return; }
                 contentArea.innerHTML = '<div class="container"><p>載入中...</p></div>';
 
-                // 先檢查零星訂購的檔期
+                // 【核心修改】如果是零星訂購，先檢查檔期
                 if (pageFileName === 'Page_LooseOrder') {
                     google.script.run
                         .withSuccessHandler(function(isActive) {
                             if (isActive) {
-                                loadAndRenderPage(pageFileName, contentArea);
+                                // 在檔期內，正常載入訂購頁面
+                                loadAndRenderPage('Page_LooseOrder', contentArea);
                             } else {
-                                contentArea.innerHTML = '<div class="container"><h2>零星訂購暫未開放</h2><p>零星訂購已結束或尚未開始，請使用成箱訂購，或期待下次檔期，謝謝！</p></div>';
+                                // 【修正】不在檔期內，直接呼叫後端獲取時間來顯示訊息
+                                contentArea.innerHTML = '<div class="container"><p>載入檔期資訊中...</p></div>';
+                                google.script.run
+                                    .withSuccessHandler(displayLooseOrderClosedMessage)
+                                    .withFailureHandler(function() { 
+                                        contentArea.innerHTML = '<div class="container"><p style="color:red;">無法載入檔期資訊。</p></div>'; 
+                                    })
+                                    .getSettings();
                             }
                         })
                         .withFailureHandler(function(error) {
                             contentArea.innerHTML = '<div class="container"><p style="color:red;">檢查零星訂購檔期時發生錯誤。</p></div>';
                         })
                         .isLooseOrderPeriodActive();
+                } else if (pageFileName === 'Page_CaseSummary') {
+                  loadCaseSummaryData();
+                } else if (pageFileName === 'Page_LooseSummary') { 
+                  loadLooseSummaryData(); 
+                } else if (pageFileName === 'Page_CaseOrderAdmin') {
+                  loadCaseOrderAdminPage();
                 } else {
+                    // 對於其他頁面，直接載入
                     loadAndRenderPage(pageFileName, contentArea);
                 }
             } catch(e) {
                  console.error("Error in showSubPage:", e);
             }
+        }
+        
+        /**
+         * 【新增】輔助函式，用於在前端動態產生「零星訂購關閉」的提示訊息
+         * @param {Object} settings - 從後端 getSettings() 函式回傳的設定物件
+         */
+        function displayLooseOrderClosedMessage(settings) {
+            const contentArea = document.getElementById('main-content-area');
+            if (!contentArea) return;
+
+            // 格式化日期的輔助函式
+            function formatDateTime(isoString) {
+                if (!isoString) return "未設定";
+                try {
+                    const date = new Date(isoString);
+                    if (isNaN(date.getTime())) return "日期格式無效";
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    return year + '/' + month + '/' + day + ' ' + hours + ':' + minutes;
+                } catch (e) {
+                    return "日期格式錯誤";
+                }
+            }
+
+            let messageHtml = '';
+            if (settings && !settings.error) {
+                const activityStart = formatDateTime(settings.activityStartTime);
+                const activityEnd = formatDateTime(settings.activityEndTime);
+                const looseStart = formatDateTime(settings.looseOrderStartTime);
+                const looseEnd = formatDateTime(settings.looseOrderEndTime);
+                
+                messageHtml = `
+                    <div class="container">
+                        <div class="period-closed-card">
+                            <div class="icon">
+                                <span class="material-symbols-outlined" style="font-size: 64px;">timer_off</span>
+                            </div>
+                            <h2 class="title">零星訂購暫未開放</h2>
+                            <p class="message">請改用成箱訂購，或敬請期待下次開放，謝謝！</p>
+                            <div class="date-info">
+                                <p><strong>本次活動檔期：</strong><span>${activityStart} ~ ${activityEnd}</span></p>
+                                <p><strong>零星訂購開放時間：</strong><span>${looseStart} ~ ${looseEnd}</span></p>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                messageHtml = '<div class="container"><p style="color:red;">無法載入檔期資訊。</p></div>';
+            }
+            contentArea.innerHTML = messageHtml;
         }
 
         function loadAndRenderPage(pageFileName, contentArea) {
@@ -357,7 +589,13 @@ window.addEventListener('load', function() {
             try {
                 if (pageFileName === 'Page_LooseOrder') {
                     const btn = document.getElementById('openSiteSelectionModalBtn');
-                    if (btn) btn.addEventListener('click', openSiteSelectionModal);
+                    // 將要更新的 input 欄位 ID 作為參數傳遞
+                    if (btn) btn.addEventListener('click', function() { openSiteSelectionModal('looseDeliveryLocation'); });
+                } else if (pageFileName === 'Page_CaseOrder') {
+                    // 【新增】為成箱訂購頁面的站點選擇按鈕綁定事件
+                    const btn = document.getElementById('openSiteSelectionModalBtn_CaseOrder');
+                    // 將要更新的 input 欄位 ID 作為參數傳遞
+                    if (btn) btn.addEventListener('click', function() { openSiteSelectionModal('affiliatedSite'); });
                 }
             } catch(e) {
                  console.error("Error binding dynamic buttons for " + pageFileName + ":", e);
@@ -507,34 +745,77 @@ window.addEventListener('load', function() {
             modal.style.display = 'flex';
         }
         function closeCaseOrderModal() { document.getElementById('caseOrderModal').style.display = 'none'; }
+        /**
+         * 【已更新】處理成箱訂購的訂單送出
+         */
         function submitCaseOrder() {
             const selectedQty = parseInt(document.getElementById('caseOrderQtySelect').value);
-            if (!selectedQty || isNaN(selectedQty)) { alert("請選擇有效的訂購數量！"); return; }
-            if (!currentOrderingProduct) { alert("發生錯誤：找不到目前的商品資訊。請關閉視窗後重試。"); return; }
+            if (!selectedQty || isNaN(selectedQty)) {
+                alert("請選擇有效的訂購數量！"); 
+                return;
+            }
+            if (!currentOrderingProduct) {
+                alert("發生錯誤：找不到目前的商品資訊。請關閉視窗後重試。"); 
+                return;
+            }
+            
+            // 1. 計算總金額和箱數
             const pricePerBox = (currentOrderingProduct.casePricePerBox > 0) ? currentOrderingProduct.casePricePerBox : currentOrderingProduct.sellingPricePerBox;
             const totalPrice = pricePerBox * selectedQty;
             const caseCount = (selectedQty / currentOrderingProduct.boxesPerCase).toFixed(2);
+            
+            // 2. 獲取所有表單資訊
             const ordererName = document.getElementById('modalOrdererName').textContent;
             const deliveryDate = document.getElementById('modalDeliveryDate').textContent;
-            const confirmationMessage = "請確認訂單資訊：\n-------------------------------------\n訂購人姓名: " + ordererName + "\n寄送日期: " + deliveryDate + "\n商品名稱: " + currentOrderingProduct.productName + "\n訂購數量: " + selectedQty + " 盒\n-------------------------------------\n總計金額: " + totalPrice + " 元\n\n確認無誤後請點擊「確定」送出訂單。";
+            const affiliatedSite = document.getElementById('affiliatedSite').value.trim(); // 【新增】獲取訂單隸屬站點
+
+            // 準備確認訊息
+            const confirmationMessage = "請確認訂單資訊：\n" +
+                "-------------------------------------\n" +
+                "訂購人姓名: " + ordererName + "\n" +
+                "寄送日期: " + deliveryDate + "\n" +
+                "訂單隸屬站點: " + affiliatedSite + "\n" + // 【新增】在確認訊息中顯示
+                "商品名稱: " + currentOrderingProduct.productName + "\n" +
+                "訂購數量: " + selectedQty + " 盒\n" +
+                "-------------------------------------\n" +
+                "總計金額: " + totalPrice + " 元\n\n" +
+                "確認無誤後請點擊「確定」送出訂單。";
+            
+            // 3. 彈出確認對話框
             if (confirm(confirmationMessage)) {
                 const submitBtn = document.getElementById('submitCaseOrderBtn');
-                submitBtn.disabled = true; submitBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span>訂單傳送中...';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span>訂單傳送中...';
+
+                // 4. 【修正】準備要傳送到後端的資料物件，加入新欄位
                 const orderData = {
-                    name: ordererName, phone: document.getElementById('modalOrdererPhone').textContent,
-                    productName: currentOrderingProduct.productName, quantity: selectedQty, totalPrice: totalPrice,
-                    location: document.getElementById('modalDeliveryLocation').textContent, date: deliveryDate,
-                    caseCount: parseFloat(caseCount)
+                    name: ordererName,
+                    phone: document.getElementById('modalOrdererPhone').textContent,
+                    productName: currentOrderingProduct.productName,
+                    quantity: selectedQty,
+                    totalPrice: totalPrice,
+                    location: document.getElementById('modalDeliveryLocation').textContent,
+                    date: deliveryDate,
+                    caseCount: parseFloat(caseCount),
+                    affiliatedSite: affiliatedSite // 【新增】
                 };
+
+                // 5. 呼叫後端函式
                 google.script.run
                     .withSuccessHandler(function(response) {
-                        if (response.success) { alert("訂單已成功送出！"); closeCaseOrderModal(); } 
-                        else { alert("訂單送出失敗：\n" + response.error); }
-                        submitBtn.disabled = false; submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
+                        if (response.success) {
+                            alert("訂單已成功送出！");
+                            closeCaseOrderModal();
+                        } else {
+                            alert("訂單送出失敗：\n" + response.error);
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
                     })
                     .withFailureHandler(function(error) {
                         alert("與伺服器連線失敗，無法送出訂單：\n" + error.message);
-                        submitBtn.disabled = false; submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span class="material-symbols-outlined">send</span>送出訂單';
                     })
                     .submitCaseOrderToServer(orderData);
             }
@@ -614,39 +895,70 @@ window.addEventListener('load', function() {
                 return tr;
             }, 6, '目前無可零星訂購的商品。');
         }
-        function openSiteSelectionModal() {
+        /**
+         * 【已更新】打開站點選擇 Modal，現在它知道要更新哪個輸入框
+         * @param {string} targetInputId - 要接收選擇結果的 input 欄位的 ID
+         */
+        function openSiteSelectionModal(targetInputId) {
             const modal = document.getElementById('siteSelectionModal');
             if (!modal) return;
             const listDiv = document.getElementById('siteSelectionList');
             listDiv.innerHTML = '<p>載入站點資訊中...</p>';
             modal.style.display = 'flex';
+
+            // 將目標 input ID 暫存到 modal 元素上，以便後續使用
+            modal.dataset.targetInput = targetInputId;
+
             if (isSiteDataForSelectionLoaded) {
                 populateSiteList(allSiteDataForSelection);
             } else {
                  google.script.run
                     .withSuccessHandler(function(sites) {
-                        allSiteDataForSelection = sites || []; isSiteDataForSelectionLoaded = true;
+                        allSiteDataForSelection = sites || []; 
+                        isSiteDataForSelectionLoaded = true;
                         populateSiteList(allSiteDataForSelection);
                     })
-                    .withFailureHandler(function(err){ listDiv.innerHTML = '<p style="color:red">無法載入站點列表。</p>'; })
+                    .withFailureHandler(function(err){ 
+                        listDiv.innerHTML = '<p style="color:red">無法載入站點列表。</p>'; 
+                    })
                     .getSiteInfoListData(); 
             }
         }
+        /**
+         * 【已更新】填充站點列表，現在它會為每個按鈕加上點擊後需要的資訊
+         */
         function populateSiteList(sites) {
             const listDiv = document.getElementById('siteSelectionList');
             listDiv.innerHTML = '';
-            if(!sites || sites.length === 0){ listDiv.innerHTML = '<p>沒有可用的站點。</p>'; return; }
+            if(!sites || sites.length === 0){ 
+                listDiv.innerHTML = '<p>沒有可用的站點。</p>'; 
+                return; 
+            }
+            const modal = document.getElementById('siteSelectionModal');
+            const targetInputId = modal.dataset.targetInput; // 讀取目標 input ID
+
             sites.forEach(function(site) {
                 const siteBtn = document.createElement('button');
                 siteBtn.className = 'site-item';
-                siteBtn.textContent = site.siteName + '(' + site.siteCode + ')';
-                siteBtn.addEventListener('click', function() { selectSite(site.siteName, site.siteCode); });
+                const displayText = site.siteName + '(' + site.siteCode + ')';
+                siteBtn.textContent = displayText;
+                siteBtn.addEventListener('click', function() {
+                    // 點擊時，將 displayText 填入正確的輸入框
+                    selectSite(displayText, targetInputId);
+                });
                 listDiv.appendChild(siteBtn);
             });
         }
-        function selectSite(siteName, siteCode) {
-            const locationInput = document.getElementById('looseDeliveryLocation');
-            if (locationInput) { locationInput.value = siteName + '(' + siteCode + ')'; }
+        /**
+         * 【已更新】處理站點選擇
+         * @param {string} selectedText - 格式化後的站點文字，例如 "新竹站(D4240)"
+         * @param {string} targetInputId - 要填入此文字的 input 欄位的 ID
+         */
+        function selectSite(selectedText, targetInputId) {
+            const locationInput = document.getElementById(targetInputId);
+            if (locationInput) {
+                locationInput.value = selectedText;
+            }
             closeSiteSelectionModal();
         }
         function closeSiteSelectionModal() {
@@ -723,6 +1035,245 @@ window.addEventListener('load', function() {
                     .submitLooseOrderToServer(orderData);
             }
         }
+
+        // --- 【新增】成箱彙總表相關函式 ---
+        function loadCaseSummaryData() {
+            const container = document.getElementById('main-content-area').querySelector('.container');
+            if (!container) return;
+            container.innerHTML = '<h2>成箱彙總表</h2><p>正在從伺服器獲取並計算訂單資料...</p>';
+            
+            google.script.run
+                .withSuccessHandler(renderCaseSummaryTable)
+                .withFailureHandler(function(err) {
+                    console.error("Failed to get summary data:", err);
+                    container.innerHTML = '<h2>成箱彙總表</h2><p style="color:red;">無法產生彙總表。</p>';
+                })
+                .getCaseOrderSummaryData();
+        }
+
+        function renderCaseSummaryTable(data) {
+            const container = document.getElementById('main-content-area').querySelector('.container');
+            if (!container) return;
+
+            if (!data || !data.success) {
+                container.innerHTML = '<h2>成箱彙總表</h2><p style="color:red;">' + (data.error || '未知的錯誤') + '</p>';
+                return;
+            }
+
+            const { headers, summary, sites } = data;
+
+            // 創建表格結構
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'table-container';
+            const table = document.createElement('table');
+            table.id = 'summary-table';
+            const thead = table.createTHead();
+            const tbody = table.createTBody();
+            
+            // 創建表頭
+            const headerRow = thead.insertRow();
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            // 創建表格內容
+            sites.forEach(siteName => {
+                const row = tbody.insertRow();
+                const siteCell = row.insertCell();
+                siteCell.textContent = siteName;
+                siteCell.style.fontWeight = 'bold';
+
+                for (let i = 1; i < headers.length; i++) {
+                    const productName = headers[i];
+                    const dataCell = row.insertCell();
+                    dataCell.className = 'text-center';
+                    const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
+                    dataCell.textContent = quantity > 0 ? quantity : '';
+                }
+            });
+
+            tableContainer.appendChild(table);
+            // 將新產生的表格放入容器中，替換掉「載入中」訊息
+            container.innerHTML = '<h2>成箱彙總表</h2>'; // 先清空並加入標題
+            container.appendChild(tableContainer);
+        }
+
+        // 【新增】載入零星彙總表的函式
+        function loadLooseSummaryData() {
+          const container = document.getElementById('main-content-area').querySelector('.container');
+          if (!container) { 
+              console.error("找不到 #loose-summary-table-container");
+              return;
+          }
+          container.innerHTML = '<p>正在從伺服器獲取並計算零星訂單資料...</p>';
+          
+          google.script.run
+              .withSuccessHandler(renderLooseSummaryTable) // 成功後呼叫專屬的渲染函式
+              .withFailureHandler(function(err) {
+                  console.error("Failed to get loose summary data:", err);
+                  container.innerHTML = '<h2>零星彙總表</h2><p style="color:red;">無法產生彙總表。</p>';
+              })
+              .getLooseOrderSummaryData(); // 呼叫 OrderSystem.gs 中的函式
+      }
+      
+      /**
+       * 渲染「零星彙總表」
+       * @param {Object} data - 從後端 getLooseOrderSummaryData() 獲取的彙總資料物件
+       */
+      function renderLooseSummaryTable(data) {
+          const container = document.getElementById('main-content-area').querySelector('.container');
+          if (!container) return;
+
+          if (!data || !data.success) {
+              container.parentElement.querySelector('h2').textContent = '零星彙總表';
+              container.innerHTML = '<p style="color:red;">' + (data.error || '未知的錯誤') + '</p>';
+              return;
+          }
+
+          const { headers, summary, sites } = data;
+
+          // 創建表格結構
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'table-container';
+            const table = document.createElement('table');
+            table.id = 'summary-table';
+            const thead = table.createTHead();
+            const tbody = table.createTBody();
+            
+            // 創建表頭
+            const headerRow = thead.insertRow();
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            // 創建表格內容
+            sites.forEach(siteName => {
+                const row = tbody.insertRow();
+                const siteCell = row.insertCell();
+                siteCell.textContent = siteName;
+                siteCell.style.fontWeight = 'bold';
+
+                for (let i = 1; i < headers.length; i++) {
+                    const productName = headers[i];
+                    const dataCell = row.insertCell();
+                    dataCell.className = 'text-center';
+                    const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
+                    dataCell.textContent = quantity > 0 ? quantity : '';
+                }
+            });
+
+            tableContainer.appendChild(table);
+            // 將新產生的表格放入容器中，替換掉「載入中」訊息
+            container.innerHTML = '<h2>零星彙總表</h2>'; // 先清空並加入標題
+            container.appendChild(tableContainer);
+      }
+
+
+      // --- 【新增】成箱訂購管理頁面相關函式 ---
+        
+        let caseOrderAdminGrid; // 將 Grid.js 的實例設為全域變數
+
+        function loadCaseOrderAdminPage() {
+            //const container = document.getElementById('case-order-admin-table-wrapper');
+            const container = document.getElementById('main-content-area').querySelector('.container');
+            if (!container) return;
+            container.innerHTML = '<p>正在載入訂單資料...</p>';
+
+            google.script.run
+                .withSuccessHandler(renderCaseOrderAdminTable)
+                .withFailureHandler(function(err) {
+                    container.innerHTML = '<p style="color:red;">無法載入訂單資料。</p>';
+                })
+                .getCaseOrdersForAdmin();
+        }
+
+        function renderCaseOrderAdminTable(response) {
+          console.log(response);
+            //const container = document.getElementById('case-order-admin-table-wrapper');
+            const container = document.getElementById('main-content-area').querySelector('.container');
+            if (!container) return;
+            
+            if (!response || !response.success) {
+                console.log("已執行至此");
+                //container.parentElement.querySelector('h2').textContent = '成箱訂購管理';
+                container.innerHTML = '<p style="color:red;">' + (response.error || '載入資料時發生未知錯誤') + '</p>';
+                return;
+            }
+            
+
+            container.innerHTML = ''; // 清空載入中訊息
+
+            // 如果已經存在一個 Grid 實例，先銷毀它
+            if (caseOrderAdminGrid) {
+                caseOrderAdminGrid.destroy();
+            }
+            
+            // 使用 Grid.js 建立可篩選排序的表格
+            caseOrderAdminGrid = new gridjs.Grid({
+                columns: [
+                    { name: '訂購人姓名', width: '10%' },
+                    { name: '訂購人電話', width: '10%' },
+                    { name: '商品名稱', width: '20%' },
+                    { name: '盒數', width: '5%' },
+                    { name: '總計金額', width: '8%' },
+                    { name: '寄送地點', width: '12%' },
+                    { name: '寄送日期', width: '10%' },
+                    { name: '訂單隸屬站點', width: '12%' },
+                    '結案',
+                    '訂購時間',
+                    '操作人員',
+                    { 
+                        name: '訂單編號',
+                        editor: true, // 允許編輯
+                        width: '15%'
+                    }
+                ],
+                data: response.data,
+                search: true, // 啟用搜尋
+                sort: true,   // 啟用排序
+                pagination: { // 啟用分頁
+                    enabled: true,
+                    limit: 10
+                },
+                style: {
+                    th: { 'background-color': '#f2f2f2' }
+                },
+                language: {
+                    'search': { 'placeholder': '🔍 搜尋...' },
+                    'pagination': { 'previous': '上一頁', 'next': '下一頁', 'showing': '顯示', 'to': '到', 'of': '之', 'results': '項結果' }
+                }
+            }).render(container);
+            
+            // 監聽儲存格編輯事件
+            caseOrderAdminGrid.on('cellEdited', function(cell, row) {
+                const newValue = cell.data;
+                const originalRowNumber = row.cells[12].data; // 我們將原始列號放在最後一欄
+                
+                showStatusMessage('case-order-admin-status-msg', '更新訂單編號中...', false);
+                
+                google.script.run
+                    .withSuccessHandler(function(updateResponse) {
+                        if (updateResponse.success) {
+                            showStatusMessage('case-order-admin-status-msg', '訂單編號更新成功！', true);
+                        } else {
+                            showErrorStatusMessage('case-order-admin-status-msg', updateResponse, '更新訂單編號');
+                            // 可選：將儲存格恢復原值
+                            loadCaseOrderAdminPage(); // 最簡單的方式是重新載入整個表格
+                        }
+                    })
+                    .withFailureHandler(function(err) {
+                        showErrorStatusMessage('case-order-admin-status-msg', err, '更新訂單編號');
+                        loadCaseOrderAdminPage();
+                    })
+                    .updateOrderNumber({ rowNumber: originalRowNumber, newOrderNumber: newValue });
+            });
+        }
+    
     </script>
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 </body>
 </html>
