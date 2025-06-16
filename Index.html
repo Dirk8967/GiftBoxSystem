@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet"/>
     
     <style>
       body, html { 
@@ -1221,16 +1221,24 @@ window.addEventListener('load', function() {
                     { name: '盒數', width: '5%' },
                     { name: '總計金額', width: '8%' },
                     { name: '寄送地點', width: '12%' },
-                    { name: '寄送日期', width: '10%' },
+                    { name: '寄送日期', formatter: (cell) => cell ? new Date(cell).toLocaleDateString() : '' },
                     { name: '訂單隸屬站點', width: '12%' },
-                    '結案',
-                    '訂購時間',
+                    { name: '結案', formatter: (cell) => cell ? '是' : '否' },
+                    { name: '訂購時間', formatter: (cell) => cell ? new Date(cell).toLocaleString() : '' },
                     '操作人員',
                     { 
-                        name: '訂單編號',
-                        editor: true, // 允許編輯
-                        width: '15%'
-                    }
+                      name: '訂單編號',
+                      width: '15%',
+                      // 【新寫法】使用 attributes 和 formatter 來讓儲存格可編輯
+                      formatter: (cell, row) => {
+                          return gridjs.h('div', {
+                              contentEditable: 'true',
+                              'data-row-number': row.cells[12].data, // 將原始列號存在 data- 屬性中
+                              oninput: (e) => { e.target.style.backgroundColor = '#fff3cd'; }, // 輸入時變色提示
+                              onblur: (e) => { handleOrderNumberUpdate(e.target); } // 焦點移開時觸發更新
+                          }, cell);
+                      }
+                  }
                 ],
                 data: response.data,
                 search: true, // 啟用搜尋
@@ -1272,7 +1280,39 @@ window.addEventListener('load', function() {
                     .updateOrderNumber({ rowNumber: originalRowNumber, newOrderNumber: newValue });
             });
         }
-    
+
+
+
+        /**
+       * 【新增】處理訂單編號更新的輔助函式
+       * @param {HTMLElement} cellElement - 被編輯的儲存格 DOM 元素
+       */
+      function handleOrderNumberUpdate(cellElement) {
+          cellElement.style.backgroundColor = ''; // 恢復原色
+          
+          const originalRowNumber = cellElement.dataset.rowNumber;
+          const newValue = cellElement.textContent;
+
+          // 可選：檢查值是否真的有改變，如果沒有就不呼叫後端
+          // ...
+
+          showStatusMessage('case-order-admin-status-msg', '更新訂單編號中...', false);
+          
+          google.script.run
+              .withSuccessHandler(function(updateResponse) {
+                  if (updateResponse.success) {
+                      showStatusMessage('case-order-admin-status-msg', `訂單 (列號 ${originalRowNumber}) 編號更新成功！`, true);
+                  } else {
+                      showErrorStatusMessage('case-order-admin-status-msg', updateResponse, '更新訂單編號');
+                      loadCaseOrderAdminPage(); // 更新失敗時，重新載入表格以恢復原值
+                  }
+              })
+              .withFailureHandler(function(err) {
+                  showErrorStatusMessage('case-order-admin-status-msg', err, '更新訂單編號');
+                  loadCaseOrderAdminPage();
+              })
+              .updateOrderNumber({ rowNumber: parseInt(originalRowNumber), newOrderNumber: newValue });
+      } 
     </script>
     <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 </body>
