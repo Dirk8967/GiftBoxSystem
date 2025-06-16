@@ -94,15 +94,15 @@ function getOperatorNameByEmail_(email) {
 function submitCaseOrderToServer(orderData) {
   try {
     const operatorEmail = Session.getActiveUser().getEmail();
-    const operatorName = getOperatorNameByEmail_(operatorEmail); // 假設 getOperatorNameByEmail_ 已存在
+    const operatorName = getOperatorNameByEmail_(operatorEmail);
     const orderTimestamp = new Date();
 
-    // 驗證傳入的資料
+    // 驗證傳入的資料，確保新欄位也一併檢查（如果需要）
     if (!orderData || !orderData.name || !orderData.productName || !orderData.quantity) {
       throw new Error("傳入的訂單資料不完整。");
     }
 
-    const targetSpreadsheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID); // ORDER_INVENTORY_SHEET_ID 應已定義
+    const targetSpreadsheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID);
     const targetSheet = targetSpreadsheet.getSheetByName("使用者訂單(箱)");
     if (!targetSheet) {
       throw new Error("在目標試算表中找不到名為 '使用者訂單(箱)' 的工作表。");
@@ -111,7 +111,7 @@ function submitCaseOrderToServer(orderData) {
     const phoneStr = String(orderData.phone || '').trim();
     const phoneValueToWrite = phoneStr ? "'" + phoneStr : ""; 
 
-    // 【修正】依照新的欄位順序準備要寫入的資料列 (共 13 欄，對應 A 到 M)
+    // 【修正】依照新的 14 欄位格式準備要寫入的資料列 (A 到 N)
     const rowData = [
       orderData.name,             // A欄: 訂購人姓名
       phoneValueToWrite,          // B欄: 訂購人電話
@@ -120,12 +120,13 @@ function submitCaseOrderToServer(orderData) {
       orderData.totalPrice,       // E欄: 總計金額
       orderData.location,         // F欄: 寄送地點
       orderData.date,             // G欄: 寄送日期
-      false,                      // H欄: (原 I 欄) 固定填入 FALSE
-      '',                         // I欄: (原 J 欄) 空白
-      orderTimestamp,             // J欄: (原 K 欄) 訂購時間
-      operatorName,               // K欄: (原 L 欄) 操作人員姓名
-      operatorEmail,              // L欄: (原 M 欄) 操作人員信箱
-      ''                          // M欄: (原 H 欄) 空白
+      orderData.affiliatedSite,   // H欄: 【新增】訂單隸屬站點
+      false,                      // I欄: (原 H 欄) 固定填入 FALSE
+      '',                         // J欄: (原 I 欄) 空白
+      orderTimestamp,             // K欄: (原 J 欄) 訂購時間
+      operatorName,               // L欄: (原 K 欄) 操作人員姓名
+      operatorEmail,              // M欄: (原 L 欄) 操作人員信箱
+      ''                          // N欄: (原 M 欄) 空白
     ];
 
     targetSheet.appendRow(rowData);
@@ -136,10 +137,12 @@ function submitCaseOrderToServer(orderData) {
     if (phoneStr) {
         targetSheet.getRange(lastRow, 2).setNumberFormat("@"); 
     }
+    // 未來如果隸屬站點也需要強制文字，可在此處加入
+    // targetSheet.getRange(lastRow, 8).setNumberFormat("@"); 
     
     return { success: true };
   } catch (e) {
-    console.error("submitCaseOrderToServer 錯誤: " + e.toString() + " Stack: " + e.stack);
+    console.error("submitCaseOrderToServer 錯誤: " + e.toString());
     return { success: false, error: "伺服器處理訂單時發生錯誤: " + e.message };
   }
 }
@@ -200,6 +203,152 @@ function submitLooseOrderToServer(orderData) {
   }
 }
 
+
+/**
+ * 【已更新】獲取成箱訂單的彙總資料，並加入詳細的偵錯日誌
+ */
+function getCaseOrderSummaryData() {
+  try {
+    Logger.log("getCaseOrderSummaryData: 函式開始執行。");
+
+    const productSheet = SpreadsheetApp.openById(PRODUCT_SHEET_ID).getSheets()[0];
+    Logger.log("getCaseOrderSummaryData: 已獲取商品工作表。");
+    
+    const siteSheet = SpreadsheetApp.openById(SITE_INFO_SHEET_ID).getSheets()[0];
+    Logger.log("getCaseOrderSummaryData: 已獲取站點工作表。");
+
+    const orderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(箱)");
+    if (!orderSheet) {
+      throw new Error("在目標試算表中找不到名為 '使用者訂單(箱)' 的工作表。");
+    }
+    Logger.log("getCaseOrderSummaryData: 已獲取成箱訂單工作表。");
+
+    const lastProductRow = productSheet.getLastRow();
+    if (lastProductRow < 2) { return { success: true, headers: ["站名"], summary: {}, sites: [] }; }
+    const productValues = productSheet.getRange("B2:B" + lastProductRow).getValues();
+    const productNames = [...new Set(productValues.map(row => row[0]).filter(Boolean))];
+    Logger.log("getCaseOrderSummaryData: 獲取到 " + productNames.length + " 個不重複的商品名稱。");
+
+    const lastSiteRow = siteSheet.getLastRow();
+    if (lastSiteRow < 2) { return { success: true, headers: ["站名"].concat(productNames), summary: {}, sites: [] }; }
+    const siteValues = siteSheet.getRange("B2:B" + lastSiteRow).getValues();
+    const siteNames = [...new Set(siteValues.map(row => row[0]).filter(Boolean))];
+    Logger.log("getCaseOrderSummaryData: 獲取到 " + siteNames.length + " 個不重複的站名。");
+
+    const summaryData = {};
+    siteNames.forEach(siteName => {
+      summaryData[siteName] = {};
+      productNames.forEach(productName => {
+        summaryData[siteName][productName] = 0;
+      });
+    });
+    Logger.log("getCaseOrderSummaryData: 已初始化彙總資料結構。");
+
+    if (orderSheet.getLastRow() >= 2) {
+      const orderRange = orderSheet.getRange("C2:H" + orderSheet.getLastRow()); 
+      const orders = orderRange.getValues();
+      Logger.log("getCaseOrderSummaryData: 讀取到 " + orders.length + " 筆訂單進行處理。");
+
+      orders.forEach(function(order, index) {
+        const productName = order[0]; 
+        const quantity = order[1];    
+        let affiliatedSiteRaw = order[5]; 
+        let affiliatedSite = "";
+
+        if (affiliatedSiteRaw && typeof affiliatedSiteRaw === 'string') {
+          affiliatedSite = affiliatedSiteRaw.split('(')[0].trim();
+        }
+
+        if (summaryData[affiliatedSite] && summaryData[affiliatedSite].hasOwnProperty(productName)) {
+          if (typeof quantity === 'number' && !isNaN(quantity)) {
+            summaryData[affiliatedSite][productName] += quantity;
+          }
+        }
+      });
+    }
+    Logger.log("getCaseOrderSummaryData: 訂單資料處理完畢。");
+
+    const columnHeaders = ["站名"].concat(productNames);
+    
+    return {
+      success: true,
+      headers: columnHeaders,
+      summary: summaryData,
+      sites: siteNames
+    };
+
+  } catch (e) {
+    Logger.log("getCaseOrderSummaryData 發生嚴重錯誤: " + e.toString() + "\n" + e.stack);
+    return { success: false, error: "產生彙總表時發生伺服器錯誤: " + e.message };
+  }
+}
+
+/**
+ * 【已更新】獲取零星訂單的彙總資料，並加入詳細的偵錯日誌
+ */
+function getLooseOrderSummaryData() {
+  try {
+    Logger.log("getLooseOrderSummaryData: 函式開始執行。");
+
+    const productSheet = SpreadsheetApp.openById(PRODUCT_SHEET_ID).getSheets()[0];
+    const siteSheet = SpreadsheetApp.openById(SITE_INFO_SHEET_ID).getSheets()[0];
+    const orderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(盒)");
+    if (!orderSheet) {
+      throw new Error("在目標試算表中找不到名為 '使用者訂單(盒)' 的工作表。");
+    }
+    Logger.log("getLooseOrderSummaryData: 已成功獲取所有需要的試算表。");
+
+    const productValues = productSheet.getRange("B2:B" + productSheet.getLastRow()).getValues();
+    const productNames = [...new Set(productValues.map(row => row[0]).filter(Boolean))];
+
+    const siteValues = siteSheet.getRange("B2:B" + siteSheet.getLastRow()).getValues();
+    const siteNames = [...new Set(siteValues.map(row => row[0]).filter(Boolean))];
+
+    const summaryData = {};
+    siteNames.forEach(siteName => {
+      summaryData[siteName] = {};
+      productNames.forEach(productName => {
+        summaryData[siteName][productName] = 0;
+      });
+    });
+
+    if (orderSheet.getLastRow() >= 2) {
+      const orderRange = orderSheet.getRange("C2:F" + orderSheet.getLastRow());
+      const orders = orderRange.getValues();
+      Logger.log("getLooseOrderSummaryData: 讀取到 " + orders.length + " 筆訂單進行處理。");
+
+      orders.forEach(function(order) {
+        const productName = order[0]; // C欄
+        const quantity = order[1];    // D欄
+        let deliveryLocation = order[3]; // F欄
+
+        if (deliveryLocation && typeof deliveryLocation === 'string') {
+          deliveryLocation = deliveryLocation.split('(')[0].trim();
+        }
+
+        if (summaryData[deliveryLocation] && summaryData[deliveryLocation].hasOwnProperty(productName)) {
+          if (typeof quantity === 'number' && !isNaN(quantity)) {
+            summaryData[deliveryLocation][productName] += quantity;
+          }
+        }
+      });
+    }
+    Logger.log("getLooseOrderSummaryData: 訂單資料處理完畢。");
+
+    const columnHeaders = ["站名"].concat(productNames);
+    
+    return {
+      success: true,
+      headers: columnHeaders,
+      summary: summaryData,
+      sites: siteNames
+    };
+
+  } catch (e) {
+    console.error("getLooseOrderSummaryData 錯誤: " + e.toString() + " Stack: " + e.stack);
+    return { success: false, error: "產生零星彙總表時發生伺服器錯誤: " + e.message };
+  }
+}
 
 // --- 未來將在此處加入更多後端邏輯 ---
 // 例如:
