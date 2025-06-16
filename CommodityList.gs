@@ -104,16 +104,14 @@ function deleteDriveFile_(fileId) {
 }
 
 /**
- * 【已更新】獲取所有商品資料 (8 欄)
+ * 獲取所有商品資料 (包含詳細日誌)
  * @returns {Array<Object>} 商品資料陣列
  */
 function getProductListData() {
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(PRODUCT_CACHE_KEY);
-  if (cached != null) {
-    Logger.log('getProductListData: 從快取讀取商品資料。');
-    try { return JSON.parse(cached); } catch (e) { Logger.log('解析商品快取失敗，重新讀取。 Error: ' + e.message);}
-  }
+  // 快取邏輯暫時停用以方便偵錯
+  // const cache = CacheService.getScriptCache();
+  // const cached = cache.get(PRODUCT_CACHE_KEY);
+  // if (cached != null) { /* ... */ }
 
   Logger.log('getProductListData: 函式開始執行。');
   try {
