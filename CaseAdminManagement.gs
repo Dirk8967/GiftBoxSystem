@@ -176,3 +176,86 @@ function deleteCaseAdminData(deleteInfo) {
     return { success: false, error: e.message };
   }
 }
+
+
+
+/**
+ * 【新增】獲取所有成箱訂單以供管理員查看
+ * @returns {Object} 包含 { success: boolean, data?: Array<Array<any>>, error?: string } 的物件
+ */
+function getCaseOrdersForAdmin() {
+  try {
+    Logger.log("getCaseOrdersForAdmin: 函式開始執行。");
+    
+    const orderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(箱)");
+    if (!orderSheet || orderSheet.getLastRow() < 2) {
+      Logger.log("getCaseOrdersForAdmin: '使用者訂單(箱)' 工作表為空或不存在。");
+      return { success: true, data: [] };
+    }
+
+    const lastRow = orderSheet.getLastRow();
+    Logger.log("getCaseOrdersForAdmin: 訂單工作表的最後一列是: " + lastRow);
+
+    const fullRange = orderSheet.getRange("A2:Q" + lastRow).getValues();
+    Logger.log("getCaseOrdersForAdmin: 成功讀取到 " + fullRange.length + " 列原始訂單資料。");
+    
+    const displayData = fullRange.map(function(row, index) {
+      const rowNumber = index + 2;
+      return [
+        row[0],  // A: 訂購人姓名
+        row[1],  // B: 訂購人電話
+        row[2],  // C: 商品名稱
+        row[3],  // D: 盒數
+        row[4],  // E: 總計金額
+        row[5],  // F: 寄送地點
+        row[6],  // G: 寄送日期
+        row[7],  // H: 訂單隸屬站點
+        row[8],  // I: (FALSE)
+        row[10], // K: 訂購時間
+        row[11], // L: 操作人員姓名
+        row[13], // N: 訂單編號
+        rowNumber 
+      ];
+    });
+    Logger.log("getCaseOrdersForAdmin: 資料轉換完成，準備回傳 " + displayData.length + " 筆訂單資料。");
+    Logger.log(displayData);
+    return { success: true, data: displayData };
+  } catch (e) {
+    Logger.log("getCaseOrdersForAdmin 發生嚴重錯誤: " + e.toString() + "\n" + e.stack);
+    console.error("getCaseOrdersForAdmin 錯誤: " + e.toString());
+    return { success: false, error: "讀取成箱訂單時發生伺服器錯誤: " + e.message };
+  }
+}
+
+/**
+ * 【新增】更新指定列的訂單編號
+ * @param {Object} updateInfo - { rowNumber, newOrderNumber }
+ * @returns {Object} { success: boolean, error?: string }
+ */
+function updateOrderNumber(updateInfo) {
+  try {
+    const { rowNumber, newOrderNumber } = updateInfo;
+    if (!rowNumber || newOrderNumber === undefined || newOrderNumber === null) {
+      throw new Error("缺少必要的更新資訊（列號和新的訂單編號）。");
+    }
+
+    const operatorEmail = Session.getActiveUser().getEmail();
+    const operatorName = getOperatorNameByEmail_(operatorEmail);
+    const operationTimestamp = new Date();
+
+    const orderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(箱)");
+    
+    orderSheet.getRange(rowNumber, 14, 1, 4).setValues([[
+      newOrderNumber,     // N: 訂單編號
+      operatorName,       // O: 成箱管理員姓名
+      operatorEmail,      // P: 成箱管理員信箱
+      operationTimestamp  // Q: 成箱管理員操作時間
+    ]]);
+
+    SpreadsheetApp.flush();
+    return { success: true };
+  } catch (e) {
+    console.error("updateOrderNumber 錯誤: " + e.toString());
+    return { success: false, error: "更新訂單編號時發生伺服器錯誤: " + e.message };
+  }
+}
