@@ -267,12 +267,17 @@
     </div>
 
     <script>
+      // --- 【新增】將 escapeHtml 函式加在最前面 ---
+        function escapeHtml(unsafe) {
+            if (unsafe === null || typeof unsafe === 'undefined') return '';
+            return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
       // --- 全域變數 ---
         let allApplicantsData = [], currentUserEditMode = 'add';
         let allCaseAdminData = [], currentCaseAdminEditMode = 'add';
         let allProductsData = [], currentProductEditMode = 'add', newProductImageFile = null; 
         let allSiteInfoData = [], currentSiteEditMode = 'add';
-
+        
         // --- 初始載入與事件綁定 ---
         window.addEventListener('load', function() { 
             try {
@@ -1105,32 +1110,45 @@
 
         // 【修改】為 loadSettingsData 和 saveSettings 加入新的欄位處理
         function loadSettingsData() {
-            if (isSettingsDataLoaded) { return; } 
-            showSettingsStatus('載入目前設定...', false);
+            // isSettingsDataLoaded 旗標可選，若希望每次都重新載入最新設定，可移除此判斷
+            // if (isSettingsDataLoaded) { return; } 
+            
+            showStatusMessage('settings-status-msg', '載入目前設定中...', false);
+            
             google.script.run
                 .withSuccessHandler(function(settings) {
-                    if(settings.error) {
-                        showSettingsError({message: settings.error}, '載入設定');
-                        return;
+                    const statusEl = document.getElementById('settings-status-msg');
+                    
+                    if (settings && !settings.error) {
+                        console.log("成功獲取設定: ", settings);
+                        // 將從後端獲取的設定值，填入對應的輸入框
+                        document.getElementById('activityNameInput').value = settings.activityName || '';
+                        document.getElementById('activityStartTimeInput').value = settings.activityStartTime || '';
+                        document.getElementById('activityEndTimeInput').value = settings.activityEndTime || '';
+                        document.getElementById('looseOrderStartTimeInput').value = settings.looseOrderStartTime || '';
+                        document.getElementById('looseOrderEndTimeInput').value = settings.looseOrderEndTime || '';
+                        
+                        if (statusEl) statusEl.textContent = '設定已載入。';
+                        setTimeout(function(){ if(statusEl && statusEl.textContent === '設定已載入。') statusEl.textContent = ''; }, 2000);
+                        
+                        // isSettingsDataLoaded = true;
+                    } else {
+                        console.error("載入設定時回傳錯誤: ", settings ? settings.error : '未知錯誤');
+                        showErrorStatusMessage('settings-status-msg', {message: settings.error}, '載入設定');
                     }
-                    // 填入所有設定欄位
-                    document.getElementById('activityNameInput').value = settings.activityName || '';
-                    document.getElementById('activityStartTimeInput').value = settings.activityStartTime || '';
-                    document.getElementById('activityEndTimeInput').value = settings.activityEndTime || '';
-                    document.getElementById('looseOrderStartTimeInput').value = settings.looseOrderStartTime || '';
-                    document.getElementById('looseOrderEndTimeInput').value = settings.looseOrderEndTime || '';
-
-                    showSettingsStatus('設定已載入。', true);
-                    isSettingsDataLoaded = true;
                 })
-                .withFailureHandler(function(err) { showSettingsError(err, '載入設定'); })
-                .getSettings(); // 呼叫新的 getSettings 函式
+                .withFailureHandler(function(err) { 
+                    showErrorStatusMessage('settings-status-msg', err, '載入設定');
+                })
+                .getSettings(); // 呼叫 Settings.gs 中的 getSettings 函式
         }
 
         function saveSettings() {
             const saveBtn = document.getElementById('saveSettingsBtn');
+            if(!saveBtn) return;
+            
             saveBtn.disabled = true;
-            showSettingsStatus('儲存中...', false);
+            showStatusMessage('settings-status-msg','儲存中...', false);
 
             const settings = {
                 activityName: document.getElementById('activityNameInput').value.trim(),
@@ -1140,36 +1158,34 @@
                 looseOrderEndTime: document.getElementById('looseOrderEndTimeInput').value
             };
             
-            // 只需要驗證全站檔期的必填
             if (!settings.activityStartTime || !settings.activityEndTime) {
                 alert("全站檔期的開始和結束時間為必填欄位。");
                 saveBtn.disabled = false;
-                showSettingsStatus('儲存失敗', false);
+                showStatusMessage('settings-status-msg', '儲存失敗', false);
                 return;
             }
-             // 驗證零星訂購時間的邏輯：要嘛都填，要嘛都留空
             if ((settings.looseOrderStartTime && !settings.looseOrderEndTime) || (!settings.looseOrderStartTime && settings.looseOrderEndTime)) {
                 alert("零星訂購的開始和結束時間必須同時設定或同時留空。");
                 saveBtn.disabled = false;
-                showSettingsStatus('儲存失敗', false);
+                showStatusMessage('settings-status-msg', '儲存失敗', false);
                 return;
             }
-
 
             google.script.run
                 .withSuccessHandler(function(response) {
                     if (response.success) {
-                        showSettingsStatus('設定已成功儲存！', true);
+                        showStatusMessage('settings-status-msg','設定已成功儲存！', true);
+                        isSettingsDataLoaded = false; // 強制下次點擊時重新載入以確認更新
                     } else {
-                        showSettingsError({message: response.error}, '儲存設定');
+                        showErrorStatusMessage('settings-status-msg', {message: response.error}, '儲存設定');
                     }
                     saveBtn.disabled = false;
                 })
                 .withFailureHandler(function(err) {
-                    showSettingsError(err, '儲存設定');
+                    showErrorStatusMessage('settings-status-msg', err, '儲存設定');
                     saveBtn.disabled = false;
                 })
-                .saveSettings(settings); // 呼叫新的 saveSettings 函式
+                .saveSettings(settings);
         }
     </script>
 </body>
