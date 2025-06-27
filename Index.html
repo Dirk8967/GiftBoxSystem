@@ -227,17 +227,32 @@
         }
         /* 【修改】將彙總表的特定樣式改為通用的 class */
         .summary-table-container {
-            flex-grow: 1;
-            overflow: auto; 
+            flex-grow: 1; /* 讓容器填滿剩餘空間 */
+            overflow: auto; /* 【核心】當內容超出時，顯示滾動條 */
             border: 1px solid #dee2e6;
             border-radius: 4px;
         }
         .summary-table { /* 新增一個 class 給彙總表本身 */
-            border-spacing: 0;
+            border-spacing: 0; /* 移除儲存格間的預設間距 */
         }
         .summary-table thead th {
-            position: sticky; top: 0;
+            position: sticky; 
+            /* top: 0; */
             background-color: #e9ecef; z-index: 2;
+        }
+        /* 讓【第一行】標頭黏在最頂端 (top: 0) */
+        .summary-table thead tr:first-child > th {
+            top: 0;
+            background-color: #e9ecef; /* 主標頭背景色 */
+            /* 為第一行標頭設定一個固定的高度，這是計算下一行位置的關鍵 */
+            height: 40px; 
+        }
+
+        /* 讓【第二行】標頭黏在第一行的正下方 */
+        /* 這裡的 top 值必須等於第一行標頭的高度 */
+        .summary-table thead tr:nth-child(2) > th {
+            top: 64px; 
+            background-color: #f0f2f5; /* 可以給子標頭一個稍淺的顏色以茲區別 */
         }
         .summary-table tbody td:first-child, 
         .summary-table thead th:first-child {
@@ -280,6 +295,137 @@
             cursor: pointer; 
             transition: background-color 0.2s; 
         }
+
+        /* 讓可排序的標頭顯示為可點擊的手指游標 */
+        .sortable-header {
+            cursor: pointer;
+            position: relative; /* 為了排序圖示的定位 */
+        }
+
+        /* 滑鼠移過時給予回饋 */
+        .sortable-header:hover {
+            background-color: #e2e2e2;
+        }
+
+        /* 排序圖示的樣式 */
+        .sort-indicator {
+            font-size: 12px;
+            color: #333;
+        }
+        /* --- 搜尋輸入框美化樣式 --- */
+
+        /* 這是包裹圖示和輸入框的容器，我們用它來定位圖示 */
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 這是搜尋圖示本身的樣式 */
+        .search-input-wrapper .material-symbols-outlined {
+            position: absolute; /* 讓圖示脫離文檔流，以便疊在輸入框上 */
+            left: 12px;       /* 將圖示定位在容器左側，並向右推 12px */
+            color: #888;       /* 設定一個柔和的圖示顏色 */
+            pointer-events: none; /* 讓滑鼠可以「穿透」圖示，直接點到下方的輸入框 */
+            font-size: 24px;    /* 適當的圖示大小 */
+        }
+
+        /* 這是輸入框本身的主要樣式 */
+        #cao-search-input.control-input {
+            width: 100%;
+            box-sizing: border-box; /* 確保 padding 和 border 不會撐大寬度 */
+            font-size: 16px;
+            
+            /* 調整內距：上下10px, 右15px, 左45px (為左側的圖示留出空間) */
+            padding: 10px 15px 10px 45px; 
+            
+            border: 1px solid #ccc;
+            border-radius: 8px; /* 更明顯的圓角 */
+            background-color: #fff;
+            
+            /* 為點擊時的動畫效果加上平滑過渡 */
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        /* 當使用者點擊輸入框 (獲取焦點) 時的樣式 */
+        #cao-search-input.control-input:focus {
+            outline: none; /* 移除瀏覽器預設的藍色或橘色外框 */
+            border-color: #007bff; /* 將邊框顏色變為您網站的主題色 */
+            
+            /* 加上一個柔和的「光暈」效果，提供清晰的視覺回饋 */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+        /* --- Modal 基礎樣式 --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            /* display: flex; align-items: center; justify-content: center; */
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 25px 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-title { margin-top: 0; }
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px 25px;
+        }
+        .modal-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        /* --- [美化] 統一 Modal 中的表單控制項樣式 --- */
+        /* 針對所有在 Modal 表單中的輸入框與下拉選單 */
+        .modal-form-grid .control-input {
+            /* 讓它填滿容器寬度 */
+            width: 100%;
+            /* 確保 padding 和 border 不會撐大寬度 */
+            box-sizing: border-box; 
+            /* 舒適的內邊距 */
+            padding: 10px 12px; 
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px; /* 柔和的圓角 */
+            background-color: #fff;
+            /* 統一高度，讓視覺更整齊 */
+            height: 42px; 
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        /* 針對 select 下拉選單的特殊處理 */
+        .modal-form-grid select.control-input {
+            /* 【關鍵】移除瀏覽器預設的下拉選單外觀 (包括原生箭頭) */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            /* 【關鍵】用背景圖的方式加入一個自訂的 SVG 箭頭圖示 */
+            /* 這是一個用程式碼寫的簡單、乾淨的向下箭頭，不需額外圖檔 */
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center; /* 定位在右側中間 */
+            background-size: 1em; /* 圖示大小 */
+
+            /* 調整右側內邊距，避免文字與新箭頭重疊 */
+            padding-right: 40px;
+        }
+
+        /* 當使用者點擊任何一個控制項時，提供統一的光暈效果 */
+        .modal-form-grid .control-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
         @keyframes modalOpen { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) {
              .main-nav { flex-direction: column; align-items: stretch; padding: 0; }
@@ -288,6 +434,134 @@
             .user-menu { padding: 10px; background-color: #f8f9fa; }
             .main-content { padding: 15px; }
             .main-content .container { padding: 15px; } 
+        }
+        /* 讓按鈕在被點擊時有輕微下壓的視覺回饋 */
+        /* --- [美化] 表格中的「操作」按鈕樣式 --- */
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+        /* 2. 「編輯」按鈕的專屬顏色 (藍色系) */
+        .btn-edit {
+            background-color: #4389e6; /* 一個標準的藍色 */
+        }
+
+        /* 滑鼠移過「編輯」按鈕時的顏色 */
+        .btn-edit:hover {
+            background-color: #0056b3; /* 顏色加深 */
+        }
+
+
+        /* 3. 「刪除」按鈕的專屬顏色 (紅色系，表示警示) */
+        .btn-delete {
+            background-color: #e8585f; /* 一個標準的危險紅色 */
+        }
+
+        /* 滑鼠移過「刪除」按鈕時的顏色 */
+        .btn-delete:hover {
+            background-color: #c82333; /* 顏色加深 */
+        }
+        /* --- [美化] 表格標頭內的篩選輸入框 --- */
+        .column-filter-input {
+            width: 100%; /* 讓輸入框填滿整個儲存格 */
+            padding: 5px 6px;
+            box-sizing: border-box; /* 關鍵：讓 padding 不會撐大格子 */
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        /* --- 狀態顏色定義 --- */
+        .color-green {
+            color: #198754; /* 綠色 */
+            font-weight: bold;
+        }
+        .color-yellow {
+            color: #ffc107; /* 黃色 */
+            font-weight: bold;
+        }
+        .color-red {
+            color: #dc3545; /* 紅色 */
+            font-weight: bold;
+        }
+        .color-blue {
+            color: #0d6efd; /* 藍色 */
+            font-weight: bold;
+        }
+
+        /* --- [美化] 庫存管理表格標頭樣式 --- */
+        /* 1. 將「已向廠商訂購」這格的文字置中 */
+        .summary-table thead th[colspan="2"] {
+            text-align: center;
+            /* 同時加一條底線，讓它和下方的子標頭有區隔 */
+            border-bottom: 1px solid #c0c8d2; 
+        }
+
+        /* 2. 為頂層的各個標頭儲存格，加上更明顯的右側分隔線 */
+        /* 使用 :not(:last-child) 來確保最右邊的「操作」欄右側沒有線 */
+        .summary-table thead tr:first-child > th:not(:last-child) {
+            text-align: center;
+            border-right: 2px solid #d5dde5;
+        }
+
+        /* 3. 針對第二行的子標頭「未到貨」和「已到貨」進行樣式統一 */
+        .summary-table thead tr:nth-child(2) th {
+            text-align: center;
+            /* 給予一個稍微不同的背景色，以凸顯層次感 */
+            background-color: #f0f2f5;
+            /* 設定一個最小寬度，讓它們在內容不多時也能撐開，達到均分效果 */
+            min-width: 50px; 
+        }
+        /* 將「操作」標頭文字置中 */
+        .summary-table thead th:last-child {
+            text-align: center;
+        }
+
+        /* --- [美化] 編輯進貨紀錄 Modal 內表格的輸入欄位 --- */
+
+        /* 1. 針對表格內所有輸入框/下拉選單的通用樣式 */
+        #purchase-records-table-container .control-input {
+            width: 100%;
+            height: 38px; /* 統一高度 */
+            padding: 6px 10px;
+            font-size: 14px;
+            font-family: inherit; /* 繼承表格的字體 */
+            color: #212529;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box; /* 確保 padding 不會撐爆儲存格 */
+            transition: border-color 0.2s, box-shadow 0.2s;
+            /* 移除某些瀏覽器為 datetime-local 增加的多餘邊距 */
+            margin: 0;
+        }
+
+        /* 2. 當使用者點擊任何一個輸入框時的「光暈」效果 */
+        #purchase-records-table-container .control-input:focus {
+            outline: none;
+            border-color: #86b7fe; /* 淺藍色邊框 */
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25); /* 柔和的藍色光暈 */
+        }
+
+        /* 3. 針對下拉選單 (select) 的特殊美化 */
+        #purchase-records-table-container select.control-input {
+            /* 移除瀏覽器預設的下拉選單外觀 (包括原生箭頭) */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            /* 用背景圖的方式加入一個自訂的 SVG 箭頭圖示 */
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 0.8em;
+            padding-right: 30px; /* 為箭頭留出空間 */
+        }
+
+        /* 4. (可選) 讓數字輸入框的文字也置中，與表頭對齊 */
+        #purchase-records-table-container input[type="number"].control-input {
+            text-align: center;
+        }
+        .summary-table .col-is-arrived {
+            min-width: 90px !important;
         }
     </style>
     
@@ -305,6 +579,7 @@
                 <div id="navLooseOrderAdmin" class="nav-dropdown hidden">
                     <button class="nav-button nav-button-admin"><span class="material-symbols-outlined">receipt_long</span>零星訂購管理<span class="material-symbols-outlined">arrow_drop_down</span></button>
                     <div class="nav-dropdown-content">
+                        <button id="navLooseOrderManagement"><span class="material-symbols-outlined">Receipt</span>訂單管理</button>
                         <button id="navIOManagement"><span class="material-symbols-outlined">import_export</span>進/出貨管理</button>
                         <button id="navInventoryManagement"><span class="material-symbols-outlined">inventory</span>庫存管理</button>
                     </div>
@@ -397,6 +672,211 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="edit-order-modal" style="display: none;">
+    <div class="modal-content">
+        <h2 class="modal-title">編輯訂單資訊</h2>
+        <form id="edit-order-form">
+            <input type="hidden" id="edit-order-uuid">
+            
+            <div class="modal-form-grid">
+                <div class="form-group"><label for="edit-order-time">訂購時間</label><input type="datetime-local" id="edit-order-time" disabled></div>
+                <div class="form-group"><label for="edit-name">姓名</label><input type="text" id="edit-name"></div>
+                <div class="form-group"><label for="edit-phone">電話</label><input type="text" id="edit-phone"></div>
+                <div class="form-group"><label for="edit-product">商品</label><input type="text" id="edit-product" disabled></div>
+                <div class="form-group"><label for="edit-quantity">盒數</label><input type="number" id="edit-quantity" disabled></div>
+                <div class="form-group"><label for="edit-total-amount">總計金額</label><input type="number" id="edit-total-amount" disabled></div>
+                <div class="form-group"><label for="edit-location">寄送地點</label><input type="text" id="edit-location"></div>
+                <div class="form-group"><label for="edit-delivery-date">寄送日期</label><input type="date" id="edit-delivery-date"></div>
+                <div class="form-group"><label for="edit-site">隸屬站點</label><input type="text" id="edit-site" disabled></div>
+                <div class="form-group">
+                  <label for="edit-is-paid">已付款</label>
+                  <select id="edit-is-paid" class="control-input" disabled>
+                    <option value="true">是 (TRUE)</option>
+                    <option value="false">否 (FALSE)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="display: none;"><label for="edit-is-paidtime">付款時間</label><input type="text" id="edit-is-paidtime"></div>
+                <div class="form-group"><label for="edit-operator">操作人員</label><input type="text" id="edit-operator" disabled></div>
+                <div class="form-group" style="display: none;"><label for="edit-operatoremail">操作人員信箱</label><input type="text" id="edit-operatoremail"></div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" id="cancel-edit-btn">取消</button>
+                <button type="submit" class="action-btn btn-save">儲存變更</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="edit-loose-order-modal" style="display: none;">
+    <div class="modal-content">
+        <h2 class="modal-title">編輯零星訂單</h2>
+        <form id="edit-loose-order-form">
+            <input type="hidden" id="edit-loose-order-uuid">
+            <div class="modal-form-grid">
+                <div class="form-group"><label for="edit-loa-name">訂購人姓名</label><input type="text" id="edit-loa-name" class="control-input"></div>
+                <div class="form-group"><label for="edit-loa-phone">訂購人電話</label><input type="text" id="edit-loa-phone" class="control-input"></div>
+                <div class="form-group"><label for="edit-loa-product">商品名稱</label><input type="text" id="edit-loa-product" class="control-input" disabled></div>
+                <div class="form-group"><label for="edit-loa-quantity">盒數</label><input type="number" id="edit-loa-quantity" class="control-input" disabled></div>
+                <div class="form-group"><label for="edit-loa-totalAmount">總計金額</label><input type="number" id="edit-loa-totalAmount" class="control-input" disabled></div>
+                <div class="form-group"><label for="edit-loa-location">寄送地點</label><input type="text" id="edit-loa-location" class="control-input"></div>
+                <div class="form-group"><label for="edit-loa-isPaid">已繳費</label>
+                    <select id="edit-loa-isPaid" class="control-input">
+                        <option value="true">TRUE</option><option value="false">FALSE</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="edit-loa-paymentTime">繳費時間</label><input type="datetime-local" id="edit-loa-paymentTime" class="control-input"></div>
+                <div class="form-group"><label for="edit-loa-isPickedUp">已取貨</label>
+                     <select id="edit-loa-isPickedUp" class="control-input">
+                        <option value="true">TRUE</option><option value="false">FALSE</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="edit-loa-pickupTime">取貨時間</label><input type="datetime-local" id="edit-loa-pickupTime" class="control-input"></div>
+                <div class="form-group">
+                  <label for="edit-loa-orderTime">訂購時間</label>
+                  <input type="text" id="edit-loa-orderTime" class="control-input" disabled>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" id="cancel-loose-edit-btn">取消</button>
+                <button type="submit" class="action-btn btn-save">儲存變更</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="io-details-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+        <button class="close-btn" onclick="closeIoDetailsModal()">&times;</button>
+        <h2 class="modal-title" id="io-details-title">出貨狀態詳情</h2>
+        
+        <div class="order-modal-section">
+            <h4 id="io-details-summary-product">商品：-</h4>
+            <h4 id="io-details-summary-site">站點：-</h4>
+            <div style="display: flex; gap: 20px; font-size: 16px; margin-top: 10px; flex-wrap: wrap;">
+            <span><strong>訂購：</strong><span id="io-details-ordered">0</span> 盒</span>
+            <span style="color: #28a745;"><strong>已到貨：</strong><span id="io-details-shipped">0</span> 盒</span> <span style="color: #ffc107;"><strong>配送中：</strong><span id="io-details-in-transit">0</span> 盒</span>
+            <span style="color: #dc3545;"><strong>未出貨：</strong><span id="io-details-unshipped">0</span> 盒</span> 
+            </div>
+        </div>
+
+        <div id="io-details-table-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <h4>詳細出貨列表</h4>
+            <button class="action-btn btn-add" id="open-add-shipment-modal-btn" style="padding: 5px 10px; font-size: 14px; background-color:green;">
+                <span class="material-symbols-outlined" style="margin-right: 4px; font-size: 18px;">add</span>新增
+            </button>
+        </div>
+        <div id="io-details-table-container" class="table-container" style="max-height: 40vh;">
+            <p>載入詳細資料中...</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="edit-shipment-modal" style="display: none;">
+    <div class="modal-content">
+        <h2 class="modal-title">編輯出貨紀錄</h2>
+        <form id="edit-shipment-form">
+            <input type="hidden" id="edit-shipment-uuid">
+            <div class="modal-form-grid">
+                <div class="form-group"><label>商品名稱</label><input type="text" id="edit-shipment-product" class="control-input"></div>
+                <div class="form-group"><label>盒數</label><input type="number" id="edit-shipment-quantity" class="control-input"></div>
+                <div class="form-group"><label>寄送地點</label><input type="text" id="edit-shipment-location" class="control-input"></div>
+                <div class="form-group"><label>派送人員姓名</label><input type="text" id="edit-shipment-courierName" class="control-input"></div>
+                <div class="form-group"><label>派送人員信箱</label><input type="email" id="edit-shipment-courierEmail" class="control-input"></div>
+                <div class="form-group"><label>派送時間</label><input type="datetime-local" id="edit-shipment-shippingTime" class="control-input"></div>
+                <div class="form-group"><label>已派送完成</label>
+                    <select id="edit-shipment-isCompleted" class="control-input">
+                        <option value="true">是</option><option value="false">否</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" id="cancel-shipment-edit-btn">取消</button>
+                <button type="submit" class="action-btn btn-save">儲存變更</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="add-shipment-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <h2 class="modal-title">新增出貨紀錄</h2>
+        <form id="add-shipment-form">
+            <div class="modal-form-grid" style="grid-template-columns: 1fr;"> <div class="form-group">
+                    <label for="add-shipment-quantity">盒數</label>
+                    <input type="number" id="add-shipment-quantity" class="control-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-shipment-courier">派送人員姓名</label>
+                    <select id="add-shipment-courier" class="control-input" required>
+                        <option value="">讀取人員名單中...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" id="cancel-add-shipment-btn">取消</button>
+                <button type="submit" class="action-btn btn-save">新增紀錄</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="edit-inventory-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 1000px;">
+        <button class="close-btn" onclick="document.getElementById('edit-inventory-modal').style.display='none'">&times;</button>
+        <h2 class="modal-title" id="edit-inventory-title">編輯進貨紀錄</h2>
+        
+        <div class="modal-actions" style="justify-content: space-between; margin-bottom: 20px;">
+            <button id="open-add-purchase-modal-btn" class="action-btn btn-add" style="background-color: #28a745;">
+                <span class="material-symbols-outlined">add</span>新增進貨
+            </button>
+            <button id="save-all-purchases-btn" class="action-btn btn-save">
+                <span class="material-symbols-outlined">save</span>儲存所有變更
+            </button>
+        </div>
+
+        <div id="purchase-records-table-container" class="table-container" style="max-height: 50vh;">
+            <p>載入進貨紀錄中...</p>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="add-purchase-modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+        <h2 class="modal-title">新增進貨紀錄</h2>
+        <form id="add-purchase-form">
+            <div class="modal-form-grid" style="grid-template-columns: 1fr;">
+                <div class="form-group">
+                    <label for="add-purchase-product">商品名稱 (唯讀)</label>
+                    <input type="text" id="add-purchase-product" class="control-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="add-purchase-quantity">盒數</label>
+                    <input type="number" id="add-purchase-quantity" class="control-input" required min="1">
+                </div>
+                <div class="form-group">
+                    <label for="add-purchase-purchaseTime">訂購時間</label>
+                    <input type="datetime-local" id="add-purchase-purchaseTime" class="control-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="add-purchase-isArrived">是否已到貨</label>
+                    <select id="add-purchase-isArrived" class="control-input">
+                        <option value="false" selected>否</option>
+                        <option value="true">是</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-purchase-arrivedTime">到貨時間 (如果已到貨)</label>
+                    <input type="datetime-local" id="add-purchase-arrivedTime" class="control-input">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="action-btn btn-cancel" id="cancel-add-purchase-btn">取消</button>
+                <button type="submit" class="action-btn btn-save">新增紀錄</button>
+            </div>
+        </form>
+    </div>
+</div>
 
     <script>
       // --- 全域變數 ---
@@ -434,6 +914,7 @@ window.addEventListener('load', function() {
                 event.stopPropagation();
                 this.parentElement.classList.toggle('open');
             });
+            document.getElementById('navLooseOrderManagement').addEventListener('click', function() { showSubPage('Page_LooseOrderAdmin', looseOrderAdminDropdown.querySelector('.nav-button')); });
             document.getElementById('navIOManagement').addEventListener('click', function() { showSubPage('Page_IOManagement', looseOrderAdminDropdown.querySelector('.nav-button')); });
             document.getElementById('navInventoryManagement').addEventListener('click', function() { showSubPage('Page_InventoryManagement', looseOrderAdminDropdown.querySelector('.nav-button')); });
         }
@@ -502,8 +983,6 @@ window.addEventListener('load', function() {
                   loadCaseSummaryData();
                 } else if (pageFileName === 'Page_LooseSummary') { 
                   loadLooseSummaryData(); 
-                } else if (pageFileName === 'Page_CaseOrderAdmin') {
-                  loadCaseOrderAdminPage();
                 } else {
                     // 對於其他頁面，直接載入
                     loadAndRenderPage(pageFileName, contentArea);
@@ -574,6 +1053,10 @@ window.addEventListener('load', function() {
                         if (pageFileName === 'Page_MyProfile') { loadMyProfileData(); } 
                         else if (pageFileName === 'Page_CaseOrder') { loadCaseOrderPageData(); }
                         else if (pageFileName === 'Page_LooseOrder') { loadLooseOrderPageData(); }
+                        else if (pageFileName === 'Page_CaseOrderAdmin') { loadCaseOrderAdminCRUDPage(); }
+                        else if (pageFileName === 'Page_LooseOrderAdmin') { loadLooseOrderAdminPage(); }
+                        else if (pageFileName === 'Page_IOManagement') { loadIoManagementPage(); }
+                        else if (pageFileName === 'Page_InventoryManagement') { loadInventoryManagementPage(); }
                     } else {
                         contentArea.innerHTML = htmlContent || '<div class="container"><p style="color:red;">載入頁面時收到無效內容。</p></div>';
                     }
@@ -1132,8 +1615,8 @@ window.addEventListener('load', function() {
               return;
           }
 
-          const { headers, summary, sites } = data;
-
+          // const { headers, summary, sites } = data;
+          const { headers, sites, ordered, arrived, inTransit } = data;
           // 創建表格結構
             const tableContainer = document.createElement('div');
             tableContainer.className = 'table-container';
@@ -1157,162 +1640,1549 @@ window.addEventListener('load', function() {
                 siteCell.textContent = siteName;
                 siteCell.style.fontWeight = 'bold';
 
+                // for (let i = 1; i < headers.length; i++) {
+                //     const productName = headers[i];
+                //     const dataCell = row.insertCell();
+                //     dataCell.className = 'text-center';
+                //     const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
+                //     dataCell.textContent = quantity > 0 ? quantity : '';
+                // }
                 for (let i = 1; i < headers.length; i++) {
                     const productName = headers[i];
                     const dataCell = row.insertCell();
-                    dataCell.className = 'text-center';
-                    const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
-                    dataCell.textContent = quantity > 0 ? quantity : '';
+                    
+                    // 【核心修改】從三個物件中獲取對應的數量
+                    const orderedQty = (ordered[siteName] && ordered[siteName][productName]) || 0;
+                    const arrivedQty = (arrived[siteName] && arrived[siteName][productName]) || 0;
+                    const inTransitQty = (inTransit[siteName] && inTransit[siteName][productName]) || 0;
+                    
+                    // 計算未出貨數量
+                    const unshippedQty = orderedQty - arrivedQty - inTransitQty;
+
+                    let colorClass = '';
+                    if (orderedQty > 0) { // 只為有訂購的儲存格上色
+                        if (unshippedQty < 0) {
+                            colorClass = 'color-blue'; // 藍色: 超出貨
+                        } else if (unshippedQty > 0) {
+                            colorClass = 'color-red'; // 紅色: 未出貨 > 0
+                        } else { // unshippedQty === 0
+                            if (inTransitQty === 0) {
+                                colorClass = 'color-green'; // 綠色: 訂購=已到貨, 且無配送中
+                            } else {
+                                colorClass = 'color-yellow'; // 黃色: 訂購=已到貨+配送中
+                            }
+                        }
+                    }
+                    
+                    dataCell.className = `text-center drill-down-cell ${colorClass}`;
+                    dataCell.dataset.productName = productName;
+                    dataCell.dataset.siteName = siteName;
+                    dataCell.textContent = orderedQty > 0 ? orderedQty : '';
                 }
             });
 
             tableContainer.appendChild(table);
+            attachIoInfoTableClickListener();
             // 將新產生的表格放入容器中，替換掉「載入中」訊息
             container.innerHTML = '<h2>零星彙總表</h2>'; // 先清空並加入標題
             container.appendChild(tableContainer);
       }
 
-
-      // --- 【新增】成箱訂購管理頁面相關函式 ---
-        
-        let caseOrderAdminGrid; // 將 Grid.js 的實例設為全域變數
-
-        function loadCaseOrderAdminPage() {
-            //const container = document.getElementById('case-order-admin-table-wrapper');
-            const container = document.getElementById('main-content-area').querySelector('.container');
-            if (!container) return;
-            container.innerHTML = '<p>正在載入訂單資料...</p>';
-
-            google.script.run
-                .withSuccessHandler(renderCaseOrderAdminTable)
-                .withFailureHandler(function(err) {
-                    container.innerHTML = '<p style="color:red;">無法載入訂單資料。</p>';
-                })
-                .getCaseOrdersForAdmin();
-        }
-
-        function renderCaseOrderAdminTable(response) {
-          console.log(response);
-            //const container = document.getElementById('case-order-admin-table-wrapper');
-            const container = document.getElementById('main-content-area').querySelector('.container');
-            if (!container) return;
-            
-            if (!response || !response.success) {
-                console.log("已執行至此");
-                //container.parentElement.querySelector('h2').textContent = '成箱訂購管理';
-                container.innerHTML = '<p style="color:red;">' + (response.error || '載入資料時發生未知錯誤') + '</p>';
-                return;
-            }
-            
-
-            container.innerHTML = ''; // 清空載入中訊息
-
-            // 如果已經存在一個 Grid 實例，先銷毀它
-            if (caseOrderAdminGrid) {
-                caseOrderAdminGrid.destroy();
-            }
-            
-            // 使用 Grid.js 建立可篩選排序的表格
-            caseOrderAdminGrid = new gridjs.Grid({
-                columns: [
-                    { name: '訂購人姓名', width: '10%' },
-                    { name: '訂購人電話', width: '10%' },
-                    { name: '商品名稱', width: '20%' },
-                    { name: '盒數', width: '5%' },
-                    { name: '總計金額', width: '8%' },
-                    { name: '寄送地點', width: '12%' },
-                    { name: '寄送日期', formatter: (cell) => cell ? new Date(cell).toLocaleDateString() : '' },
-                    { name: '訂單隸屬站點', width: '12%' },
-                    { name: '結案', formatter: (cell) => cell ? '是' : '否' },
-                    { name: '訂購時間', formatter: (cell) => cell ? new Date(cell).toLocaleString() : '' },
-                    '操作人員',
-                    { 
-                      name: '訂單編號',
-                      width: '15%',
-                      // 【新寫法】使用 attributes 和 formatter 來讓儲存格可編輯
-                      formatter: (cell, row) => {
-                          return gridjs.h('div', {
-                              contentEditable: 'true',
-                              'data-row-number': row.cells[12].data, // 將原始列號存在 data- 屬性中
-                              oninput: (e) => { e.target.style.backgroundColor = '#fff3cd'; }, // 輸入時變色提示
-                              onblur: (e) => { handleOrderNumberUpdate(e.target); } // 焦點移開時觸發更新
-                          }, cell);
-                      }
+      /**
+       * 在載入「進/出貨管理」頁面時，為表格綁定點擊事件(簡略版本，沒有提供出貨詳情)
+       */
+      function attachIoInfoTableClickListener() {
+          const tableContainer = document.getElementById('main-content-area').querySelector('.container');
+          if(tableContainer) {
+              tableContainer.addEventListener('click', function(event){
+                  // 使用事件委派，檢查是否點擊到目標儲存格
+                  const cell = event.target.closest('.drill-down-cell');
+                  if(cell) {
+                      document.getElementById("io-details-table-title").style.display = "none";
+                      document.getElementById("io-details-table-container").style.display = "none";
+                      openIoDetailsModal(cell);
                   }
-                ],
-                data: response.data,
-                search: true, // 啟用搜尋
-                sort: true,   // 啟用排序
-                pagination: { // 啟用分頁
-                    enabled: true,
-                    limit: 10
-                },
-                style: {
-                    th: { 'background-color': '#f2f2f2' }
-                },
-                language: {
-                    'search': { 'placeholder': '🔍 搜尋...' },
-                    'pagination': { 'previous': '上一頁', 'next': '下一頁', 'showing': '顯示', 'to': '到', 'of': '之', 'results': '項結果' }
+              });
+          }
+      }
+
+
+// ==========================================================
+// ================ 成箱訂購管理 CRUD  (前端處理版本) =====
+// ==========================================================
+
+// --- 全域變數 ---
+let allAdminOrders = []; // 用來儲存從後端獲取的「所有」訂單資料
+let currentSort = { key: 'orderTime', order: 'desc' }; // 預設排序狀態
+
+/**
+ * 主載入函式：初始化頁面、綁定事件
+ */
+function loadCaseOrderAdminCRUDPage() {
+    // 獲取並綁定事件監聽器
+    const searchInput = document.getElementById('cao-search-input');
+    const tableHead = document.querySelector('#admin-case-orders-table thead');
+    const filterRow = document.getElementById('filter-row');
+
+    // 為搜尋框綁定 'input' 事件，達到即時搜尋效果
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFiltersAndSort);
+    }
+    
+    // 為表格標頭綁定點擊事件 (事件委派)
+    if (tableHead) {
+        tableHead.addEventListener('click', handleSortClick);
+    }
+    if (filterRow) {
+        // 為整列的輸入事件進行監聽，達到即時篩選效果
+        filterRow.addEventListener('input', applyFiltersAndSort);
+    }
+
+    // 為編輯 Modal 的按鈕綁定事件
+    document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+        document.getElementById('edit-order-modal').style.display = 'none';
+    });
+    document.getElementById('edit-order-form').addEventListener('submit', saveOrderChanges);
+
+    // 從後端載入初始資料
+    fetchAndDisplayAdminOrders();
+}
+
+/**
+ * (R)ead - 從後端讀取並顯示訂單表格
+ */
+function fetchAndDisplayAdminOrders() {
+    const statusMsg = document.getElementById('cao-admin-status-msg');
+    if (statusMsg) statusMsg.textContent = '讀取所有訂單資料中...';
+
+    google.script.run
+        .withSuccessHandler(function(jsonString) {
+            try {
+                // 將收到的資料解析並存到全域變數中
+                allAdminOrders = JSON.parse(jsonString);
+                // 檢查是否為錯誤物件
+                if (allAdminOrders && allAdminOrders.error) {
+                    if (statusMsg) statusMsg.textContent = '讀取資料時發生錯誤: ' + allAdminOrders.message;
+                    allAdminOrders = []; // 清空資料
                 }
-            }).render(container);
-            
-            // 監聽儲存格編輯事件
-            caseOrderAdminGrid.on('cellEdited', function(cell, row) {
-                const newValue = cell.data;
-                const originalRowNumber = row.cells[12].data; // 我們將原始列號放在最後一欄
-                
-                showStatusMessage('case-order-admin-status-msg', '更新訂單編號中...', false);
-                
-                google.script.run
-                    .withSuccessHandler(function(updateResponse) {
-                        if (updateResponse.success) {
-                            showStatusMessage('case-order-admin-status-msg', '訂單編號更新成功！', true);
-                        } else {
-                            showErrorStatusMessage('case-order-admin-status-msg', updateResponse, '更新訂單編號');
-                            // 可選：將儲存格恢復原值
-                            loadCaseOrderAdminPage(); // 最簡單的方式是重新載入整個表格
-                        }
-                    })
-                    .withFailureHandler(function(err) {
-                        showErrorStatusMessage('case-order-admin-status-msg', err, '更新訂單編號');
-                        loadCaseOrderAdminPage();
-                    })
-                    .updateOrderNumber({ rowNumber: originalRowNumber, newOrderNumber: newValue });
+            } catch (e) {
+                console.error("JSON Parsing Error:", e);
+                if (statusMsg) statusMsg.textContent = '資料格式錯誤。';
+                allAdminOrders = []; // 清空資料
+            }
+            // 第一次渲染表格
+            applyFiltersAndSort();
+        })
+        .withFailureHandler(function(err) {
+             if (statusMsg) statusMsg.textContent = '讀取失敗：' + err.message;
+        })
+        .getAdminCaseOrders();
+}
+
+/**
+ * 核心處理函式：根據目前的篩選和排序條件，更新表格顯示
+ */
+function applyFiltersAndSort() {
+    let ordersToDisplay = [...allAdminOrders]; // 從完整資料建立一個副本來操作
+
+    // --- 1. 【全新】執行「交集」篩選 ---
+    
+    // 首先，收集所有「有填寫內容」的篩選框
+    const activeFilters = [];
+    document.querySelectorAll('.column-filter-input').forEach(input => {
+        if (input.value.trim() !== '') {
+            activeFilters.push({
+                key: input.dataset.columnKey,
+                value: input.value.toLowerCase()
             });
         }
+    });
+
+    // 如果有任何有效的篩選條件，則過濾資料
+    if (activeFilters.length > 0) {
+        ordersToDisplay = ordersToDisplay.filter(order => {
+            // 使用 a.every(b) 來確保「所有」篩選條件都必須滿足 (AND 邏輯)
+            return activeFilters.every(filter => {
+                const cellValue = order[filter.key];
+                // 如果是日期，進行特殊格式化再比對，以符合顯示格式
+                if (filter.key === 'orderTime' && cellValue) {
+                    return new Date(cellValue).toLocaleString('zh-TW', { hour12: false }).toLowerCase().includes(filter.value);
+                }
+                if (filter.key === 'deliveryDate' && cellValue) {
+                    return new Date(cellValue).toLocaleDateString().toLowerCase().includes(filter.value);
+                }
+                // 其他則直接轉為字串比對
+                return String(cellValue).toLowerCase().includes(filter.value);
+            });
+        });
+    }
+    // --- 2. 執行排序 ---
+    if (currentSort.key) {
+        ordersToDisplay.sort((a, b) => {
+            const valA = a[currentSort.key];
+            const valB = b[currentSort.key];
+
+            // 嘗試將值轉為數字進行比較，適用於金額、盒數
+            const numA = Number(valA);
+            const numB = Number(valB);
+
+            let comparison = 0;
+            if (!isNaN(numA) && !isNaN(numB)) {
+                // 數字比較
+                comparison = numA - numB;
+            } else if (Date.parse(valA) && Date.parse(valB)) {
+                // 日期比較
+                comparison = new Date(valA) - new Date(valB);
+            } else {
+                // 字串比較
+                comparison = String(valA).localeCompare(String(valB));
+            }
+
+            return currentSort.order === 'asc' ? comparison : -comparison;
+        });
+    }
+    // --- 3. 渲染最終結果 ---
+    renderAdminOrdersTable(ordersToDisplay);
+    updateSortIndicators();
+}
+
+/**
+ * 處理表格標頭點擊事件
+ */
+function handleSortClick(event) {
+    const header = event.target.closest('.sortable-header');
+    if (!header) return;
+
+    const sortKey = header.dataset.sortKey;
+
+    if (currentSort.key === sortKey) {
+        // 如果點擊的是同一個欄位，則切換升/降冪
+        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        // 如果點擊的是新欄位，則預設為升冪
+        currentSort.key = sortKey;
+        currentSort.order = 'asc';
+    }
+
+    // 套用新的排序並重新渲染表格
+    applyFiltersAndSort();
+}
+
+/**
+ * 將給定的訂單資料渲染成表格 (此函式只負責渲染)
+ * @param {Array<Object>} orders - 要顯示在表格上的訂單陣列
+ */
+function renderAdminOrdersTable(orders) {
+    const tableBody = document.querySelector('#admin-case-orders-table tbody');
+    const statusMsg = document.getElementById('cao-admin-status-msg');
+    
+    tableBody.innerHTML = '';
+
+    if (!orders || orders.length === 0) {
+        statusMsg.textContent = '查無符合條件的訂單資料。';
+        tableBody.innerHTML = '<tr><td colspan="13">查無符合條件的訂單資料。</td></tr>';
+        return;
+    }
+
+    statusMsg.textContent = `顯示 ${orders.length} 筆資料 (共 ${allAdminOrders.length} 筆)。`;
+    
+    const fragment = document.createDocumentFragment();
+    orders.forEach(order => {
+        const tr = document.createElement('tr');
+        tr.id = `order-row-${order.uuid}`; // 使用 uuid 作為 tr 的 id
+        tr.innerHTML = `
+            <td>${order.orderTime ? new Date(order.orderTime).toLocaleString() : ''}</td>
+            <td>${escapeHtml(order.name || '')}</td>
+            <td>${escapeHtml(order.phone || '')}</td>
+            <td>${escapeHtml(order.product || '')}</td>
+            <td>${escapeHtml(order.quantity || '')}</td>
+            <td>${escapeHtml(order.totalAmount || '')}</td>
+            <td>${escapeHtml(order.location || '')}</td>
+            <td>${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : ''}</td>
+            <td>${escapeHtml(order.site || '')}</td>
+            <td>${escapeHtml(order.isPaid ? '是': '否')}</td>
+            <td>${escapeHtml(order.operator || '')}</td>
+            <td>${escapeHtml(order.orderId || '')}</td>
+            <td>
+                <button class="action-btn btn-edit" onclick="handleEditOrder('${escapeHtml(order.uuid)}')">編輯</button>
+                <button class="action-btn btn-delete" onclick="handleDeleteOrder('${escapeHtml(order.uuid)}')">刪除</button>
+            </td>
+        `;
+        fragment.appendChild(tr);
+    });
+    tableBody.appendChild(fragment);
+}
+
+/**
+ * 更新表格標頭上的排序指示圖示 (▲/▼)
+ */
+function updateSortIndicators() {
+    document.querySelectorAll('.sortable-header').forEach(header => {
+        const indicator = header.querySelector('.sort-indicator');
+        if (!indicator) return;
+
+        if (header.dataset.sortKey === currentSort.key) {
+            indicator.textContent = currentSort.order === 'asc' ? ' ▲' : ' ▼';
+        } else {
+            indicator.textContent = '';
+        }
+    });
+}
+
+// 確保您有以下函式，它們是按鈕功能的佔位函式
+function handleEditOrder(uuid) { // 參數改為 uuid
+    // 【核心修改】根據 uuid 從前端陣列尋找資料
+    const orderToEdit = allAdminOrders.find(order => order.uuid === uuid);
+
+    if (!orderToEdit) {
+        alert("錯誤：在資料中找不到該筆紀錄！");
+        return;
+    }
+
+    // 【核心修改】將 uuid 填入 modal 的隱藏欄位
+    document.getElementById('edit-order-uuid').value = orderToEdit.uuid;
+    
+    // 其他將資料填入表單的欄位不變...
+    // 【核心修改】將 uuid 填入 modal 的隱藏欄位
+    document.getElementById('edit-order-uuid').value = orderToEdit.uuid;
+    // 注意：Date/Time 欄位的格式需要特別處理才能正確顯示在 input 中
+    document.getElementById('edit-order-time').value = orderToEdit.orderTime ? new Date(orderToEdit.orderTime).toISOString().slice(0, 16) : '';
+    document.getElementById('edit-name').value = orderToEdit.name || '';
+    document.getElementById('edit-phone').value = orderToEdit.phone || '';
+    document.getElementById('edit-product').value = orderToEdit.product || '';
+    document.getElementById('edit-quantity').value = orderToEdit.quantity || '';
+    document.getElementById('edit-total-amount').value = orderToEdit.totalAmount || '';
+    document.getElementById('edit-location').value = orderToEdit.location || '';
+    document.getElementById('edit-delivery-date').value = orderToEdit.deliveryDate ? new Date(orderToEdit.deliveryDate).toISOString().slice(0, 10) : '';
+    document.getElementById('edit-site').value = orderToEdit.site || '';
+    // 我們將其轉換為字串 "true" 或 "false" 來匹配 <option> 的 value
+    document.getElementById('edit-is-paid').value = String(orderToEdit.isPaid === true);
+    document.getElementById('edit-is-paidtime').value = orderToEdit.paidtime || '';
+    document.getElementById('edit-operator').value = orderToEdit.operator || '';
+    document.getElementById('edit-operatoremail').value = orderToEdit.operatoremail || '';
+    // 顯示 Modal
+    document.getElementById('edit-order-modal').style.display = 'flex';
+}
+
+/**
+ * (D)elete - 處理刪除按鈕點擊事件
+ * @param {string} orderId 要刪除的訂單編號
+ */
+function handleDeleteOrder(uuid) { // 參數改為 uuid
+    if (!uuid) {
+        alert("錯誤：UUID 無效。");
+        return;
+    }
+    
+    // 跳出確認視窗
+    const confirmed = confirm(`您確定要刪除這筆紀錄嗎？\nUUID: ${uuid}\n此操作無法復原！`);
+    
+    if (confirmed) {
+        const statusMsg = document.getElementById('cao-admin-status-msg');
+        if(statusMsg) statusMsg.textContent = `正在刪除訂單 ${uuid}...`;
+        
+        google.script.run
+            .withSuccessHandler(function(response) {
+                if(response.success) {
+                    // 【核心修改】根據 uuid 從前端陣列移除資料
+                    const indexToRemove = allAdminOrders.findIndex(order => order.uuid === uuid);
+                    if (indexToRemove > -1) {
+                        allAdminOrders.splice(indexToRemove, 1);
+                    }
+                    applyFiltersAndSort();
+                    alert(response.message);
+                } else {
+                    alert("刪除失敗：\n" + response.message);
+                }
+            })
+            // ... 錯誤處理部分不變 ...
+            .deleteOrderByUuid(uuid); // 【核心修改】呼叫新的後端函式
+    }
+}
+
+// 請替換此函式
+function saveOrderChanges(event) {
+    console.log("步驟 2: 『儲存』按鈕觸發了 saveOrderChanges 函式！");
+    event.preventDefault(); // 防止表單傳統提交導致頁面刷新
+
+    // 從表單中收集更新後的資料
+    const updatedOrder = {
+        uuid: document.getElementById('edit-order-uuid').value,
+        // orderId: document.getElementById('edit-order-id').value,
+        orderTime: (document.getElementById('edit-order-time').value),
+        name: document.getElementById('edit-name').value,
+        phone: document.getElementById('edit-phone').value,
+        product: document.getElementById('edit-product').value,
+        quantity: document.getElementById('edit-quantity').value,
+        totalAmount: document.getElementById('edit-total-amount').value,
+        location: document.getElementById('edit-location').value,
+        deliveryDate: (document.getElementById('edit-delivery-date').value),
+        site: document.getElementById('edit-site').value,
+        isPaid: document.getElementById('edit-is-paid').value === 'true',
+        paidtime: document.getElementById('edit-is-paidtime').value,
+        operator: document.getElementById('edit-operator').value,
+        operatoremail: document.getElementById('edit-operatoremail').value
+    };
+
+    // 從 `updatedOrder` 物件中找到 `orderId`，以便在本地陣列中更新
+    const originalOrder = allAdminOrders.find(o => o.uuid === updatedOrder.uuid);
+    if(originalOrder) {
+        updatedOrder.orderId = originalOrder.orderId;
+    }
+
+    const statusMsg = document.getElementById('cao-admin-status-msg');
+    if(statusMsg) statusMsg.textContent = `正在儲存訂單 ${updatedOrder.orderId} 的變更...`;
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                // 更新前端的「完整資料備份」
+                const indexToUpdate = allAdminOrders.findIndex(order => order.uuid === updatedOrder.uuid);
+                if (indexToUpdate > -1) {
+                    allAdminOrders[indexToUpdate] = updatedOrder;
+                }
+                // 隱藏 Modal 並重新渲染表格
+                document.getElementById('edit-order-modal').style.display = 'none';
+                applyFiltersAndSort();
+                alert("儲存成功！");
+            } else {
+                alert("儲存失敗：\n" + response.message);
+            }
+        })
+        .withFailureHandler(function(err) {
+            alert("儲存時發生嚴重錯誤：" + err.message);
+        })
+        .updateOrder(updatedOrder);
+}
+
+// ==========================================================
+// ================ 零星訂單管理 (功能完整版) ===============
+// ==========================================================
+
+// --- 全域變數 ---
+let allAdminLooseOrders = []; // 儲存所有零星訂單
+let currentLooseSort = { key: 'orderTime', order: 'desc' }; // 預設排序
+
+/**
+ * 主載入函式：初始化頁面、綁定事件
+ */
+function loadLooseOrderAdminPage() {
+    // 綁定篩選與排序事件
+    const searchInput = document.getElementById('loa-search-input');
+    const tableHead = document.querySelector('#admin-loose-orders-table thead');
+    const filterRow = document.getElementById('loa-filter-row');
+    if (searchInput) searchInput.addEventListener('input', applyLooseFiltersAndSort);
+    if (tableHead) tableHead.addEventListener('click', handleLooseSortClick);
+    if (filterRow) filterRow.addEventListener('input', applyLooseFiltersAndSort);
+    
+    // 綁定編輯 Modal 的按鈕事件
+    document.getElementById('cancel-loose-edit-btn').addEventListener('click', () => {
+        document.getElementById('edit-loose-order-modal').style.display = 'none';
+    });
+    document.getElementById('edit-loose-order-form').addEventListener('submit', saveLooseOrderChanges);
+
+    // 載入初始資料
+    fetchAndDisplayAdminLooseOrders();
+}
+
+/**
+ * 從後端獲取所有零星訂單
+ */
+function fetchAndDisplayAdminLooseOrders() {
+    const statusMsg = document.getElementById('loa-admin-status-msg');
+    if (statusMsg) statusMsg.textContent = '讀取所有零星訂單資料中...';
+
+    google.script.run
+        .withSuccessHandler(function(jsonString) {
+            try {
+                allAdminLooseOrders = JSON.parse(jsonString);
+                if (allAdminLooseOrders && allAdminLooseOrders.error) {
+                    if (statusMsg) statusMsg.textContent = '讀取資料時發生錯誤: ' + allAdminLooseOrders.message;
+                    allAdminLooseOrders = [];
+                }
+            } catch (e) {
+                console.error("JSON Parsing Error:", e);
+                if (statusMsg) statusMsg.textContent = '資料格式錯誤。';
+                allAdminLooseOrders = [];
+            }
+            applyLooseFiltersAndSort();
+        })
+        .withFailureHandler(function(err) {
+             if (statusMsg) statusMsg.textContent = '讀取失敗：' + err.message;
+        })
+        .getAdminLooseOrders(); // 呼叫新的後端函式
+}
+
+/**
+ * 核心處理函式：篩選與排序
+ */
+function applyLooseFiltersAndSort() {
+    let ordersToDisplay = [...allAdminLooseOrders];
+
+    // --- 1. 執行「交集」篩選 ---
+    const activeFilters = [];
+    // 【修改點】確保只選取零星訂單表格內的篩選框
+    document.querySelectorAll('#admin-loose-orders-table .column-filter-input').forEach(input => {
+        if (input.value.trim() !== '') {
+            activeFilters.push({
+                key: input.dataset.columnKey,
+                value: input.value.toLowerCase()
+            });
+        }
+    });
+
+    if (activeFilters.length > 0) {
+        ordersToDisplay = ordersToDisplay.filter(order => {
+            return activeFilters.every(filter => {
+                const cellValue = order[filter.key];
+                // 將布林值 true/false 轉為 '是'/'否' 來篩選
+                if (filter.key === 'isPaid') {
+                    const displayValue = cellValue ? '是' : '否';
+                    return displayValue.toLowerCase().includes(filter.value);
+                }
+                // 處理日期
+                if ((filter.key === 'paymentTime' || filter.key === 'orderTime') && cellValue) {
+                    return new Date(cellValue).toLocaleString('zh-TW', { hour12: false }).toLowerCase().includes(filter.value);
+                }
+                return String(cellValue).toLowerCase().includes(filter.value);
+            });
+        });
+    }
+
+    // --- 2. 執行排序 (使用零星訂單的排序狀態變數) ---
+    if (currentLooseSort.key) {
+        ordersToDisplay.sort((a, b) => {
+            const valA = a[currentLooseSort.key], valB = b[currentLooseSort.key];
+            const numA = Number(valA), numB = Number(valB);
+            let comparison = 0;
+            if (!isNaN(numA) && !isNaN(numB)) { comparison = numA - numB; }
+            else if (Date.parse(valA) && Date.parse(valB)) { comparison = new Date(valA) - new Date(valB); }
+            else { comparison = String(valA).localeCompare(String(valB)); }
+            return currentLooseSort.order === 'asc' ? comparison : -comparison;
+        });
+    }
+
+    renderAdminLooseOrdersTable(ordersToDisplay);
+    updateLooseSortIndicators();
+}
+
+/**
+ * 處理表格標頭點擊事件
+ */
+function handleLooseSortClick(event) {
+    const header = event.target.closest('.sortable-header');
+    if (!header) return;
+    const sortKey = header.dataset.sortKey;
+    if (currentLooseSort.key === sortKey) {
+        currentLooseSort.order = currentLooseSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentLooseSort.key = sortKey;
+        currentLooseSort.order = 'asc';
+    }
+    applyLooseFiltersAndSort();
+}
+
+/**
+ * 將給定的訂單資料渲染成表格
+ */
+function renderAdminLooseOrdersTable(orders) {
+    const tableBody = document.querySelector('#admin-loose-orders-table tbody');
+    const statusMsg = document.getElementById('loa-admin-status-msg');
+    
+    tableBody.innerHTML = '';
+    if (!orders || orders.length === 0) {
+        statusMsg.textContent = '查無符合條件的訂單資料。';
+        tableBody.innerHTML = '<tr><td colspan="10">查無符合條件的訂單資料。</td></tr>';
+        return;
+    }
+
+    statusMsg.textContent = `顯示 ${orders.length} 筆資料 (共 ${allAdminLooseOrders.length} 筆)。`;
+    
+    const fragment = document.createDocumentFragment();
+    orders.forEach(order => {
+        const tr = document.createElement('tr');
+        // 只顯示指定的 9 個欄位
+        tr.innerHTML = `
+            <td>${escapeHtml(order.name || '')}</td>
+            <td>${escapeHtml(order.phone || '')}</td>
+            <td>${escapeHtml(order.product || '')}</td>
+            <td>${escapeHtml(order.quantity || '')}</td>
+            <td>${escapeHtml(order.totalAmount || '')}</td>
+            <td>${escapeHtml(order.location || '')}</td>
+            <td>${order.isPaid ? '是' : '否'}</td>
+            <td>${order.paymentTime ? new Date(order.paymentTime).toLocaleString() : ''}</td>
+            <td>${escapeHtml(order.operatorName || '')}</td>
+            <td>
+                <button class="action-btn btn-edit" onclick="handleEditLooseOrder('${escapeHtml(order.uuid)}')">編輯</button>
+                <button class="action-btn btn-delete" onclick="handleDeleteLooseOrder('${escapeHtml(order.uuid)}')">刪除</button>
+            </td>
+        `;
+        fragment.appendChild(tr);
+    });
+    tableBody.appendChild(fragment);
+}
+
+/**
+ * 更新表格標頭上的排序指示圖示
+ */
+function updateLooseSortIndicators() {
+    document.querySelectorAll('#admin-loose-orders-table .sortable-header').forEach(header => {
+        const indicator = header.querySelector('.sort-indicator');
+        if (!indicator) return;
+        if (header.dataset.sortKey === currentLooseSort.key) {
+            indicator.textContent = currentLooseSort.order === 'asc' ? ' ▲' : ' ▼';
+        } else {
+            indicator.textContent = '';
+        }
+    });
+}
+
+/**
+ * (D)elete - 處理刪除按鈕
+ */
+function handleDeleteLooseOrder(uuid) {
+    if (!uuid || !confirm(`您確定要刪除這筆零星訂單嗎？\nUUID: ${uuid}\n此操作無法復原！`)) return;
+    google.script.run
+        .withSuccessHandler(response => {
+            if (response.success) {
+                const index = allAdminLooseOrders.findIndex(o => o.uuid === uuid);
+                if (index > -1) allAdminLooseOrders.splice(index, 1);
+                applyLooseFiltersAndSort();
+                alert(response.message);
+            } else { alert("刪除失敗：\n" + response.message); }
+        })
+        .deleteLooseOrderByUuid(uuid);
+}
+
+/**
+ * (U)pdate - 處理編輯按鈕
+ */
+function handleEditLooseOrder(uuid) {
+    const orderToEdit = allAdminLooseOrders.find(o => o.uuid === uuid);
+    if (!orderToEdit) return alert("錯誤：找不到該筆訂單！");
+    
+    // 填寫 Modal
+    // 我們將日期物件格式化為本地的、包含時間的字串
+    document.getElementById('edit-loa-orderTime').value = orderToEdit.orderTime ? new Date(orderToEdit.orderTime).toLocaleString('zh-TW', { hour12: false }) : '';
+    document.getElementById('edit-loose-order-uuid').value = orderToEdit.uuid;
+    document.getElementById('edit-loa-name').value = orderToEdit.name || '';
+    document.getElementById('edit-loa-phone').value = orderToEdit.phone || '';
+    document.getElementById('edit-loa-product').value = orderToEdit.product || '';
+    document.getElementById('edit-loa-quantity').value = orderToEdit.quantity || '';
+    document.getElementById('edit-loa-totalAmount').value = orderToEdit.totalAmount || '';
+    document.getElementById('edit-loa-location').value = orderToEdit.location || '';
+    document.getElementById('edit-loa-isPaid').value = String(orderToEdit.isPaid === true);
+    document.getElementById('edit-loa-paymentTime').value = orderToEdit.paymentTime ? new Date(orderToEdit.paymentTime).toISOString().slice(0, 16) : '';
+    document.getElementById('edit-loa-isPickedUp').value = String(orderToEdit.isPickedUp === true);
+    document.getElementById('edit-loa-pickupTime').value = orderToEdit.pickupTime ? new Date(orderToEdit.pickupTime).toISOString().slice(0, 16) : '';
+
+    // 顯示 Modal
+    document.getElementById('edit-loose-order-modal').style.display = 'flex';
+}
+
+/**
+ * (U)pdate - 處理儲存變更
+ */
+function saveLooseOrderChanges(event) {
+    event.preventDefault();
+    const uuid = document.getElementById('edit-loose-order-uuid').value;
+    const originalOrder = allAdminLooseOrders.find(o => o.uuid === uuid);
+    if (!originalOrder) return alert("儲存錯誤：找不到原始訂單！");
+
+    // 收集表單資料
+    const updatedOrderData = {
+        ...originalOrder, // 保留不變的欄位，如 admin...
+        name: document.getElementById('edit-loa-name').value,
+        phone: document.getElementById('edit-loa-phone').value,
+        product: document.getElementById('edit-loa-product').value,
+        quantity: document.getElementById('edit-loa-quantity').value,
+        totalAmount: document.getElementById('edit-loa-totalAmount').value,
+        location: document.getElementById('edit-loa-location').value,
+        isPaid: document.getElementById('edit-loa-isPaid').value === 'true',
+        paymentTime: document.getElementById('edit-loa-paymentTime').value,
+        isPickedUp: document.getElementById('edit-loa-isPickedUp').value === 'true',
+        pickupTime: document.getElementById('edit-loa-pickupTime').value,
+    };
+
+    google.script.run
+        .withSuccessHandler(response => {
+            if (response.success) {
+                const index = allAdminLooseOrders.findIndex(o => o.uuid === uuid);
+                if (index > -1) allAdminLooseOrders[index] = updatedOrderData;
+                applyLooseFiltersAndSort();
+                document.getElementById('edit-loose-order-modal').style.display = 'none';
+                alert("儲存成功！");
+            } else { alert("儲存失敗：\n" + response.message); }
+        })
+        .updateLooseOrder(updatedOrderData);
+}
+
+/**
+ * 1. 【新增】載入「進/出貨管理」頁面的資料
+ */
+function loadIoManagementPage() {
+    const container = document.getElementById('io-management-table-container');
+    if (!container) return;
+    container.innerHTML = '<p>正在從伺服器獲取並計算訂單資料...</p>';
+
+    // 呼叫與「零星彙總表」相同的後端函式
+    google.script.run
+        .withSuccessHandler(function(data) {
+            // 成功後，呼叫專屬於這個頁面的渲染函式
+            renderIoManagementTable(data);
+            // 【核心修改】在表格渲染完成後，立即為其綁定點擊事件
+            attachIoTableClickListener();
+        })
+        .withFailureHandler(function(err) {
+            container.innerHTML = '<p style="color:red;">無法產生彙總表。</p>';
+        })
+        .getLooseOrderSummaryData();
+    
+    // 【新增】為新 Modal 的按鈕綁定事件
+    document.getElementById('cancel-shipment-edit-btn').addEventListener('click', () => {
+        document.getElementById('edit-shipment-modal').style.display = 'none';
+    });
+    document.getElementById('edit-shipment-form').addEventListener('submit', saveShipmentChanges);
+    // 【新增】為新 Modal 的按鈕綁定事件
+    document.getElementById('cancel-add-shipment-btn').addEventListener('click', closeAddShipmentModal);
+    document.getElementById('add-shipment-form').addEventListener('submit', saveNewShipment);
+    document.getElementById('open-add-shipment-modal-btn').addEventListener('click', openAddShipmentModal);
+}
+
+/**
+ * 2. 【新增】將彙總資料渲染成「進/出貨管理」的表格
+ * (這是 renderLooseSummaryTable 函式的複製版本，但目標容器不同)
+ * @param {Object} data - 從後端接收的彙總資料
+ */
+/**
+ * [顏色狀態版] 將彙總資料渲染成「進/出貨管理」的表格
+ * @param {Object} data - 從後端接收的包含三種數量的彙總資料
+ */
+function renderIoManagementTable(data) {
+    const container = document.getElementById('io-management-table-container');
+    const statusMsg = document.getElementById('io-management-status-msg');
+
+    if (!container) return;
+
+    if (!data || !data.success) {
+        if(statusMsg) statusMsg.textContent = '';
+        container.innerHTML = '<p style="color:red;">' + (data.error || '未知的錯誤') + '</p>';
+        return;
+    }
+    
+    //if(statusMsg) statusMsg.textContent = '資料計算完成。';
+
+    // 解構出所有需要的資料
+    const { headers, sites, ordered, arrived, inTransit } = data;
+
+    // 【核心修改 1】為外層容器加上通用的 class 名稱
+    container.className = 'table-container'; 
+
+    const table = document.createElement('table');
+    // 【核心修改 2】為表格本身加上通用的 class 名稱
+    table.id = 'summary-table'; //原為table.className = 'summary-table'; 
+    
+    const thead = table.createTHead();
+    const tbody = table.createTBody();
+    
+    // ... 後續創建表頭 (thead) 和表格內容 (tbody) 的邏輯完全不變 ...
+    const headerRow = thead.insertRow();
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
+    });
+
+    // 【核心修改】為儲存格加上點擊功能
+    sites.forEach(siteName => {
+        const row = tbody.insertRow();
+        const siteCell = row.insertCell();
+        siteCell.textContent = siteName;
+
+        for (let i = 1; i < headers.length; i++) {
+            const productName = headers[i];
+            const dataCell = row.insertCell();
+            //dataCell.classList.add('text-center');
+            // 【核心修改】從三個物件中獲取對應的數量
+            const orderedQty = (ordered[siteName] && ordered[siteName][productName]) || 0;
+            const arrivedQty = (arrived[siteName] && arrived[siteName][productName]) || 0;
+            const inTransitQty = (inTransit[siteName] && inTransit[siteName][productName]) || 0;
+            // 計算未出貨數量
+            const unshippedQty = orderedQty - arrivedQty - inTransitQty;
+
+            let colorClass = '';
+            if (orderedQty > 0) { // 只為有訂購的儲存格上色
+                if (unshippedQty < 0) {
+                    colorClass = 'color-blue'; // 藍色: 超出貨
+                } else if (unshippedQty > 0) {
+                    colorClass = 'color-red'; // 紅色: 未出貨 > 0
+                } else { // unshippedQty === 0
+                    if (inTransitQty === 0) {
+                        colorClass = 'color-green'; // 綠色: 訂購=已到貨, 且無配送中
+                    } else {
+                        colorClass = 'color-yellow'; // 黃色: 訂購=已到貨+配送中
+                    }
+                }
+            }
+            
+            dataCell.className = `text-center drill-down-cell ${colorClass}`;
+            dataCell.dataset.productName = productName;
+            dataCell.dataset.siteName = siteName;
+            dataCell.textContent = orderedQty > 0 ? orderedQty : '';
+        }
+    });
+
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+// --- 進/出貨管理鑽取功能 ---
+
+/**
+ * 在載入「進/出貨管理」頁面時，為表格綁定點擊事件
+ */
+function attachIoTableClickListener() {
+    const tableContainer = document.getElementById('io-management-table-container');
+    if(tableContainer) {
+        tableContainer.addEventListener('click', function(event){
+            // 使用事件委派，檢查是否點擊到目標儲存格
+            const cell = event.target.closest('.drill-down-cell');
+            if(cell) {
+                document.getElementById("io-details-table-title").style.display = "flex";
+                document.getElementById("io-details-table-container").style.display = "block";
+                openIoDetailsModal(cell);
+            }
+        });
+    }
+}
+
+/**
+ * 打開詳細資訊 Modal，並觸發後端查詢
+ */
+function openIoDetailsModal(cell) {
+    const productName = cell.dataset.productName;
+    const siteName = cell.dataset.siteName;
+    const orderedQty = cell.textContent;
+
+    // 【新增】將關鍵資訊暫存到 Modal 元素上，方便後續刷新
+    const modal = document.getElementById('io-details-modal');
+    modal.dataset.productName = productName;
+    modal.dataset.siteName = siteName;
+
+    // 填充 Modal 標題和已知資訊
+    document.getElementById('io-details-summary-product').textContent = "商品：" + productName;
+    document.getElementById('io-details-summary-site').textContent = "站點：" + siteName;
+    document.getElementById('io-details-ordered').textContent = orderedQty;
+    
+    // 重置計算值和詳細表格
+    document.getElementById('io-details-shipped').textContent = '...';
+    document.getElementById('io-details-in-transit').textContent = '...';
+    document.getElementById('io-details-unshipped').textContent = '...'; // 【新增】重置未出貨欄位
+    document.getElementById('io-details-table-container').innerHTML = '<p>載入詳細資料中...</p>';
+    
+    // 顯示 Modal
+    document.getElementById('io-details-modal').style.display = 'flex';
+    
+    // 呼叫後端查詢
+    google.script.run
+        .withSuccessHandler(displayShipmentDetails)
+        .withFailureHandler(err => {
+            document.getElementById('io-details-table-container').innerHTML = `<p style="color:red">查詢失敗: ${err.message}</p>`;
+        })
+        .getShipmentDetails(productName, siteName);
+}
+
+// --- 【新增】一個獨立的函式，專門用來刷新 Modal 內容 ---
+function refreshIoDetails() {
+    const modal = document.getElementById('io-details-modal');
+    const productName = modal.dataset.productName;
+    const siteName = modal.dataset.siteName;
+
+    if (!productName || !siteName) return;
+
+    // 顯示載入中...
+    document.getElementById('io-details-shipped').textContent = '...';
+    document.getElementById('io-details-in-transit').textContent = '...';
+    document.getElementById('io-details-unshipped').textContent = '...';
+    document.getElementById('io-details-table-container').innerHTML = '<p>重新載入詳細資料中...</p>';
+    
+    // 重新呼叫後端
+    google.script.run
+        .withSuccessHandler(displayShipmentDetails)
+        .withFailureHandler(/*...*/)
+        .getShipmentDetails(productName, siteName);
+}
+
+/**
+ * 將後端查詢到的詳細資料渲染到 Modal 中
+ */
+function displayShipmentDetails(data) {
+    if (!data || !data.success) {
+        document.getElementById('io-details-table-container').innerHTML = `<p style="color:red">查詢失敗: ${data.error}</p>`;
+        return;
+    }
+
+    // 更新上方的統計數字
+    // document.getElementById('io-details-shipped').textContent = data.shipped || 0;
+    // document.getElementById('io-details-in-transit').textContent = data.inTransit || 0;
+
+    // --- 【核心修改】計算邏輯 ---
+    
+    // 1. 從後端資料獲取「已到貨」和「配送中」的數量
+    const arrivedQty = data.shipped || 0;
+    const inTransitQty = data.inTransit || 0;
+
+    // 2. 從畫面元素中讀取「訂購」的總數
+    const orderedQty = parseInt(document.getElementById('io-details-ordered').textContent) || 0;
+
+    // 3. 計算「未出貨」的數量
+    const unshippedQty = orderedQty - arrivedQty - inTransitQty;
+
+    // 4. 更新 Modal 上方的所有統計數字
+    document.getElementById('io-details-shipped').textContent = arrivedQty; // 已到貨
+    document.getElementById('io-details-in-transit').textContent = inTransitQty; // 配送中
+    document.getElementById('io-details-unshipped').textContent = unshippedQty; // 未出貨
+
+    // --- 後續渲染下方詳細表格的邏輯完全不變 ---
+    // 渲染下方的詳細表格
+    const container = document.getElementById('io-details-table-container');
+    const details = data.details || [];
+    if (details.length === 0) {
+        container.innerHTML = '<p>查無相關出貨紀錄。</p>';
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'detail-table'; // 可以為此表格設定獨立樣式
+    const thead = table.createTHead();
+    const tbody = table.createTBody();
+
+    // 建立表頭 (B-H欄)
+    const headers = ['商品', '盒數', '地點', '派送員', '派送員信箱', '派送時間', '已完成', '操作'];
+    const headerRow = thead.insertRow();
+    headers.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+    });
+
+    // 【修改點】建立表格內容時，加入按鈕
+    details.forEach(shipment => { // 現在 details 是物件陣列
+        const tr = tbody.insertRow();
+        tr.innerHTML = `
+            <td>${escapeHtml(shipment.productName)}</td>
+            <td>${escapeHtml(shipment.quantity)}</td>
+            <td>${escapeHtml(shipment.location)}</td>
+            <td>${escapeHtml(shipment.courierName)}</td>
+            <td>${escapeHtml(shipment.courierEmail)}</td>
+            <td>${shipment.shippingTime ? new Date(shipment.shippingTime).toLocaleString('zh-TW', { hour12: false }) : ''}</td>
+            <td>${shipment.isCompleted ? '是' : '否'}</td>
+            <td>
+                <button class="action-btn btn-edit" onclick="handleEditShipment('${escapeHtml(JSON.stringify(shipment))}')">編輯</button>
+                <button class="action-btn btn-delete" onclick="handleDeleteShipment('${escapeHtml(shipment.uuid)}')">刪除</button>
+            </td>
+        `;
+    });
+
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+// --- 【新增】處理出貨紀錄的編輯與刪除函式 ---
+/**
+ * (D)elete - 處理出貨紀錄的刪除按鈕
+ */
+function handleDeleteShipment(uuid) {
+    if (!uuid || !confirm(`您確定要刪除這筆出貨紀錄嗎？\nUUID: ${uuid}`)) return;
+    
+    google.script.run
+        .withSuccessHandler(response => {
+            if (response.success) {
+                alert("刪除成功！");
+                refreshIoDetails(); // 刷新主 Modal 內容
+            } else { alert("刪除失敗：\n" + response.message); }
+        })
+        .withFailureHandler(err => alert("刪除時發生錯誤：" + err.message))
+        .deleteShipmentByUuid(uuid);
+}
+
+/**
+ * (U)pdate - 處理「編輯出貨」按鈕點擊，打開並填充 Modal
+ * @param {string} shipmentString - 包含單筆出貨紀錄的 JSON 字串
+ */
+function handleEditShipment(shipmentString) {
+    try {
+        // 1. 將傳入的 JSON 字串解析回物件
+        const shipment = JSON.parse(shipmentString);
+
+        // 2. 將資料填寫到 #edit-shipment-modal 的各個欄位中
+        document.getElementById('edit-shipment-uuid').value = shipment.uuid;
+        document.getElementById('edit-shipment-product').value = shipment.productName || '';
+        document.getElementById('edit-shipment-quantity').value = shipment.quantity || '';
+        document.getElementById('edit-shipment-location').value = shipment.location || '';
+        document.getElementById('edit-shipment-courierName').value = shipment.courierName || '';
+        document.getElementById('edit-shipment-courierEmail').value = shipment.courierEmail || '';
+        
+        // 處理日期時間欄位，確保格式正確
+        document.getElementById('edit-shipment-shippingTime').value = shipment.shippingTime ? new Date(shipment.shippingTime).toISOString().slice(0, 16) : '';
+        
+        // 處理布林值的下拉選單
+        document.getElementById('edit-shipment-isCompleted').value = String(shipment.isCompleted === true);
+
+        // 3. 顯示編輯 Modal
+        document.getElementById('edit-shipment-modal').style.display = 'flex';
+
+    } catch (e) {
+        alert("打開編輯視窗時發生錯誤。");
+        console.error("Error in handleEditShipment:", e);
+    }
+}
+
+/**
+ * (U)pdate - 處理「編輯出貨」Modal 的儲存按鈕，將變更送出
+ */
+function saveShipmentChanges(event) {
+    event.preventDefault(); // 防止表單提交導致頁面刷新
+
+    // 1. 從表單中收集更新後的資料
+    const shipmentData = {
+        uuid:          document.getElementById('edit-shipment-uuid').value,
+        productName:   document.getElementById('edit-shipment-product').value,
+        quantity:      parseInt(document.getElementById('edit-shipment-quantity').value) || 0,
+        location:      document.getElementById('edit-shipment-location').value,
+        courierName:   document.getElementById('edit-shipment-courierName').value,
+        courierEmail:  document.getElementById('edit-shipment-courierEmail').value,
+        shippingTime:  document.getElementById('edit-shipment-shippingTime').value,
+        isCompleted:   document.getElementById('edit-shipment-isCompleted').value === 'true'
+    };
+
+    // 顯示處理中狀態
+    const saveBtn = document.querySelector('#edit-shipment-form button[type="submit"]');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '儲存中...';
+
+    // 2. 呼叫後端函式進行更新
+    google.script.run
+        .withSuccessHandler(function(response) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存變更';
+
+            if (response.success) {
+                // 3. 成功後，隱藏編輯 Modal，並呼叫刷新函式
+                document.getElementById('edit-shipment-modal').style.display = 'none';
+                alert("儲存成功！");
+                refreshIoDetails(); // 【核心】刷新後方的詳細資料列表
+            } else {
+                alert("儲存失敗：\n" + response.message);
+            }
+        })
+        .withFailureHandler(function(err) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存變更';
+            alert("儲存時發生嚴重錯誤：" + err.message);
+        })
+        .updateShipment(shipmentData);
+}
+
+/**
+ * 打開「新增出貨」Modal，並填充派送人員下拉選單
+ */
+function openAddShipmentModal() {
+    // 清空舊資料
+    document.getElementById('add-shipment-form').reset();
+    const courierSelect = document.getElementById('add-shipment-courier');
+    courierSelect.innerHTML = '<option value="">讀取人員名單中...</option>';
+    courierSelect.disabled = true;
+
+    // 顯示 Modal
+    document.getElementById('add-shipment-modal').style.display = 'flex';
+    
+    // 從後端獲取派送人員名單
+    google.script.run
+        .withSuccessHandler(function(couriers) {
+            courierSelect.innerHTML = '<option value="">-- 請選擇派送人員 --</option>';
+            if (couriers && couriers.length > 0) {
+                couriers.forEach(courier => {
+                    const option = new Option(courier.name, courier.name);
+                    courierSelect.add(option);
+                });
+                courierSelect.disabled = false;
+            } else {
+                courierSelect.innerHTML = '<option value="">無可用人員</option>';
+            }
+        })
+        .withFailureHandler(err => {
+            courierSelect.innerHTML = '<option value="">讀取失敗</option>';
+        })
+        .getCourierList();
+}
+
+/**
+ * 關閉「新增出貨」Modal
+ */
+function closeAddShipmentModal() {
+    document.getElementById('add-shipment-modal').style.display = 'none';
+}
+
+/**
+ * 處理「新增出貨」的儲存邏輯
+ */
+function saveNewShipment(event) {
+    event.preventDefault();
+
+    // 獲取當前商品與站點資訊
+    const mainModal = document.getElementById('io-details-modal');
+    const productName = mainModal.dataset.productName;
+    const siteName = mainModal.dataset.siteName;
+
+    // 獲取新表單的資料
+    const quantity = parseInt(document.getElementById('add-shipment-quantity').value);
+    const courierName = document.getElementById('add-shipment-courier').value;
+
+    if (isNaN(quantity) || quantity <= 0) {
+        alert("請輸入有效的盒數！");
+        return;
+    }
+    if (!courierName) {
+        alert("請選擇派送人員！");
+        return;
+    }
+
+    const shipmentData = {
+        productName: productName,
+        location: siteName, // 寄送地點即為站點名稱
+        quantity: quantity,
+        courierName: courierName
+    };
+    
+    const saveBtn = document.querySelector('#add-shipment-form button[type="submit"]');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '新增中...';
+
+    google.script.run
+        .withSuccessHandler(response => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '新增紀錄';
+            if (response.success) {
+                alert("新增成功！");
+                closeAddShipmentModal();
+                refreshIoDetails(); // 刷新後方的詳細資料列表
+            } else {
+                alert("新增失敗：\n" + response.message);
+            }
+        })
+        .withFailureHandler(err => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = '新增紀錄';
+            alert("新增時發生錯誤：" + err.message);
+        })
+        .addNewShipment(shipmentData);
+}
+
+/**
+ * 關閉詳細資訊 Modal
+ */
+function closeIoDetailsModal() {
+    document.getElementById('io-details-modal').style.display = 'none';
+}
 
 
+/**
+ * 載入「庫存管理」頁面
+ */
+function loadInventoryManagementPage() {
+    const container = document.getElementById('inventory-management-table-container');
+    if (!container) return;
+    container.innerHTML = '<p>正在從伺服器整合庫存資料...</p>';
 
-        /**
-       * 【新增】處理訂單編號更新的輔助函式
-       * @param {HTMLElement} cellElement - 被編輯的儲存格 DOM 元素
-       */
-      function handleOrderNumberUpdate(cellElement) {
-          cellElement.style.backgroundColor = ''; // 恢復原色
-          
-          const originalRowNumber = cellElement.dataset.rowNumber;
-          const newValue = cellElement.textContent;
+    google.script.run
+        .withSuccessHandler(renderInventoryManagementTable)
+        .withFailureHandler(function(err) {
+            container.innerHTML = `<p style="color:red">無法產生庫存報表: ${err.error}</p>`;
+        })
+        .getInventoryManagementData();
+}
 
-          // 可選：檢查值是否真的有改變，如果沒有就不呼叫後端
-          // ...
+/**
+ * 將庫存資料渲染成表格
+ */
+function renderInventoryManagementTable(response) {
+    const container = document.getElementById('inventory-management-table-container');
+    if (!response || !response.success) {
+        container.innerHTML = `<p style="color:red">載入資料失敗: ${response.error}</p>`;
+        return;
+    }
+    
+    const inventoryData = response.data;
+    const table = document.createElement('table');
+    // 加上 class 以套用與彙總表相似的樣式
+    table.className = 'summary-table'; 
 
-          showStatusMessage('case-order-admin-status-msg', '更新訂單編號中...', false);
-          
-          google.script.run
-              .withSuccessHandler(function(updateResponse) {
-                  if (updateResponse.success) {
-                      showStatusMessage('case-order-admin-status-msg', `訂單 (列號 ${originalRowNumber}) 編號更新成功！`, true);
-                  } else {
-                      showErrorStatusMessage('case-order-admin-status-msg', updateResponse, '更新訂單編號');
-                      loadCaseOrderAdminPage(); // 更新失敗時，重新載入表格以恢復原值
-                  }
-              })
-              .withFailureHandler(function(err) {
-                  showErrorStatusMessage('case-order-admin-status-msg', err, '更新訂單編號');
-                  loadCaseOrderAdminPage();
-              })
-              .updateOrderNumber({ rowNumber: parseInt(originalRowNumber), newOrderNumber: newValue });
-      } 
+    // 創建複雜的表頭
+    const thead = table.createTHead();
+    const tr1 = thead.insertRow();
+    tr1.innerHTML = `
+        <th rowspan="2">商品名稱</th>
+        <th rowspan="2">各站訂購總數</th>
+        <th colspan="2">已向廠商訂購</th>
+        <th rowspan="2">已出貨</th>
+        <th rowspan="2">實際庫存</th>
+        <th rowspan="2">操作</th>
+    `;
+    const tr2 = thead.insertRow();
+    tr2.innerHTML = `
+        <th>未到貨</th>
+        <th>已到貨</th>
+    `;
+    
+    // 創建表格內容
+    const tbody = table.createTBody();
+    if (inventoryData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7">沒有商品資訊可供顯示。</td></tr>';
+    } else {
+        inventoryData.forEach(item => {
+            const tr = tbody.insertRow();
+
+            // 1. 準備顏色判斷所需的變數
+            const totalOrdered = item.totalOrdered;
+            const notArrived = item.notArrived;
+            const arrived = item.arrived;
+            const shipped = item.shipped;
+            const actualInventory = item.actualInventory;
+
+            // 2. 判斷「未到貨」和「已到貨」的顏色
+            let purchaseColorClass = '';
+            if ((notArrived + arrived) < totalOrdered) {
+                purchaseColorClass = 'color-red'; // 規則 1
+            } else if ((notArrived + arrived) >= totalOrdered && arrived < totalOrdered) {
+                purchaseColorClass = 'color-yellow'; // 規則 2
+            }
+            
+            // 3. 判斷「已出貨」的顏色
+            let shippedColorClass = '';
+            if (shipped < totalOrdered) {
+                shippedColorClass = 'color-red'; // 規則 3
+            }
+
+            // 4. 判斷「實際庫存」的顏色
+            let inventoryColorClass = '';
+            if (actualInventory < 0) {
+                inventoryColorClass = 'color-red'; // 規則 4
+            }
+            // 5. 產生帶有顏色 class 的 HTML
+            tr.innerHTML = `
+                <td style="text-align: left; font-weight: bold;">${escapeHtml(item.productName)}</td>
+                <td style="text-align: center;">${totalOrdered}</td>
+                <td class="${purchaseColorClass}" style="text-align: center;">${notArrived}</td>
+                <td class="${purchaseColorClass}" style="text-align: center;">${arrived}</td>
+                <td class="${shippedColorClass}" style="text-align: center;">${shipped}</td>
+                <td class="${inventoryColorClass}" style="text-align: center; font-weight: bold;">${actualInventory}</td>
+                <td style="text-align: center;">
+                    <button class="action-btn btn-edit" onclick="openEditInventoryModal('${escapeHtml(item.productName)}')">編輯</button>
+                </td>
+            `;
+        });
+    }
+    
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+/**
+ * 處理「庫存管理」表格中「編輯」按鈕的點擊事件
+ */
+function openEditInventoryModal(productName) {
+    // 【新增】為「新增/編輯 進貨 Modal」的按鈕綁定事件
+    document.getElementById('cancel-add-purchase-btn').addEventListener('click', closeAddPurchaseModal);
+    document.getElementById('add-purchase-form').addEventListener('submit', saveNewPurchase);
+    document.getElementById('open-add-purchase-modal-btn').addEventListener('click', openAddPurchaseModal);
+    document.getElementById('save-all-purchases-btn').addEventListener('click', saveAllPurchaseChanges);
+    document.getElementById('cancel-edit-btn')?.addEventListener('click', () => { // 編輯主視窗的取消
+        document.getElementById('edit-inventory-modal').style.display = 'none';
+    });
+
+    const modal = document.getElementById('edit-inventory-modal');
+    if (!modal) return;
+
+    // 將當前操作的商品名稱暫存到 modal 上，方便後續使用
+    modal.dataset.productName = productName;
+    document.getElementById('edit-inventory-title').textContent = `編輯進貨紀錄：${productName}`;
+    document.getElementById('purchase-records-table-container').innerHTML = '<p>載入進貨紀錄中...</p>';
+    modal.style.display = 'flex';
+
+    // 呼叫後端獲取該商品的進貨紀錄
+    google.script.run
+        .withSuccessHandler(renderPurchaseRecordsTable)
+        .withFailureHandler(err => {
+            document.getElementById('purchase-records-table-container').innerHTML = `<p style="color:red">讀取進貨紀錄失敗: ${err.message}</p>`;
+        })
+        .getPurchaseRecords(productName);
+}
+
+/**
+ * 將獲取到的進貨紀錄，渲染到 Modal 的表格中
+ */
+function renderPurchaseRecordsTable(response) {
+    const container = document.getElementById('purchase-records-table-container');
+    if (!response || !response.success) {
+        container.innerHTML = `<p style="color:red">渲染資料失敗: ${response.error}</p>`;
+        return;
+    }
+    
+    currentPurchaseRecords = response.data; // 暫存資料
+    const records = currentPurchaseRecords;
+
+    if (records.length === 0) {
+        container.innerHTML = '<p>尚無此商品的進貨紀錄。</p>';
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'summary-table';
+    
+    const thead = table.createTHead();
+    thead.innerHTML = `<tr>
+        <th>商品名稱</th><th>盒數</th><th class="col-is-arrived">已到貨</th><th>到貨時間</th><th>訂購時間</th><th>操作</th>
+    </tr>`;
+
+    const tbody = table.createTBody();
+    records.forEach(rec => {
+        const tr = tbody.insertRow();
+        tr.id = `purchase-row-${rec.uuid}`;
+        
+        // 處理布林值和日期時間格式
+        const isArrivedString = String(rec.isArrived === true);
+        // 【核心修改】使用新的輔助函式來格式化兩個日期時間欄位
+        const arrivedTimeString = convertUtcToLocalInputString(rec.arrivedTime);
+        const purchaseTimeString = convertUtcToLocalInputString(rec.purchaseTime);
+
+        // 【核心修改】將「盒數」和「訂購時間」也改為 input 欄位
+        tr.innerHTML = `
+            <td>${escapeHtml(rec.productName)}</td>
+            <td>
+                <input type="number" class="control-input" value="${escapeHtml(rec.quantity)}" data-uuid="${rec.uuid}" data-field="quantity" style="text-align: center; width: 80px;">
+            </td>
+            <td>
+                <select class="control-input" data-uuid="${rec.uuid}" data-field="isArrived">
+                    <option value="true" ${isArrivedString === 'true' ? 'selected' : ''}>是</option>
+                    <option value="false" ${isArrivedString === 'false' ? 'selected' : ''}>否</option>
+                </select>
+            </td>
+            <td>
+                <input type="datetime-local" class="control-input" value="${arrivedTimeString}" data-uuid="${rec.uuid}" data-field="arrivedTime">
+            </td>
+            <td>
+                <input type="datetime-local" class="control-input" value="${purchaseTimeString}" data-uuid="${rec.uuid}" data-field="purchaseTime">
+            </td>
+            <td>
+                <button class="action-btn btn-delete" onclick="deletePurchaseRecordInModal('${rec.uuid}')">刪除</button>
+            </td>
+        `;
+    });
+    
+    container.innerHTML = '';
+    container.appendChild(table);
+}
+
+/**
+ * 【新增】輔助函式：將 UTC 時間字串，轉換為 datetime-local 輸入框所需的本地時間字串
+ * @param {string | null} isoString - 從後端傳來的 UTC 格式日期字串
+ * @returns {string} 格式為 YYYY-MM-DDTHH:mm 的本地時間字串
+ */
+function convertUtcToLocalInputString(isoString) {
+    if (!isoString) return '';
+    try {
+        const date = new Date(isoString);
+        // 檢查日期是否有效
+        if (isNaN(date.getTime())) return '';
+
+        // getFullYear(), getMonth() 等函式會自動回傳瀏覽器本地時區的值
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    } catch (e) {
+        console.error("Date conversion error:", e);
+        return '';
+    }
+}
+
+/**
+ * 處理 Modal 內「刪除」按鈕的點擊事件
+ */
+function deletePurchaseRecordInModal(uuid) {
+    if (!uuid || !confirm(`您確定要刪除這筆進貨紀錄嗎？\nUUID: ${uuid}\n此操作無法復原！`)) return;
+
+    google.script.run
+        .withSuccessHandler(response => {
+            if (response.success) {
+                // 刷新 Modal 內容
+                const currentProduct = document.getElementById('edit-inventory-modal').dataset.productName;
+                openEditInventoryModal(currentProduct);
+                alert("刪除成功！");
+            } else {
+                alert("刪除失敗：\n" + response.message);
+            }
+        })
+        .withFailureHandler(err => alert("刪除時發生錯誤：" + err.message))
+        .deletePurchaseRecord(uuid);
+}
+
+// ==========================================================
+// ================ 進/出貨管理鑽取功能 (最終版) ==============
+// ==========================================================
+let currentPurchaseRecords = []; // 暫存 Modal 中顯示的紀錄，方便編輯
+
+// refreshEditInventoryModal 函式 (從 openEditInventoryModal 拆分出來，方便複用)
+function refreshEditInventoryModal() {
+    const modal = document.getElementById('edit-inventory-modal');
+    const productName = modal.dataset.productName;
+    if (!productName) return;
+
+    document.getElementById('purchase-records-table-container').innerHTML = '<p>重新載入進貨紀錄中...</p>';
+    google.script.run
+        .withSuccessHandler(renderPurchaseRecordsTable) // 成功後渲染表格
+        .withFailureHandler(err => { /* ... */ })
+        .getPurchaseRecords(productName);
+}
+
+
+/**
+ * 【新增】打開「新增進貨」Modal
+ */
+function openAddPurchaseModal() {
+    // 1. 重設表單，清空舊資料
+    document.getElementById('add-purchase-form').reset();
+    
+    // 2. 將主視窗的商品名稱，預先填入新視窗的唯讀欄位中
+    const currentProduct = document.getElementById('edit-inventory-modal').dataset.productName;
+    const productNameInput = document.getElementById('add-purchase-product');
+    if (productNameInput) {
+        productNameInput.value = currentProduct;
+    }
+    
+    // 3. 顯示「新增進貨」Modal
+    document.getElementById('add-purchase-modal').style.display = 'flex';
+}
+
+/**
+ * 【新增】關閉「新增進貨」Modal
+ */
+function closeAddPurchaseModal() {
+    document.getElementById('add-purchase-modal').style.display = 'none';
+}
+
+/**
+ * 【新增】處理「新增進貨」的儲存邏輯
+ */
+function saveNewPurchase(event) {
+    event.preventDefault(); // 防止表單提交導致頁面刷新
+
+    // 從表單中收集資料
+    const newRecord = {
+        productName:  document.getElementById('add-purchase-product').value,
+        quantity:     document.getElementById('add-purchase-quantity').value,
+        isArrived:    document.getElementById('add-purchase-isArrived').value === 'true',
+        arrivedTime:  document.getElementById('add-purchase-arrivedTime').value,
+        purchaseTime: document.getElementById('add-purchase-purchaseTime').value
+    };
+
+    if (!newRecord.purchaseTime) {
+        alert("「訂購時間」為必填欄位！");
+        return;
+    }
+    if (!newRecord.quantity || parseInt(newRecord.quantity) <= 0) {
+        alert("請輸入有效的「盒數」！");
+        return;
+    }
+
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = '新增中...';
+
+    // 呼叫後端函式 addNewPurchaseRecord
+    google.script.run
+        .withSuccessHandler(response => {
+            btn.disabled = false;
+            btn.textContent = '新增紀錄';
+            if (response.success) {
+                alert("新增成功！");
+                closeAddPurchaseModal(); // 關閉新增視窗
+                refreshEditInventoryModal(); // 刷新後方的詳細資料列表
+            } else {
+                alert("新增失敗：\n" + response.message);
+            }
+        })
+        .withFailureHandler(err => {
+            btn.disabled = false;
+            btn.textContent = '新增紀錄';
+            alert("新增時發生錯誤：" + err.message);
+        })
+        .addNewPurchaseRecord(newRecord);
+}
+
+
+/**
+ * 處理「儲存所有變更」按鈕的點擊事件
+ */
+function saveAllPurchaseChanges() {
+    const tableRows = document.querySelectorAll('#purchase-records-table-container tbody tr');
+    if (tableRows.length === 0) {
+        alert("沒有可儲存的資料。");
+        return;
+    }
+
+    const changedRecords = [];
+    tableRows.forEach(row => {
+        // 找到該列所有的輸入框
+        const quantityInput = row.querySelector('input[data-field="quantity"]');
+        const isArrivedSelect = row.querySelector('select[data-field="isArrived"]');
+        const arrivedTimeInput = row.querySelector('input[data-field="arrivedTime"]');
+        const purchaseTimeInput = row.querySelector('input[data-field="purchaseTime"]'); // 【新增】找到訂購時間輸入框
+        
+        if (isArrivedSelect) { // 以其中一個欄位為代表，確認此列存在
+            changedRecords.push({
+                uuid: isArrivedSelect.dataset.uuid,
+                // 【新增】收集盒數和訂購時間的值
+                quantity: parseInt(quantityInput.value) || 0,
+                purchaseTime: purchaseTimeInput.value,
+                isArrived: isArrivedSelect.value === 'true',
+                arrivedTime: arrivedTimeInput.value
+            });
+        }
+    });
+
+    if (changedRecords.length === 0) {
+        alert("沒有任何變更需要儲存。");
+        return;
+    }
+
+    const btn = document.getElementById('save-all-purchases-btn');
+    btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span>儲存中...';
+
+    // 呼叫後端的批次更新函式
+    google.script.run
+        .withSuccessHandler(response => {
+            btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined">save</span>儲存所有變更';
+            if (response.success) {
+                alert("所有變更已儲存！");
+                refreshEditInventoryModal();
+            } else {
+                alert("儲存失敗：\n" + response.message);
+            }
+        })
+        .withFailureHandler(err => {
+            btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined">save</span>儲存所有變更';
+            alert("儲存時發生錯誤：" + err.message);
+        })
+        .updatePurchaseRecords(changedRecords);
+}
+
+// (請保留您所有其他與此功能無關的函式)
+
     </script>
     <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 </body>
