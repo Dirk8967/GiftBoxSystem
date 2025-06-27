@@ -1,21 +1,55 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
-    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="section-header">
-          <h2>成箱訂購管理</h2>
-          <span id="case-order-admin-status-msg" class="status-message"></span>
-      </div>
+<div class="container">
+    <div class="section-header">
+        <h2>成箱訂購管理</h2>
+    </div>
 
-      <div id="case-order-admin-table-wrapper">
-          <p>載入訂單資料中...</p>
+    <div class="admin-controls-bar" style="display: none">
+      <div class="control-group flex-grow">
+        <label for="cao-search-input">搜尋</label>
+        <div class="search-input-wrapper">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" id="cao-search-input" class="control-input" placeholder="在所有欄位中搜尋關鍵字...(若要查詢所有已付款請輸入「true」，查詢所有未付款請輸入「false」)">
+        </div>
       </div>
     </div>
     
-  </body>
-</html>
+    <div id="cao-admin-status-msg" class="status-message" style="margin-top: 15px;"></div>
+    <div class="table-container">
+        <table id="admin-case-orders-table">
+            <thead>
+                <tr>
+                    <th class="sortable-header" data-sort-key="orderTime">訂購時間 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="name" width="7%">姓名 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="phone" width="7%">電話 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="product" width="10%">商品 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="quantity" width="7%">盒數 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="totalAmount" width="10%">總計金額 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="location">寄送地點 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="deliveryDate" width="10%">寄送日期 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="site">隸屬站點 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="isPaid">已付款 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="operator">操作人員 <span class="sort-indicator"></span></th>
+                    <th class="sortable-header" data-sort-key="orderId">訂單編號 <span class="sort-indicator"></span></th>
+                    <th>操作</th>
+                </tr>
+                <tr id="filter-row">
+                    <th><input type="text" class="column-filter-input" data-column-key="orderTime" placeholder="篩選時間…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="name" placeholder="篩選姓名…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="phone" placeholder="篩選電話…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="product" placeholder="篩選商品…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="quantity" placeholder="篩選盒數…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="totalAmount" placeholder="篩選金額…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="location" placeholder="篩選地點…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="deliveryDate" placeholder="篩選日期…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="site" placeholder="篩選站點…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="isPaid" placeholder="篩選狀態…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="operator" placeholder="篩選人員…"></th>
+                    <th><input type="text" class="column-filter-input" data-column-key="orderId" placeholder="篩選單號…"></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
