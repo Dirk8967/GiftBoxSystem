@@ -95,8 +95,10 @@ function getPartialHtmlFromFile(fileName) {
         'Page_OrderHistory',
         'Page_DeliveryHistory',
         'Page_CaseOrderAdmin',
+        'Page_LooseOrderAdmin',
         'Page_IOManagement', 
-        'Page_InventoryManagement'
+        'Page_InventoryManagement',
+        'Page_LoosePeriodClosed'
     ];
     
     if (!fileName || !allowedPages.includes(fileName)) {
