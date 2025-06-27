@@ -208,10 +208,10 @@ function getCaseOrdersForAdmin() {
         row[3],  // D: 盒數
         row[4],  // E: 總計金額
         row[5],  // F: 寄送地點
-        row[6],  // G: 寄送日期
+        Date(row[6]),  // G: 寄送日期
         row[7],  // H: 訂單隸屬站點
         row[8],  // I: (FALSE)
-        row[10], // K: 訂購時間
+        Date(row[10]), // K: 訂購時間
         row[11], // L: 操作人員姓名
         row[13], // N: 訂單編號
         rowNumber 
