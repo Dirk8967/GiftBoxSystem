@@ -5,49 +5,80 @@
   </head>
   <body>
     <div class="container">
-    <div class="section-header">
-        <h1>全站與活動設定</h1>
+      <div class="section-header">
+        <h2>系統設定</h2>
         <div class="header-actions">
-            <button id="saveSettingsBtn" class="action-btn btn-save"><span class="material-symbols-outlined">save</span>儲存所有設定</button>
             <span id="settings-status-msg" class="status-message"></span>
+            <button id="saveSettingsBtn" class="action-btn btn-save">
+                <span class="material-symbols-outlined">save</span>儲存所有設定
+            </button>
         </div>
-    </div>
-    
-    <div class="settings-grid">
+      </div>
+
+      <div class="settings-grid">
+
         <div class="setting-card">
-            <h3 class="setting-card-title"><span class="material-symbols-outlined">calendar_month</span>全站檔期設定</h3>
-            <p class="setting-card-description">設定整個訂購系統的總開放時間。若目前時間不在這個區間內，所有使用者將無法訪問訂購頁面。</p>
+            <h3 class="setting-card-title">
+                <span class="material-symbols-outlined">calendar_month</span>
+                活動檔期設定
+            </h3>
+            <p class="setting-card-description">
+                設定使用者可造訪問本系統的時間區間。
+            </p>
             <div class="form-group">
-                <label for="activityNameInput">檔期名稱 (將顯示於訂購頁面)</label>
-                <input type="text" id="activityNameInput" placeholder="例如：2025年端午節預購">
+                <label for="activityNameInput">檔期名稱 (選填)</label>
+                <input type="text" id="activityNameInput" class="control-input" placeholder="例如：2025 端午節禮盒預購">
             </div>
+            
             <div class="form-grid-inner">
                 <div class="form-group">
-                    <label for="activityStartTimeInput">開始時間 (必填)</label>
-                    <input type="datetime-local" id="activityStartTimeInput">
+                    <label for="activityStartTimeInput">全站開始時間 (必填)</label>
+                    <input type="datetime-local" id="activityStartTimeInput" class="control-input">
                 </div>
                 <div class="form-group">
-                    <label for="activityEndTimeInput">結束時間 (必填)</label>
-                    <input type="datetime-local" id="activityEndTimeInput">
+                    <label for="activityEndTimeInput">全站結束時間 (必填)</label>
+                    <input type="datetime-local" id="activityEndTimeInput" class="control-input">
                 </div>
             </div>
         </div>
 
         <div class="setting-card">
-            <h3 class="setting-card-title"><span class="material-symbols-outlined">schedule</span>零星訂購開放時間設定</h3>
-            <p class="setting-card-description">您可以為「零星訂購」頁面設定一個獨立的、更短的開放時間。若留空，則零星訂購的開放時間將等同於全站檔期。</p>
+            <h3 class="setting-card-title">
+                <span class="material-symbols-outlined">shopping_cart_checkout</span>
+                零星訂購開放設定
+            </h3>
+            <p class="setting-card-description">
+                可單獨設定零星訂購的開放時間。若留空，則預設跟隨全站檔期。
+            </p>
             <div class="form-grid-inner">
                 <div class="form-group">
-                    <label for="looseOrderStartTimeInput">零星訂購開始時間 (可選)</label>
-                    <input type="datetime-local" id="looseOrderStartTimeInput">
+                    <label for="looseOrderStartTimeInput">零星訂購開始時間</label>
+                    <input type="datetime-local" id="looseOrderStartTimeInput" class="control-input">
                 </div>
                 <div class="form-group">
-                    <label for="looseOrderEndTimeInput">零星訂購結束時間 (可選)</label>
-                    <input type="datetime-local" id="looseOrderEndTimeInput">
+                    <label for="looseOrderEndTimeInput">零星訂購結束時間</label>
+                    <input type="datetime-local" id="looseOrderEndTimeInput" class="control-input">
                 </div>
             </div>
         </div>
+
+        <div class="setting-card danger-zone">
+            <h3 class="setting-card-title">
+                <span class="material-symbols-outlined">delete_sweep</span>
+                清除資料
+            </h3>
+            <p class="setting-card-description warning-text">
+                <strong>警告：</strong> 以下操作將**永久刪除**所選類別的所有訂單或紀錄，且**無法復原**。
+            </p>
+            <div class="clear-data-buttons">
+                <button id="clear-case-orders-btn" class="action-btn btn-danger">刪除所有成箱訂單</button>
+                <button id="clear-loose-orders-btn" class="action-btn btn-danger">刪除所有零星訂單</button>
+                <button id="clear-shipment-records-btn" class="action-btn btn-danger">刪除所有出貨紀錄</button>
+                <button id="clear-purchase-records-btn" class="action-btn btn-danger">刪除所有進貨紀錄</button>
+            </div>
+        </div>
+
+      </div>
     </div>
-</div>
   </body>
 </html>
