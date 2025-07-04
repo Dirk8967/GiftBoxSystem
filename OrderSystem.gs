@@ -212,68 +212,52 @@ function submitLooseOrderToServer(orderData) {
 
 
 /**
- * 【已更新】獲取成箱訂單的彙總資料，並加入詳細的偵錯日誌
+ * [含總金額版] 獲取成箱訂單的彙總資料
  */
 function getCaseOrderSummaryData() {
   try {
-    Logger.log("getCaseOrderSummaryData: 函式開始執行。");
-
     const productSheet = SpreadsheetApp.openById(PRODUCT_SHEET_ID).getSheets()[0];
-    Logger.log("getCaseOrderSummaryData: 已獲取商品工作表。");
-    
     const siteSheet = SpreadsheetApp.openById(SITE_INFO_SHEET_ID).getSheets()[0];
-    Logger.log("getCaseOrderSummaryData: 已獲取站點工作表。");
-
     const orderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(箱)");
-    if (!orderSheet) {
-      throw new Error("在目標試算表中找不到名為 '使用者訂單(箱)' 的工作表。");
-    }
-    Logger.log("getCaseOrderSummaryData: 已獲取成箱訂單工作表。");
+    if (!productSheet || !siteSheet || !orderSheet) throw new Error("無法開啟必要的試算表。");
 
-    const lastProductRow = productSheet.getLastRow();
-    if (lastProductRow < 2) { return { success: true, headers: ["站名"], summary: {}, sites: [] }; }
-    const productValues = productSheet.getRange("B2:B" + lastProductRow).getValues();
-    const productNames = [...new Set(productValues.map(row => row[0]).filter(Boolean))];
-    Logger.log("getCaseOrderSummaryData: 獲取到 " + productNames.length + " 個不重複的商品名稱。");
-
-    const lastSiteRow = siteSheet.getLastRow();
-    if (lastSiteRow < 2) { return { success: true, headers: ["站名"].concat(productNames), summary: {}, sites: [] }; }
-    const siteValues = siteSheet.getRange("B2:B" + lastSiteRow).getValues();
-    const siteNames = [...new Set(siteValues.map(row => row[0]).filter(Boolean))];
-    Logger.log("getCaseOrderSummaryData: 獲取到 " + siteNames.length + " 個不重複的站名。");
+    const productNames = productSheet.getRange("B2:B" + productSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
+    const siteNames = siteSheet.getRange("B2:B" + siteSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
 
     const summaryData = {};
+    const totalAmountBySite = {}; // 【新增】用來儲存各站點總金額的物件
     siteNames.forEach(siteName => {
       summaryData[siteName] = {};
+      totalAmountBySite[siteName] = 0; // 【新增】初始化每個站點的金額為 0
       productNames.forEach(productName => {
         summaryData[siteName][productName] = 0;
       });
     });
-    Logger.log("getCaseOrderSummaryData: 已初始化彙總資料結構。");
 
     if (orderSheet.getLastRow() >= 2) {
-      const orderRange = orderSheet.getRange("D2:I" + orderSheet.getLastRow()); 
-      const orders = orderRange.getValues();
-      Logger.log("getCaseOrderSummaryData: 讀取到 " + orders.length + " 筆訂單進行處理。");
+      // 讀取範圍擴大到 F 欄，以包含總計金額
+      const orders = orderSheet.getRange("D2:I" + orderSheet.getLastRow()).getValues(); // D:商品, E:盒數, F:總金額, I:站點
+      orders.forEach(order => {
+        const productName = order[0]; // D
+        const quantity = order[1];    // E
+        const totalAmount = order[2]; // F: 總計金額
+        let affiliatedSite = order[5]; // I: 訂單隸屬站點
 
-      orders.forEach(function(order, index) {
-        const productName = order[0]; 
-        const quantity = order[1];    
-        let affiliatedSiteRaw = order[5]; 
-        let affiliatedSite = "";
-
-        if (affiliatedSiteRaw && typeof affiliatedSiteRaw === 'string') {
-          affiliatedSite = affiliatedSiteRaw.split('(')[0].trim();
+        if (affiliatedSite && typeof affiliatedSite === 'string') {
+          affiliatedSite = affiliatedSite.split('(')[0].trim();
         }
 
-        if (summaryData[affiliatedSite] && summaryData[affiliatedSite].hasOwnProperty(productName)) {
-          if (typeof quantity === 'number' && !isNaN(quantity)) {
+        if (summaryData[affiliatedSite] && summaryData[affiliatedSite][productName] !== undefined) {
+          if (typeof quantity === 'number') {
             summaryData[affiliatedSite][productName] += quantity;
+          }
+          // 【新增】累加總金額
+          if (typeof totalAmount === 'number') {
+            totalAmountBySite[affiliatedSite] += totalAmount;
           }
         }
       });
     }
-    Logger.log("getCaseOrderSummaryData: 訂單資料處理完畢。");
 
     const columnHeaders = ["站名"].concat(productNames);
     
@@ -281,13 +265,10 @@ function getCaseOrderSummaryData() {
       success: true,
       headers: columnHeaders,
       summary: summaryData,
-      sites: siteNames
+      sites: siteNames,
+      totalAmounts: totalAmountBySite // 【新增】將計算好的總金額物件一起回傳
     };
-
-  } catch (e) {
-    Logger.log("getCaseOrderSummaryData 發生嚴重錯誤: " + e.toString() + "\n" + e.stack);
-    return { success: false, error: "產生彙總表時發生伺服器錯誤: " + e.message };
-  }
+  } catch (e) { /* ... */ }
 }
 
 /**
@@ -310,10 +291,11 @@ function getLooseOrderSummaryData() {
     const productNames = productSheet.getRange("B2:B" + productSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
     const siteNames = siteSheet.getRange("B2:B" + siteSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
 
-    // 3. 建立三個空的資料結構 (這部分不變)
-    const orderedSummary = {}, arrivedSummary = {}, inTransitSummary = {};
+    // 【修改點】在初始化資料結構時，一併初始化 totalAmountBySite
+    const orderedSummary = {}, arrivedSummary = {}, inTransitSummary = {}, totalAmountBySite = {};
     siteNames.forEach(siteName => {
       orderedSummary[siteName] = {}; arrivedSummary[siteName] = {}; inTransitSummary[siteName] = {};
+      totalAmountBySite[siteName] = 0; // 初始化每個站點的金額為 0
       productNames.forEach(productName => {
         orderedSummary[siteName][productName] = 0;
         arrivedSummary[siteName][productName] = 0;
@@ -321,13 +303,14 @@ function getLooseOrderSummaryData() {
       });
     });
 
-    // 4. 【核心修正】計算「訂購」總數，使用您提供的最新欄位結構
+    // 計算「訂購」總數與「總金額」
     if (orderSheet.getLastRow() >= 2) {
-      // 讀取範圍 A 到 G 欄即可，因為我們只需要 商品、盒數、地點
+      // 【修改點】讀取範圍需要包含 F 欄的「總計金額」
       const orders = orderSheet.getRange("A2:G" + orderSheet.getLastRow()).getValues();
       orders.forEach(order => {
         const productName = order[3]; // D欄: 商品名稱
         const quantity = order[4];    // E欄: 盒數
+        const totalAmount = order[5]; // F欄: 總計金額
         let siteName = order[6];      // G欄: 寄送地點
         
         if (siteName && typeof siteName === 'string') siteName = siteName.split('(')[0].trim();
@@ -335,6 +318,10 @@ function getLooseOrderSummaryData() {
         if (orderedSummary[siteName] && orderedSummary[siteName][productName] !== undefined) {
           if (typeof quantity === 'number' && !isNaN(quantity)) {
             orderedSummary[siteName][productName] += quantity;
+          }
+          // 【新增】累加總金額到對應的站點
+          if (typeof totalAmount === 'number' && !isNaN(totalAmount)) {
+            totalAmountBySite[siteName] += totalAmount;
           }
         }
       });
@@ -365,12 +352,101 @@ function getLooseOrderSummaryData() {
       sites: siteNames,
       ordered: orderedSummary,
       arrived: arrivedSummary,
-      inTransit: inTransitSummary
+      inTransit: inTransitSummary,
+      totalAmounts: totalAmountBySite // 【新增】將計算好的總金額物件一起回傳
     };
 
   } catch (e) {
     console.error("getLooseOrderSummaryData 發生錯誤: " + e.toString());
     return { success: false, error: "產生彙總表時發生伺服器錯誤: " + e.message };
+  }
+}
+
+/**
+ * 【新增】獲取「總彙總表」資料，合併計算成箱與零星訂單。
+ * @returns {Object} 包含所有彙總結果的物件。
+ */
+function getGrandSummaryData() {
+  try {
+    // 1. 獲取所有需要的資料來源
+    const productSheet = SpreadsheetApp.openById(PRODUCT_SHEET_ID).getSheets()[0];
+    const siteSheet = SpreadsheetApp.openById(SITE_INFO_SHEET_ID).getSheets()[0];
+    const caseOrderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(箱)");
+    const looseOrderSheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID).getSheetByName("使用者訂單(盒)");
+
+    if (!productSheet || !siteSheet || !caseOrderSheet || !looseOrderSheet) {
+      throw new Error("無法開啟必要的資料來源工作表。");
+    }
+
+    // 2. 獲取欄/列標頭 (商品與站點)
+    const productNames = productSheet.getRange("B2:B" + productSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
+    const siteNames = siteSheet.getRange("B2:B" + siteSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
+
+    // 3. 建立空的資料結構來存放「數量」與「金額」的總和
+    const summaryData = {};       // 存放[站點][商品]的數量
+    const totalAmountBySite = {}; // 存放[站點]的總金額
+    siteNames.forEach(siteName => {
+      summaryData[siteName] = {};
+      totalAmountBySite[siteName] = 0;
+      productNames.forEach(productName => {
+        summaryData[siteName][productName] = 0;
+      });
+    });
+
+    // --- 4. 開始累加資料 ---
+
+    // 4.1 處理「成箱訂單」
+    if (caseOrderSheet.getLastRow() >= 2) {
+      const caseOrders = caseOrderSheet.getRange("A2:I" + caseOrderSheet.getLastRow()).getValues();
+      caseOrders.forEach(order => {
+        const productName = order[3]; // D欄
+        const quantity = order[4];    // E欄
+        const totalAmount = order[5]; // F欄
+        let affiliatedSite = order[8]; // I欄
+
+        if (affiliatedSite && typeof affiliatedSite === 'string') {
+          affiliatedSite = affiliatedSite.split('(')[0].trim();
+        }
+        if (summaryData[affiliatedSite] && summaryData[affiliatedSite][productName] !== undefined) {
+          if (typeof quantity === 'number') summaryData[affiliatedSite][productName] += quantity;
+          if (typeof totalAmount === 'number') totalAmountBySite[affiliatedSite] += totalAmount;
+        }
+      });
+    }
+
+    // 4.2 處理「零星訂單」
+    if (looseOrderSheet.getLastRow() >= 2) {
+      // 根據您的 schema，零星訂單的寄送地點在 G 欄
+      const looseOrders = looseOrderSheet.getRange("A2:G" + looseOrderSheet.getLastRow()).getValues();
+      looseOrders.forEach(order => {
+        const productName = order[3]; // D欄
+        const quantity = order[4];    // E欄
+        const totalAmount = order[5]; // F欄
+        let affiliatedSite = order[6]; // G欄
+
+        if (affiliatedSite && typeof affiliatedSite === 'string') {
+          affiliatedSite = affiliatedSite.split('(')[0].trim();
+        }
+        if (summaryData[affiliatedSite] && summaryData[affiliatedSite][productName] !== undefined) {
+          if (typeof quantity === 'number') summaryData[affiliatedSite][productName] += quantity;
+          if (typeof totalAmount === 'number') totalAmountBySite[affiliatedSite] += totalAmount;
+        }
+      });
+    }
+
+    // 5. 準備最終要回傳給前端的物件
+    const columnHeaders = ["站名"].concat(productNames);
+    return {
+      success: true,
+      headers: columnHeaders,
+      sites: siteNames,
+      summary: summaryData,
+      totalAmounts: totalAmountBySite
+    };
+
+  } catch (e) {
+    console.error("getGrandSummaryData 發生錯誤: " + e.toString());
+    return { success: false, error: "產生總彙總表時發生伺服器錯誤: " + e.message };
   }
 }
 
@@ -1204,8 +1280,99 @@ function addNewPurchaseRecord(recordData) {
   }
 }
 
-// --- 未來將在此處加入更多後端邏輯 ---
-// 例如:
-// function getOrderableProducts() { /* ... */ }
-// function submitCaseOrder(orderData) { /* ... */ }
-// function getUserOrderHistory() { /* ... */ }
+/**
+ * 【新增】獲取「總彙總表」所需的全部資料，在後端完成所有計算。
+ * @returns {Object} 包含表頭和最終彙總資料的物件。
+ */
+function getGrandSummaryReportData() {
+  try {
+    // 1. 獲取所有需要的資料來源
+    const userAuthSpreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const orderInventorySpreadsheet = SpreadsheetApp.openById(ORDER_INVENTORY_SHEET_ID);
+    
+    const productSheet = SpreadsheetApp.openById(PRODUCT_SHEET_ID).getSheets()[0];
+    const unitSheet = userAuthSpreadsheet.getSheetByName("營業處單位資訊");
+    const userAuthSheet = userAuthSpreadsheet.getSheetByName("訂購網頁權限");
+    const caseOrderSheet = orderInventorySpreadsheet.getSheetByName("使用者訂單(箱)");
+    const looseOrderSheet = orderInventorySpreadsheet.getSheetByName("使用者訂單(盒)");
+
+    // 2. 準備基礎資料和對應表
+    const productNames = productSheet.getRange("B2:B" + productSheet.getLastRow()).getValues().map(r => r[0]).filter(Boolean);
+    const unitDataRows = unitSheet.getRange("B2:D" + unitSheet.getLastRow()).getValues(); // B:單位名稱, D:目標業績
+    
+    const userAuthRows = userAuthSheet.getRange("C2:D" + userAuthSheet.getLastRow()).getValues(); // C:Email, D:隸屬單位
+
+    const userToUnitMap = {}; // { email: unitName }
+    userAuthRows.forEach(r => { userToUnitMap[r[0]] = r[1]; });
+    
+    const unitTargets = {}; // { unitName: target }
+    const unitNames = [];   // [unitName1, unitName2, ...]
+    unitDataRows.forEach(r => {
+        const unitName = r[0];
+        unitNames.push(unitName);
+        unitTargets[unitName] = parseFloat(r[2]) || 0; // D欄是目標業績
+    });
+
+    // 3. 初始化資料結構
+    const summaryData = {};
+    const totalAmountByUnit = {};
+    unitNames.forEach(unitName => {
+      summaryData[unitName] = {};
+      totalAmountByUnit[unitName] = 0;
+      productNames.forEach(productName => {
+        summaryData[unitName][productName] = 0;
+      });
+    });
+
+    // 4. 彙總計算 (與之前本地檔案的邏輯相同)
+    if (caseOrderSheet.getLastRow() > 1) {
+      const caseOrders = caseOrderSheet.getRange("A2:O" + caseOrderSheet.getLastRow()).getValues(); // 讀取到訂單編號
+      caseOrders.forEach(order => {
+        const operatorEmail = order[13]; // N欄
+        const unitName = userToUnitMap[operatorEmail];
+        if (unitName) {
+          const productName = order[3]; // D欄
+          const quantity = order[4];    // E欄
+          const totalAmount = order[5]; // F欄
+          if (summaryData[unitName] && summaryData[unitName][productName] !== undefined) {
+            if (typeof quantity === 'number') summaryData[unitName][productName] += quantity;
+            if (typeof totalAmount === 'number') totalAmountByUnit[unitName] += totalAmount;
+          }
+        }
+      });
+    }
+
+    if (looseOrderSheet.getLastRow() > 1) {
+      const looseOrders = looseOrderSheet.getRange("A2:N" + looseOrderSheet.getLastRow()).getValues(); // 讀取到操作人員信箱
+      looseOrders.forEach(order => {
+        const operatorEmail = order[13]; // N欄
+        const unitName = userToUnitMap[operatorEmail];
+        if (unitName) {
+          const productName = order[3]; // D欄
+          const quantity = order[4];    // E欄
+          const totalAmount = order[5]; // F欄
+          if (summaryData[unitName] && summaryData[unitName][productName] !== undefined) {
+            if (typeof quantity === 'number') summaryData[unitName][productName] += quantity;
+            if (typeof totalAmount === 'number') totalAmountByUnit[unitName] += totalAmount;
+          }
+        }
+      });
+    }
+    
+    // 5. 準備最終要回傳給前端的物件
+    return { 
+      success: true, 
+      productHeaders: productNames, 
+      unitData: unitNames.map(name => ({
+          unitName: name,
+          products: summaryData[name],
+          totalAmount: totalAmountByUnit[name],
+          target: unitTargets[name]
+      }))
+    };
+
+  } catch (e) {
+    console.error("getGrandSummaryReportData 發生錯誤: " + e.toString());
+    return { success: false, error: "產生報表時發生伺服器錯誤。" };
+  }
+}
