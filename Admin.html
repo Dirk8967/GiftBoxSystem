@@ -77,7 +77,11 @@
         .action-btn:hover { opacity: 0.85; }
         .action-btn:disabled { background-color: #cccccc !important; color: #666 !important; cursor: not-allowed; opacity: 1;}
         
-        .btn-save { background-color: #007bff; }
+        .btn-save { background-color: #007bff; 
+                    display: inline-flex; /* 使用 inline-flex 使其行為類似 inline 但具有 flexbox 特性 */
+                    align-items: center; /* 垂直居中對齊 flex 項目 */
+                    gap: 8px; /* 圖示和文字之間的間距 */
+        }
         .btn-add { background-color: #28a745; }
         .btn-edit { background-color: #ffc107; color: #212529; font-size: 13px; padding: 5px 10px; margin-right: 5px;}
         .btn-delete { background-color: #dc3545; font-size: 13px; padding: 5px 10px; }
@@ -151,37 +155,64 @@
             display: grid;
             grid-template-columns: 1fr; /* 在較小螢幕上為單欄 */
             gap: 25px;
+            margin-top: 20px;
+        }
+        /* 在寬度大於 992px 的螢幕上，變為兩欄 */
+        @media (min-width: 992px) {
+            .settings-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            /* 讓清除資料卡片橫跨兩欄 */
+            .settings-grid .danger-zone {
+                grid-column: 1 / -1;
+            }
         }
         .setting-card {
             border: 1px solid #dee2e6;
             border-radius: 8px;
-            padding: 20px;
+            padding: 20px 25px;
             background-color: #ffffff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
         }
         .setting-card-title {
             display: flex;
             align-items: center;
-            font-size: 1.1em;
+            font-size: 1.15em;
+            font-weight: 700;
             margin-top: 0;
             margin-bottom: 10px;
             color: #212529;
         }
         .setting-card-title .material-symbols-outlined {
-            margin-right: 10px;
+            margin-right: 12px;
             color: #007bff;
+            font-size: 28px;
         }
         .setting-card-description {
             font-size: 14px;
             color: #6c757d;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             line-height: 1.5;
+            flex-grow: 1; /* 讓描述區塊填滿多餘空間，確保按鈕對齊底部 */
         }
         .form-grid-inner {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
+        }
+        /* 危險區域卡片的特殊樣式 */
+        .setting-card.danger-zone {
+            border-color: #f5c2c7;
+            background-color: #fdf7f7;
+        }
+        .setting-card.danger-zone .setting-card-title {
+            color: #842029;
+        }
+        .setting-card.danger-zone .setting-card-title .material-symbols-outlined {
+            color: #dc3545;
         }
 
         /* 讓設定頁在較大螢幕上並排顯示 */
@@ -192,8 +223,134 @@
         }
          @media (max-width: 576px) {
             .form-grid-inner {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
             }
+        }
+        
+
+
+        /* --- [通用] Modal 表單美化 (適用於所有後台 Modal) --- */
+
+        /* 1. 兩欄式網格佈局 (在寬螢幕上生效) */
+        .modal-content .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 預設為單欄 */
+            gap: 15px 20px; /* 上下間距15px, 左右間距20px */
+        }
+        @media (min-width: 768px) {
+            .modal-content .modal-form-grid {
+                grid-template-columns: 1fr 1fr; /* 在寬螢幕上變為兩欄 */
+            }
+        }
+
+        /* 2. 統一樣式：讓所有輸入框、下拉選單、文字區塊看起來都一樣 */
+        .modal-content .control-input,
+        .modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        .modal-content textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* 3. 統一的點擊光暈效果 */
+        .modal-content .control-input:focus,
+        .modal-content textarea:focus {
+            outline: none;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        }
+
+        /* 4. 美化所有下拉選單的箭頭 */
+        .modal-content select.control-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 0.9em;
+            padding-right: 30px;
+        }
+
+        /* 5. 美化所有核取方塊 (Checkbox) */
+        .modal-content .checkbox-group {
+            display: flex;
+            align-items: center;
+            /* 讓它在網格中佔滿一整行的高度 */
+            grid-column: 1 / -1; 
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #f1f3f5;
+            margin-top: 5px; /* 增加一點上方間距 */
+        }
+        .modal-content .checkbox-group input[type="checkbox"] {
+            width: 1.15em;
+            height: 1.15em;
+            margin-right: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .modal-content .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        /* --- 清除資料區塊樣式 --- */
+        .warning-text {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+            padding: 15px;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+        .clear-data-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        #settings-section .control-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            line-height: 1.5; /* 增加一些行高，使其看起來更舒適 */
+            color: #495057; /* 設定文字顏色 */
+        }
+        #settings-section .control-input:focus {
+            outline: none;
+            border-color: #007bff; /* 將焦點顏色改為藍色，與按鈕風格一致 */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* 使用更標準的焦點陰影 */
+        }
+        /* 針對 datetime-local 類型的 input，稍微調整圖示和清除按鈕的位置 (部分瀏覽器有效) */
+        #settings-section input::webkit-calendar-picker-indicator {
+        opacity: 0.8;
+        cursor: pointer;
+        }
+        #settings-section input::-webkit-clear-button {
+        opacity: 0.8;
+        -webkit-appearance: none;
         }
     </style>
 </head>
@@ -203,6 +360,7 @@
       <button id="navCaseAdminManagement" class="nav-button"><span class="material-symbols-outlined">supervisor_account</span>成箱管理員權限</button>
       <button id="navProductManagement" class="nav-button"><span class="material-symbols-outlined">inventory_2</span>商品管理系統</button>
       <button id="navSiteInfoManagement" class="nav-button"><span class="material-symbols-outlined">pin_drop</span>站點資訊管理</button>
+      <button id="navBusinessUnitManagement" class="nav-button"><span class="material-symbols-outlined">domain</span>營業處單位管理</button>
       <button id="navSettings" class="nav-button"><span class="material-symbols-outlined">tune</span>設定</button>
   </div>
 
@@ -211,31 +369,101 @@
           </div>
   </div>
 
-    <div class="modal-overlay" id="userModal">
-        <div class="modal-content">
-            <button id="closeUserModalBtn" class="close-btn">&times;</button>
-            <h2 class="modal-title" id="userModalTitle">使用者資料</h2>
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-content">
+        <button id="closeUserModalBtn" class="close-btn">&times;</button>
+        <h2 class="modal-title" id="userModalTitle">使用者資料</h2>
+        
+        <form id="userModalForm">
             <input type="hidden" id="userModalRowNumber">
-            <div class="form-group"><label for="userModalName">姓名</label><input type="text" id="userModalName" placeholder="必填"></div>
-            <div class="form-group"><label for="userModalEmployeeId">員工編號</label><input type="text" id="userModalEmployeeId" placeholder="必填"></div>
-            <div class="form-group"><label for="userModalEmail">Email</label><input type="email" id="userModalEmail" placeholder="必填"></div>
-            <div class="form-group"><input type="checkbox" id="userModalIsApproved"><label for="userModalIsApproved" style="font-weight:normal;">已授權</label></div>
-            <div class="form-group"><label for="userModalRemarks">備註</label><textarea id="userModalRemarks" rows="3"></textarea></div>
-            <div class="modal-actions"><button id="cancelUserModalBtn" class="action-btn btn-cancel">取消</button><button id="userModalSaveBtn" class="action-btn btn-save">儲存</button></div>
-        </div>
+            
+            <div class="modal-form-grid">
+                <div class="form-group">
+                    <label for="userModalName">姓名</label>
+                    <input type="text" id="userModalName" placeholder="必填" class="control-input">
+                </div>
+                <div class="form-group">
+                    <label for="userModalEmployeeId">員工編號</label>
+                    <input type="text" id="userModalEmployeeId" placeholder="必填" class="control-input">
+                </div>
+                <div class="form-group">
+                    <label for="userModalEmail">Email</label>
+                    <input type="email" id="userModalEmail" placeholder="必填" class="control-input">
+                </div>
+                <div class="form-group">
+                    <label for="userModalAffiliatedUnit">隸屬單位名稱</label>
+                    <select id="userModalAffiliatedUnit" class="control-input"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="userModalRemarks">備註</label>
+                    <textarea id="userModalRemarks" rows="4"></textarea>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="userModalIsGasStationStaff">
+                    <label for="userModalIsGasStationStaff">是否為加油站人員</label>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="userModalIsApproved">
+                    <label for="userModalIsApproved">已授權</label>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelUserModalBtn" class="action-btn btn-cancel">取消</button>
+                <button type="button" id="userModalSaveBtn" class="action-btn btn-save">儲存</button>
+            </div>
+        </form>
+    </div>
+  </div>
+
     </div>
     <div class="modal-overlay" id="caseAdminModal">
-        <div class="modal-content">
-            <button id="closeCaseAdminModalBtn" class="close-btn">&times;</button>
-            <h2 class="modal-title" id="caseAdminModalTitle">成箱管理員資料</h2>
+      <div class="modal-content">
+        <button id="closeCaseAdminModalBtn" class="close-btn">&times;</button>
+        <h2 class="modal-title" id="caseAdminModalTitle">成箱管理員資料</h2>
+        
+        <form id="caseAdminModalForm">
             <input type="hidden" id="caseAdminModalRowNumber">
-            <div class="form-group"><label for="caseAdminModalName">姓名</label><input type="text" id="caseAdminModalName" placeholder="必填"></div>
-            <div class="form-group"><label for="caseAdminModalEmployeeId">員工編號</label><input type="text" id="caseAdminModalEmployeeId" placeholder="必填"></div>
-            <div class="form-group"><label for="caseAdminModalEmail">Email</label><input type="email" id="caseAdminModalEmail" placeholder="必填"></div>
-            <div class="form-group"><input type="checkbox" id="caseAdminModalIsApproved"><label for="caseAdminModalIsApproved" style="font-weight:normal;">已授權</label></div>
-            <div class="form-group"><label for="caseAdminModalRemarks">備註</label><textarea id="caseAdminModalRemarks" rows="3"></textarea></div>
-            <div class="modal-actions"><button id="cancelCaseAdminModalBtn" class="action-btn btn-cancel">取消</button><button id="caseAdminModalSaveBtn" class="action-btn btn-save">儲存</button></div>
+            
+            <div class="modal-form-grid">
+                <div class="form-group">
+                    <label for="caseAdminModalName">姓名</label>
+                    <input type="text" id="caseAdminModalName" class="control-input" placeholder="必填">
+                </div>
+                <div class="form-group">
+                    <label for="caseAdminModalEmployeeId">員工編號</label>
+                    <input type="text" id="caseAdminModalEmployeeId" class="control-input" placeholder="必填">
+                </div>
+                <div class="form-group">
+                    <label for="caseAdminModalEmail">Email</label>
+                    <input type="email" id="caseAdminModalEmail" class="control-input" placeholder="必填">
+                </div>
+                <div class="form-group">
+                    <label for="caseAdminModalAffiliatedUnit">隸屬單位名稱</label>
+                    <select id="caseAdminModalAffiliatedUnit" class="control-input"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="caseAdminModalRemarks">備註</label>
+                    <textarea id="caseAdminModalRemarks" rows="4"></textarea>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="caseAdminModalIsGasStationStaff">
+                    <label for="caseAdminModalIsGasStationStaff">是否為加油站人員</label>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="caseAdminModalIsApproved">
+                    <label for="caseAdminModalIsApproved">已授權</label>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-actions">
+            <button id="cancelCaseAdminModalBtn" class="action-btn btn-cancel">取消</button>
+            <button id="caseAdminModalSaveBtn" class="action-btn btn-save">儲存</button>
         </div>
+      </div>
     </div>
     <div class="modal-overlay" id="productModal">
         <div class="modal-content">
@@ -266,6 +494,23 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="businessUnitModal">
+      <div class="modal-content">
+          <button id="closeBusinessUnitModalBtn" class="close-btn">&times;</button>
+          <h2 class="modal-title" id="businessUnitModalTitle">單位資料</h2>
+          <input type="hidden" id="businessUnitModalRowNumber">
+          <div class="form-group"><label for="unitModalCode">單位代號</label><input type="text" id="unitModalCode" placeholder="必填"></div>
+          <div class="form-group"><label for="unitModalName">單位名稱</label><input type="text" id="unitModalName" placeholder="必填"></div>
+          <div class="form-group"><label for="unitModalMemberCount">單位人數</label><input type="number" id="unitModalMemberCount"></div>
+          <div class="form-group"><label for="unitModalTargetPerformance">目標業績</label><input type="number" id="unitModalTargetPerformance"></div>
+          <div class="form-group"><label for="unitModalRemarks">備註</label><textarea id="unitModalRemarks" rows="3"></textarea></div>
+          <div class="modal-actions">
+              <button id="cancelBusinessUnitModalBtn" class="action-btn btn-cancel">取消</button>
+              <button id="businessUnitModalSaveBtn" class="action-btn btn-save">儲存</button>
+          </div>
+      </div>
+    </div>
+
     <script>
       // --- 【新增】將 escapeHtml 函式加在最前面 ---
         function escapeHtml(unsafe) {
@@ -286,6 +531,8 @@
                 document.getElementById('navCaseAdminManagement').addEventListener('click', function() { showSection('case-admin-management-section', 'Admin_CaseAdminManagement', this); });
                 document.getElementById('navProductManagement').addEventListener('click', function() { showSection('product-management-section', 'Admin_ProductManagement', this); });
                 document.getElementById('navSiteInfoManagement').addEventListener('click', function() { showSection('site-info-management-section', 'Admin_SiteInfoManagement', this); });
+                // 【新增】為新按鈕綁定事件
+                document.getElementById('navBusinessUnitManagement').addEventListener('click', function() { showSection('business-unit-management-section', 'Admin_BusinessUnitManagement', this); });
                 document.getElementById('navSettings').addEventListener('click', function() { showSection('settings-section', 'Admin_Settings', this); });
             
                 // 為所有靜態 Modal 的按鈕綁定事件
@@ -316,6 +563,10 @@
             document.getElementById('closeSiteInfoModalBtn').addEventListener('click', closeSiteInfoModal);
             document.getElementById('cancelSiteInfoModalBtn').addEventListener('click', closeSiteInfoModal);
             document.getElementById('siteInfoModalSaveBtn').addEventListener('click', saveSiteInfoData);
+            // 【新增】為新 Modal 的按鈕綁定事件
+            document.getElementById('closeBusinessUnitModalBtn').addEventListener('click', closeBusinessUnitModal);
+            document.getElementById('cancelBusinessUnitModalBtn').addEventListener('click', closeBusinessUnitModal);
+            document.getElementById('businessUnitModalSaveBtn').addEventListener('click', saveBusinessUnitData);
         }
 
         // --- 通用函式 ---
@@ -339,6 +590,8 @@
                             else if (sectionId === 'case-admin-management-section') { loadCaseAdminData(); } 
                             else if (sectionId === 'product-management-section') { loadProductData(); } 
                             else if (sectionId === 'site-info-management-section') { loadSiteInfoData(); }
+                            // 【新增】對新區塊的資料載入呼叫 (目前為空)
+                            else if (sectionId === 'business-unit-management-section') { loadBusinessUnitData(); }
                             else if (sectionId === 'settings-section') { loadSettingsData(); }
                         } else {
                             contentPlaceholder.innerHTML = htmlContent || '<div class="container"><p style="color:red;">載入頁面時收到無效內容。</p></div>';
@@ -359,7 +612,25 @@
                 else if (sectionId === 'case-admin-management-section') { document.getElementById('addCaseAdminBtn').addEventListener('click', function(){ openCaseAdminModal('add'); }); }
                 else if (sectionId === 'product-management-section') { document.getElementById('addProductBtn').addEventListener('click', function(){ openProductModal('add'); }); } 
                 else if (sectionId === 'site-info-management-section') { document.getElementById('addSiteInfoBtn').addEventListener('click', function(){ openSiteInfoModal('add'); }); }
-                else if (sectionId === 'settings-section') { document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings); }
+                // 【新增】為新區塊的按鈕預留綁定位置
+                else if (sectionId === 'business-unit-management-section') { document.getElementById('addBusinessUnitBtn').addEventListener('click', function(){ openBusinessUnitModal('add'); }); }
+                // else if (sectionId === 'settings-section') { document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings); }
+                else if (sectionId === 'settings-section') { 
+                    document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+                    // 【新增】為清除資料按鈕綁定事件
+                    document.getElementById('clear-case-orders-btn').addEventListener('click', function() {
+                        handleClearDataClick('clearCaseOrders', '您確定要永久刪除【所有成箱訂單】嗎？', this);
+                    });
+                    document.getElementById('clear-loose-orders-btn').addEventListener('click', function() {
+                        handleClearDataClick('clearLooseOrders', '您確定要永久刪除【所有零星訂單】嗎？', this);
+                    });
+                    document.getElementById('clear-shipment-records-btn').addEventListener('click', function() {
+                        handleClearDataClick('clearShipmentRecords', '您確定要永久刪除【所有出貨紀錄】嗎？', this);
+                    });
+                    document.getElementById('clear-purchase-records-btn').addEventListener('click', function() {
+                        handleClearDataClick('clearPurchaseRecords', '您確定要永久刪除【所有進貨紀錄】嗎？', this);
+                    });
+                }
              } catch(e) { console.error("Error binding buttons for section " + sectionId + ":", e); }
         }
         
@@ -429,78 +700,77 @@
         function renderUserTable(data) {
             const tbody = document.querySelector("#applicants-table tbody");
             if (!tbody) { return; }
+            // 【核心修改】表格欄位數改為 8
             renderTable(tbody, data, function(applicant) {
                 const tr = document.createElement('tr');
                 tr.dataset.rowNumber = applicant.rowNumber;
                 
-                function createCell(text) { const td = document.createElement('td'); td.textContent = text; return td; }
+                // 【核心修改】產生新的 8 欄內容
+                tr.innerHTML = `
+                    <td>${escapeHtml(applicant.name)}</td>
+                    <td>${escapeHtml(applicant.employeeId)}</td>
+                    <td>${escapeHtml(applicant.email)}</td>
+                    <td>${escapeHtml(applicant.affiliatedUnit)}</td>
+                    <td style="text-align:center;">${applicant.isGasStationStaff ? '是' : '否'}</td>
+                    <td style="text-align:center;"><input type="checkbox" class="status-checkbox" ${applicant.isApproved ? 'checked' : ''} data-row="${applicant.rowNumber}"></td>
+                    <td class="remarks-col">${escapeHtml(applicant.remarks)}</td>
+                    <td>
+                        <button class="action-btn btn-edit user-edit-btn" data-row-number="${applicant.rowNumber}">編輯</button>
+                        <button class="action-btn btn-delete user-delete-btn" data-row-number="${applicant.rowNumber}" data-name="${escapeHtml(applicant.name)}">刪除</button>
+                    </td>
+                `;
 
-                tr.appendChild(createCell(applicant.name));
-                tr.appendChild(createCell(applicant.employeeId));
-                tr.appendChild(createCell(applicant.email));
-
-                const tdApproved = createCell('');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox'; checkbox.className = 'status-checkbox';
-                checkbox.checked = applicant.isApproved; checkbox.dataset.row = String(applicant.rowNumber);
-                tdApproved.appendChild(checkbox); tr.appendChild(tdApproved);
-
-                const tdRemarks = createCell(applicant.remarks); tdRemarks.className = 'remarks-col';
-                tr.appendChild(tdRemarks);
-
-                const tdActions = document.createElement('td');
-                const editBtn = document.createElement('button');
-                editBtn.className = 'action-btn btn-edit user-edit-btn'; editBtn.textContent = '編輯';
-                editBtn.dataset.rowNumber = String(applicant.rowNumber);
-                tdActions.appendChild(editBtn);
-
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'action-btn btn-delete user-delete-btn'; deleteBtn.textContent = '刪除';
-                deleteBtn.dataset.rowNumber = String(applicant.rowNumber); deleteBtn.dataset.name = applicant.name; 
-                tdActions.appendChild(deleteBtn); tr.appendChild(tdActions);
-                
+                tr.querySelector('.user-edit-btn').addEventListener('click', function() { openUserModal('edit', parseInt(this.dataset.rowNumber)); });
+                tr.querySelector('.user-delete-btn').addEventListener('click', function() { deleteUser(parseInt(this.dataset.rowNumber), this.dataset.name); });
                 return tr;
-            }, 6, '目前沒有任何申請記錄。');
-            
-            tbody.querySelectorAll('.user-edit-btn').forEach(function(b){ b.addEventListener('click', function() { openUserModal('edit', parseInt(this.dataset.rowNumber)); }); });
-            tbody.querySelectorAll('.user-delete-btn').forEach(function(b){ b.addEventListener('click', function() { deleteUser(parseInt(this.dataset.rowNumber), this.dataset.name); }); });
+            }, 8, '目前沒有任何申請記錄。');
         }
         
         function openUserModal(mode, rowNumber){
             currentUserEditMode = mode;
             const modal = document.getElementById('userModal');
-            if (!modal) { return; }
+            if (!modal) return;
             
-            try {
-                document.getElementById('userModalRowNumber').value = '';
-                document.getElementById('userModalName').value = '';
-                document.getElementById('userModalEmployeeId').value = '';
-                document.getElementById('userModalEmail').value = '';
-                document.getElementById('userModalIsApproved').checked = false;
-                document.getElementById('userModalRemarks').value = ''; 
-                const saveBtn = document.getElementById('userModalSaveBtn');
-                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '儲存';}
-
+            // 重置表單
+            document.getElementById('userModalForm').reset(); // 使用 form.reset() 更有效率
+            document.getElementById('userModalRowNumber').value = '';
+            document.getElementById('userModalAffiliatedUnit').innerHTML = ''; // 清空下拉選單
+            
+            // 【核心修改】異步獲取單位列表並填充下拉選單
+            showUserStatus('載入單位列表中...', false);
+            google.script.run.withSuccessHandler(function(units) {
+                showUserStatus('', false); // 清除載入訊息
+                const unitSelect = document.getElementById('userModalAffiliatedUnit');
+                unitSelect.innerHTML = '<option value="">-- 請選擇單位 --</option>';
+                if (units && units.length > 0) {
+                    units.forEach(unit => {
+                        // 假設 getBusinessUnitData 回傳的物件有 unitName 屬性
+                        const option = new Option(unit.unitName, unit.unitName);
+                        unitSelect.add(option);
+                    });
+                }
+                
+                // 在下拉選單填充完畢後，再設定編輯模式的預設值
                 if (mode === 'edit' && rowNumber) {
-                    const userData = allApplicantsData.find(function(item){ return item.rowNumber === rowNumber; });
+                    const userData = allApplicantsData.find(item => item.rowNumber === rowNumber);
                     if (userData) {
                         document.getElementById('userModalTitle').textContent = '編輯使用者資料';
                         document.getElementById('userModalRowNumber').value = userData.rowNumber;
                         document.getElementById('userModalName').value = userData.name;
                         document.getElementById('userModalEmployeeId').value = userData.employeeId;
                         document.getElementById('userModalEmail').value = userData.email;
+                        document.getElementById('userModalAffiliatedUnit').value = userData.affiliatedUnit || ''; // 設定下拉選單的值
+                        document.getElementById('userModalIsGasStationStaff').checked = userData.isGasStationStaff === true;
                         document.getElementById('userModalIsApproved').checked = userData.isApproved;
-                        document.getElementById('userModalRemarks').value = userData.remarks || ''; 
-                    } else {
-                        showUserError({message: '找不到要編輯的資料 (row ' + rowNumber + ')'}, '開啟編輯'); return;
+                        document.getElementById('userModalRemarks').value = userData.remarks || '';
                     }
                 } else {
                     document.getElementById('userModalTitle').textContent = '新增使用者';
                 }
-                modal.style.display = 'flex';
-            } catch(e) {
-                console.error("Error in openUserModal trying to set values:", e);
-            }
+
+            }).withFailureHandler(function(err){ showUserError(err, '載入單位列表'); }).getBusinessUnitData();
+
+            modal.style.display = 'flex';
         }
         
         function closeUserModal(){ document.getElementById('userModal').style.display = 'none'; }
@@ -510,11 +780,14 @@
             if(!modalSaveBtn) { return;}
             try {
                 modalSaveBtn.disabled = true; modalSaveBtn.textContent = '儲存中...';
+                // 【核心修改】收集新欄位的資料
                 const userData = {
                     rowNumber: document.getElementById('userModalRowNumber').value ? parseInt(document.getElementById('userModalRowNumber').value) : null,
                     name: document.getElementById('userModalName').value.trim(),
                     employeeId: document.getElementById('userModalEmployeeId').value.trim(),
                     email: document.getElementById('userModalEmail').value.trim(),
+                    affiliatedUnit: document.getElementById('userModalAffiliatedUnit').value,
+                    isGasStationStaff: document.getElementById('userModalIsGasStationStaff').checked,
                     isApproved: document.getElementById('userModalIsApproved').checked,
                     remarks: document.getElementById('userModalRemarks').value.trim()
                 };
@@ -621,82 +894,103 @@
             renderTable(tbody, data, function(admin) {
                 const tr = document.createElement('tr');
                 tr.dataset.rowNumber = admin.rowNumber;
-                function createCell(text) { const td = document.createElement('td'); td.textContent = text; return td; }
-                tr.appendChild(createCell(admin.name));
-                tr.appendChild(createCell(admin.employeeId));
-                tr.appendChild(createCell(admin.email));
-                const tdApproved = createCell('');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox'; checkbox.className = 'status-checkbox';
-                checkbox.checked = admin.isApproved; checkbox.disabled = true; 
-                tdApproved.appendChild(checkbox); tr.appendChild(tdApproved);
-                const tdRemarks = createCell(admin.remarks); tdRemarks.className = 'remarks-col';
-                tr.appendChild(tdRemarks);
-                const tdActions = document.createElement('td');
-                const editBtn = document.createElement('button');
-                editBtn.className = 'action-btn btn-edit case-admin-edit-btn'; editBtn.textContent = '編輯';
-                editBtn.dataset.rowNumber = String(admin.rowNumber); tdActions.appendChild(editBtn);
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'action-btn btn-delete case-admin-delete-btn'; deleteBtn.textContent = '刪除';
-                deleteBtn.dataset.rowNumber = String(admin.rowNumber); deleteBtn.dataset.name = admin.name; 
-                tdActions.appendChild(deleteBtn); tr.appendChild(tdActions);
+                // 【核心修改】產生新的 8 欄內容
+                tr.innerHTML = `
+                    <td>${escapeHtml(admin.name)}</td>
+                    <td>${escapeHtml(admin.employeeId)}</td>
+                    <td>${escapeHtml(admin.email)}</td>
+                    <td>${escapeHtml(admin.affiliatedUnit)}</td>
+                    <td style="text-align:center;">${admin.isGasStationStaff ? '是' : '否'}</td>
+                    <td style="text-align:center;"><input type="checkbox" class="status-checkbox" ${admin.isApproved ? 'checked' : ''} disabled></td>
+                    <td class="remarks-col">${escapeHtml(admin.remarks)}</td>
+                    <td>
+                        <button class="action-btn btn-edit case-admin-edit-btn" data-row-number="${admin.rowNumber}">編輯</button>
+                        <button class="action-btn btn-delete case-admin-delete-btn" data-row-number="${admin.rowNumber}" data-name="${escapeHtml(admin.name)}">刪除</button>
+                    </td>
+                `;
+                tr.querySelector('.case-admin-edit-btn').addEventListener('click', function() { openCaseAdminModal('edit', parseInt(this.dataset.rowNumber)); });
+                tr.querySelector('.case-admin-delete-btn').addEventListener('click', function() { deleteCaseAdmin(parseInt(this.dataset.rowNumber), this.dataset.name); });
                 return tr;
-            }, 6, '目前沒有任何成箱管理員。');
-            
-            tbody.querySelectorAll('.case-admin-edit-btn').forEach(function(b){ b.addEventListener('click', function() { openCaseAdminModal('edit', parseInt(this.dataset.rowNumber)); }); });
-            tbody.querySelectorAll('.case-admin-delete-btn').forEach(function(b){ b.addEventListener('click', function() { deleteCaseAdmin(parseInt(this.dataset.rowNumber), this.dataset.name); }); });
+            }, 8, '目前沒有任何成箱管理員。');
         }
         function openCaseAdminModal(mode, rowNumber) {
-             currentCaseAdminEditMode = mode;
+            currentCaseAdminEditMode = mode;
             const modal = document.getElementById('caseAdminModal');
             if (!modal) return;
+            
+            // 重置表單
+            // 假設您的 form 標籤有 id="caseAdminModalForm"
+            document.getElementById('caseAdminModalForm').reset(); 
             document.getElementById('caseAdminModalRowNumber').value = '';
-            document.getElementById('caseAdminModalName').value = '';
-            document.getElementById('caseAdminModalEmployeeId').value = '';
-            document.getElementById('caseAdminModalEmail').value = '';
-            document.getElementById('caseAdminModalIsApproved').checked = false;
-            document.getElementById('caseAdminModalRemarks').value = '';
-            const saveBtn = document.getElementById('caseAdminModalSaveBtn');
-            if(saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '儲存'; }
-            const titleEl = document.getElementById('caseAdminModalTitle');
-            if (mode === 'edit' && rowNumber) {
-                const admin = allCaseAdminData.find(function(item){ return item.rowNumber === rowNumber; });
-                if (admin) {
-                    if(titleEl) titleEl.textContent = '編輯成箱管理員';
-                    document.getElementById('caseAdminModalRowNumber').value = admin.rowNumber;
-                    document.getElementById('caseAdminModalName').value = admin.name;
-                    document.getElementById('caseAdminModalEmployeeId').value = admin.employeeId;
-                    document.getElementById('caseAdminModalEmail').value = admin.email;
-                    document.getElementById('caseAdminModalIsApproved').checked = admin.isApproved;
-                    document.getElementById('caseAdminModalRemarks').value = admin.remarks || '';
-                } else { showCaseAdminError({ message: '找不到要編輯的資料 (row ' + rowNumber + ')' }, '開啟編輯'); return; }
-            } else { if(titleEl) titleEl.textContent = '新增成箱管理員'; }
+            document.getElementById('caseAdminModalAffiliatedUnit').innerHTML = '';
+            
+            // 異步獲取單位列表並填充下拉選單
+            showCaseAdminStatus('載入單位列表中...', false);
+            google.script.run
+                .withSuccessHandler(function(units) {
+                    showCaseAdminStatus('', false);
+                    const unitSelect = document.getElementById('caseAdminModalAffiliatedUnit');
+                    unitSelect.innerHTML = '<option value="">-- 請選擇單位 --</option>';
+                    if (units && units.length > 0) {
+                        units.forEach(unit => {
+                            const option = new Option(unit.unitName, unit.unitName);
+                            unitSelect.add(option);
+                        });
+                    }
+                    
+                    // 在下拉選單填充完畢後，再設定編輯模式的預設值
+                    if (mode === 'edit' && rowNumber) {
+                        const admin = allCaseAdminData.find(item => item.rowNumber === rowNumber);
+                        if (admin) {
+                            document.getElementById('caseAdminModalTitle').textContent = '編輯成箱管理員';
+                            document.getElementById('caseAdminModalRowNumber').value = admin.rowNumber;
+                            document.getElementById('caseAdminModalName').value = admin.name;
+                            document.getElementById('caseAdminModalEmployeeId').value = admin.employeeId;
+                            document.getElementById('caseAdminModalEmail').value = admin.email;
+                            document.getElementById('caseAdminModalAffiliatedUnit').value = admin.affiliatedUnit || '';
+                            document.getElementById('caseAdminModalIsGasStationStaff').checked = admin.isGasStationStaff === true;
+                            document.getElementById('caseAdminModalIsApproved').checked = admin.isApproved;
+                            document.getElementById('caseAdminModalRemarks').value = admin.remarks || '';
+                        }
+                    } else {
+                        document.getElementById('caseAdminModalTitle').textContent = '新增成箱管理員';
+                    }
+
+                })
+                .withFailureHandler(function(err){ showCaseAdminError(err, '載入單位列表'); })
+                .getBusinessUnitData(); // 複用營業處單位管理的函式
+
             modal.style.display = 'flex';
         }
         function closeCaseAdminModal() { document.getElementById('caseAdminModal').style.display = 'none'; }
         function saveCaseAdminData() {
             const saveBtn = document.getElementById('caseAdminModalSaveBtn');
             if(!saveBtn) return;
+            
             saveBtn.disabled = true; saveBtn.textContent = '儲存中...';
+            // 【核心修改】收集新欄位的資料
             const adminData = {
                 rowNumber: document.getElementById('caseAdminModalRowNumber').value ? parseInt(document.getElementById('caseAdminModalRowNumber').value) : null,
                 name: document.getElementById('caseAdminModalName').value.trim(),
                 employeeId: document.getElementById('caseAdminModalEmployeeId').value.trim(),
                 email: document.getElementById('caseAdminModalEmail').value.trim(),
+                affiliatedUnit: document.getElementById('caseAdminModalAffiliatedUnit').value,
+                isGasStationStaff: document.getElementById('caseAdminModalIsGasStationStaff').checked,
                 isApproved: document.getElementById('caseAdminModalIsApproved').checked,
                 remarks: document.getElementById('caseAdminModalRemarks').value.trim()
             };
+
             if (!adminData.name || !adminData.employeeId || !adminData.email) {
                 alert('姓名、員工編號和Email為必填欄位！');
                 saveBtn.disabled = false; saveBtn.textContent = '儲存'; return;
             }
+
             const operation = currentCaseAdminEditMode === 'add' ? 'addCaseAdminData' : 'updateCaseAdminData';
-            const successMsg = currentCaseAdminEditMode === 'add' ? '成箱管理員新增成功！' : '成箱管理員更新成功！'; 
-            const context = currentCaseAdminEditMode === 'add' ? '新增成箱管理員' : '更新成箱管理員';
+            const successMsg = currentCaseAdminEditMode === 'add' ? '管理員新增成功！' : '管理員更新成功！';
             google.script.run
                 .withSuccessHandler(function(response){ handleCaseAdminCUDResponse(response, successMsg, saveBtn); })
-                .withFailureHandler(function(err){ handleCaseAdminCUDError(err, context, saveBtn); })
-                [operation](adminData); 
+                .withFailureHandler(function(err){ handleCaseAdminCUDError(err, '儲存成箱管理員', saveBtn); })
+                [operation](adminData);
         }
         function deleteCaseAdmin(rowNumber, name) {
             if (confirm("確定要刪除成箱管理員 \"" + escapeHtml(name) + "\" (列號: " + rowNumber + ") 嗎？")) {
@@ -1187,6 +1481,184 @@
                 })
                 .saveSettings(settings);
         }
+
+
+        // ========================================================== //
+//                    營業處單位管理函式
+// ========================================================== //
+
+// --- 全域變數 ---
+let allBusinessUnitData = [], currentBusinessUnitEditMode = 'add';
+
+// --- 資料處理 ---
+function loadBusinessUnitData() {
+    showStatusMessage('business-unit-status-msg', '載入單位資料中...', false);
+    google.script.run
+        .withSuccessHandler(function(data) {
+            allBusinessUnitData = data || [];
+            renderBusinessUnitTable(allBusinessUnitData);
+            showStatusMessage('business-unit-status-msg', allBusinessUnitData.length > 0 ? '單位資料已載入' : '目前無單位資料', false);
+        })
+        .withFailureHandler(function(err){ showErrorStatusMessage('business-unit-status-msg', err, '載入單位資料'); })
+        .getBusinessUnitData();
+}
+
+function renderBusinessUnitTable(data) {
+    const tbody = document.querySelector("#business-unit-table tbody");
+    if (!tbody) return;
+    renderTable(tbody, data, function(unit) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(unit.unitCode)}</td>
+            <td>${escapeHtml(unit.unitName)}</td>
+            <td>${escapeHtml(unit.memberCount)}</td>
+            <td>${escapeHtml(unit.targetPerformance)}</td>
+            <td class="remarks-col">${escapeHtml(unit.remarks)}</td>
+            <td>
+                <button class="action-btn btn-edit" data-row-number="${unit.rowNumber}">編輯</button>
+                <button class="action-btn btn-delete" data-row-number="${unit.rowNumber}" data-name="${escapeHtml(unit.unitName)}">刪除</button>
+            </td>
+        `;
+        // 為按鈕綁定事件
+        tr.querySelector('.btn-edit').addEventListener('click', function() { openBusinessUnitModal('edit', parseInt(this.dataset.rowNumber)); });
+        tr.querySelector('.btn-delete').addEventListener('click', function() { deleteBusinessUnit(parseInt(this.dataset.rowNumber), this.dataset.name); });
+        return tr;
+    }, 6, '目前沒有任何單位資訊。');
+}
+
+// --- Modal 控制 ---
+function openBusinessUnitModal(mode, rowNumber) {
+    currentBusinessUnitEditMode = mode;
+    const modal = document.getElementById('businessUnitModal');
+    if (!modal) return;
+    
+    // 重置表單
+    document.getElementById('businessUnitModalRowNumber').value = '';
+    document.getElementById('unitModalCode').value = '';
+    document.getElementById('unitModalName').value = '';
+    document.getElementById('unitModalMemberCount').value = '';
+    document.getElementById('unitModalTargetPerformance').value = '';
+    document.getElementById('unitModalRemarks').value = '';
+    
+    const titleEl = document.getElementById('businessUnitModalTitle');
+    if (mode === 'edit' && rowNumber) {
+        const unit = allBusinessUnitData.find(u => u.rowNumber === rowNumber);
+        if (unit) {
+            if(titleEl) titleEl.textContent = '編輯單位資料';
+            document.getElementById('businessUnitModalRowNumber').value = unit.rowNumber;
+            document.getElementById('unitModalCode').value = unit.unitCode;
+            document.getElementById('unitModalName').value = unit.unitName;
+            document.getElementById('unitModalMemberCount').value = unit.memberCount;
+            document.getElementById('unitModalTargetPerformance').value = unit.targetPerformance;
+            document.getElementById('unitModalRemarks').value = unit.remarks;
+        } else { return; }
+    } else {
+        if(titleEl) titleEl.textContent = '新增單位資料';
+    }
+    modal.style.display = 'flex';
+}
+
+function closeBusinessUnitModal() { document.getElementById('businessUnitModal').style.display = 'none'; }
+
+// --- CUD 操作 ---
+function saveBusinessUnitData() {
+    const saveBtn = document.getElementById('businessUnitModalSaveBtn');
+    saveBtn.disabled = true; saveBtn.textContent = '儲存中...';
+
+    const unitData = {
+        rowNumber: document.getElementById('businessUnitModalRowNumber').value ? parseInt(document.getElementById('businessUnitModalRowNumber').value) : null,
+        unitCode: document.getElementById('unitModalCode').value.trim(),
+        unitName: document.getElementById('unitModalName').value.trim(),
+        memberCount: document.getElementById('unitModalMemberCount').value.trim(),
+        targetPerformance: document.getElementById('unitModalTargetPerformance').value.trim(),
+        remarks: document.getElementById('unitModalRemarks').value.trim()
+    };
+
+    if (!unitData.unitCode || !unitData.unitName) {
+        alert('單位代號和單位名稱為必填欄位！');
+        saveBtn.disabled = false; saveBtn.textContent = '儲存'; return;
+    }
+
+    const operation = currentBusinessUnitEditMode === 'add' ? 'addBusinessUnitData' : 'updateBusinessUnitData';
+    const successMsg = currentBusinessUnitEditMode === 'add' ? '單位新增成功！' : '單位更新成功！';
+    
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                closeBusinessUnitModal();
+                loadBusinessUnitData();
+                showStatusMessage('business-unit-status-msg', successMsg, true);
+            } else {
+                alert('操作失敗：' + response.error);
+            }
+            saveBtn.disabled = false; saveBtn.textContent = '儲存';
+        })
+        .withFailureHandler(function(err){ /* ... */ })
+        [operation](unitData);
+}
+
+function deleteBusinessUnit(rowNumber, name) {
+    if (confirm(`確定要刪除單位 "${name}" 嗎？此操作無法復原。`)) {
+        showStatusMessage('business-unit-status-msg', '刪除中...', false);
+        google.script.run
+            .withSuccessHandler(function(response) {
+                if (response.success) {
+                    loadBusinessUnitData();
+                    showStatusMessage('business-unit-status-msg', '單位刪除成功！', true);
+                } else {
+                    alert('刪除失敗：' + response.error);
+                }
+            })
+            .deleteBusinessUnitData({ rowNumber: rowNumber });
+    }
+}
+
+
+/**
+ * 【新增】通用的資料清除點擊處理函式
+ * @param {string} backendFunctionName - 要呼叫的後端函式名稱
+ * @param {string} confirmationMessage - 顯示在確認對話框中的訊息
+ * @param {HTMLElement} buttonElement - 被點擊的按鈕元素
+ */
+function handleClearDataClick(backendFunctionName, confirmationMessage, buttonElement) {
+    if (!confirm(confirmationMessage)) {
+        return; // 使用者取消
+    }
+    
+    // 再次確認，要求使用者輸入 "確認刪除"
+    const userInput = prompt("為確保安全，請輸入「確認刪除」四個字來執行此操作：");
+    if (userInput !== "確認刪除") {
+        alert("輸入錯誤，操作已取消。");
+        return;
+    }
+    // 【核心修改 1】在改變文字前，先將按鈕的原始文字儲存起來
+    const originalButtonText = buttonElement.textContent;
+    // 禁用按鈕並顯示處理中狀態
+    buttonElement.disabled = true;
+    buttonElement.textContent = '清除中...';
+    showSettingsStatus('正在清除資料...', false);
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                alert(response.message);
+                showSettingsStatus(response.message, true);
+            } else {
+                showSettingsError({ message: response.error }, '清除資料');
+            }
+            buttonElement.disabled = false;
+            // 【核心修改 2】無論成功或失敗，都在最後恢復按鈕的狀態
+            buttonElement.textContent = originalButtonText;
+        })
+        .withFailureHandler(function(err) {
+            showSettingsError(err, '清除資料');
+            buttonElement.disabled = false;
+            // 【核心修改 2】無論成功或失敗，都在最後恢復按鈕的狀態
+            buttonElement.textContent = originalButtonText;
+        })
+        [backendFunctionName](); // 動態呼叫後端函式
+}
+
     </script>
 </body>
 </html>
