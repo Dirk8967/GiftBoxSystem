@@ -31,6 +31,27 @@ function getCurrentUserEmail_() {
 //                        主要路由與頁面服務
 // ================================================================= //
 function doGet(e) {
+
+  // --- 【全新 API 路由，使用 JSONP 模式】 ---
+  if (e.parameter.action === 'getSummary') {
+    // 獲取前端指定的 callback 函式名稱，如果沒有則預設為 'callback'
+    const callback = e.parameter.callback || 'callback';
+    
+    // 呼叫總彙整函式，獲取資料
+    const reportData = getGrandSummaryReportData();
+    const jsonString = JSON.stringify(reportData);
+    
+    // 【核心修改】將 JSON 字串包裹在 callback 函式中
+    const outputString = `${callback}(${jsonString});`;
+    
+    // 使用 ContentService 回傳，並將 MIME 類型設為 JAVASCRIPT
+    return ContentService.createTextOutput(outputString)
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+
+
+
+
   const page = e.parameter.page;
   if (page === 'admin') {
     const userEmail = getCurrentUserEmail_();
@@ -84,6 +105,7 @@ function getPartialHtmlFromFile(fileName) {
         'Admin_CaseAdminManagement', 
         'Admin_ProductManagement', 
         'Admin_SiteInfoManagement', 
+        'Admin_BusinessUnitManagement',
         'Admin_Settings',
         
         // index.html 用的子頁面
@@ -91,6 +113,7 @@ function getPartialHtmlFromFile(fileName) {
         'Page_LooseOrder', 
         'Page_CaseSummary', 
         'Page_LooseSummary',
+        'Page_GrandSummary',
         'Page_MyProfile',
         'Page_OrderHistory',
         'Page_DeliveryHistory',
@@ -117,9 +140,11 @@ function isUserAuthorized_(userEmail, sheet) {
   try {
     if (!userEmail) return false;
     if (sheet.getLastRow() < 2) return false;
-    const data = sheet.getRange(2, 3, sheet.getLastRow() - 1, 2).getValues(); // C:Email, D:授權
+    // 【核心修改】讀取範圍從 C 欄到 F 欄 (共 4 欄)
+    const data = sheet.getRange(2, 3, sheet.getLastRow() - 1, 4).getValues(); // C:Email, D:單位, E:加油站, F:授權
     for (const row of data) {
-      if (String(row[0] || '').toLowerCase().trim() === userEmail && row[1] === true) {
+      // 在這個範圍內，Email 是第0個元素(row[0]), 授權狀態是第3個元素(row[3])
+      if (String(row[0] || '').toLowerCase().trim() === userEmail && row[3] === true) {
         return true;
       }
     }
@@ -127,19 +152,25 @@ function isUserAuthorized_(userEmail, sheet) {
   } catch (e) { return false; }
 }
 
+// 請替換此函式
 function isUserPending_(userEmail, sheet) {
   try {
     if (!userEmail) return false;
     if (sheet.getLastRow() < 2) return false;
-    const data = sheet.getRange(2, 3, sheet.getLastRow() - 1, 2).getValues();
+    
+    // 【核心修改】讀取範圍從 C 欄到 F 欄 (共 4 欄)
+    const data = sheet.getRange(2, 3, sheet.getLastRow() - 1, 4).getValues();
+
     for (const row of data) {
-      if (String(row[0] || '').toLowerCase().trim() === userEmail && row[1] !== true) {
+      // 在這個範圍內，Email 是第0個元素(row[0]), 授權狀態是第3個元素(row[3])
+      if (String(row[0] || '').toLowerCase().trim() === userEmail && row[3] !== true) {
         return true;
       }
     }
     return false;
   } catch (e) { return false; }
 }
+
 
 function requestAuthorization(userInfo) {
   try {
@@ -148,7 +179,18 @@ function requestAuthorization(userInfo) {
     const { name, employeeId } = userInfo;
     if (!name || !employeeId) throw new Error("姓名和員工編號不可為空。");
     const sheet = getAuthSheet_();
-    sheet.appendRow([name.trim(), "'" + String(employeeId).trim(), userEmail, false, '']);
+    
+    // 【核心修改】appendRow 的陣列擴充為 7 個元素
+    sheet.appendRow([
+        name.trim(),                  // A: 姓名
+        "'" + String(employeeId).trim(), // B: 員工編號
+        userEmail,                    // C: Email
+        '',                           // D: 隸屬單位名稱 (預設為空)
+        false,                        // E: 是否為加油站人員 (預設為否)
+        false,                        // F: 審核 (預設為否)
+        ''                            // G: 備註 (預設為空)
+    ]);
+
     sheet.getRange(sheet.getLastRow(), 2).setNumberFormat("@");
     SpreadsheetApp.flush();
     return { success: true };
@@ -164,24 +206,37 @@ function checkIfCurrentUserIsApproved() {
 function checkUserRoles() {
   try {
     const userEmail = getCurrentUserEmail_();
-    if (!userEmail) return { isAuthorized: false, isCaseAdmin: false, isMainAdmin: false, email: '' };
+    if (!userEmail) return { isAuthorized: false, isCaseAdmin: false, isMainAdmin: false, isGasStationStaff: false, email: '' };
 
     const isMainAdmin = ADMIN_EMAILS.includes(userEmail);
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const userSheet = spreadsheet.getSheets()[0];
+    const userSheet = spreadsheet.getSheetByName("訂購網頁權限"); // 直接用名稱獲取
     const caseAdminSheet = spreadsheet.getSheetByName("成箱管理員權限");
 
     let isAuthorized = isUserAuthorized_(userEmail, userSheet);
+    let isGasStationStaff = false;
+    // 從「訂購網頁權限」工作表中，一次性獲取授權狀態和加油站人員狀態
+    if (userSheet) {
+      const data = userSheet.getRange("C2:F" + userSheet.getLastRow()).getValues(); // C:Email, E:加油站人員, F:審核
+      for (const row of data) {
+        if (String(row[0]).toLowerCase().trim() === userEmail) {
+          if(row[3] === true) isAuthorized = true; // F欄是審核
+          if(row[2] === true) isGasStationStaff = true; // E欄是加油站人員
+          break; // 找到後即可跳出迴圈
+        }
+      }
+    }
+
     let isCaseAdmin = false;
     if (caseAdminSheet) {
       isCaseAdmin = isUserAuthorized_(userEmail, caseAdminSheet); // 重複使用 isUserAuthorized_ 邏輯
     }
     
-    const finalRoles = { isAuthorized, isCaseAdmin, isMainAdmin, email: userEmail };
+    const finalRoles = { isAuthorized, isCaseAdmin, isMainAdmin, isGasStationStaff, email: userEmail };
     Logger.log("checkUserRoles: 最終回傳的角色物件: " + JSON.stringify(finalRoles));
     return finalRoles;
   } catch (e) {
-    return { isAuthorized: false, isCaseAdmin: false, isMainAdmin: false, email: '', error: e.message };
+    return { isAuthorized: false, isCaseAdmin: false, isMainAdmin: false, isGasStationStaff: false, email: '', error: e.message };
   }
 }
 
