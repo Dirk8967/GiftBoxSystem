@@ -60,17 +60,20 @@ function getCaseAdminListData() {
     const sheet = getCaseAdminSheet_();
     if (sheet.getLastRow() < 2) { return []; } // 只有標頭或空表
 
-    const numDataRows = sheet.getLastRow() - 1;
-    const values = sheet.getRange(2, 1, numDataRows, 5).getValues(); // A到E欄 (姓名, 員工編號, Email, 授權, 備註)
+    // 【核心修改】讀取範圍擴大到 G 欄 (共 7 欄)
+    const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 7).getValues();
     
     const caseAdmins = values.map(function(row, index) {
-      return {
-        rowNumber: index + 2,
-        name: String(row[0] || ''),
-        employeeId: String(row[1] || ''),
-        email: String(row[2] || ''),
-        isApproved: row[3] === true,
-        remarks: String(row[4] || '')
+      // 【核心修改】回傳的物件新增兩個欄位
+      return {
+        rowNumber: index + 2,
+        name: String(row[0] || ''),
+        employeeId: String(row[1] || ''),
+        email: String(row[2] || ''),
+        affiliatedUnit: String(row[3] || ''),     // D欄: 隸屬單位名稱
+        isGasStationStaff: row[4] === true,     // E欄: 是否為加油站人員
+        isApproved: row[5] === true,              // F欄: 審核
+        remarks: String(row[6] || '')             // G欄: 備註
       };
     });
     
@@ -84,72 +87,74 @@ function getCaseAdminListData() {
 }
 
 /**
- * 新增成箱管理員資料，並強制設定員工編號格式以保留前導零
- * @param {Object} adminData - { name, employeeId, email, isApproved, remarks }
- * @returns {Object} { success: boolean, error?: string }
- */
+ * (C)reate - [更新版] 新增成箱管理員資料
+ */
 function addCaseAdminData(adminData) {
-  try {
-    const { name, employeeId, email, isApproved, remarks } = adminData; 
-    if (!name || !String(employeeId).trim() || !email) {
-      throw new Error("姓名、員工編號和 Email 為必填欄位。");
-    }
-    
-    const sheet = getCaseAdminSheet_();
-    const employeeIdStr = String(employeeId).trim();
+  try {
+    const { name, employeeId, email, affiliatedUnit, isGasStationStaff, isApproved, remarks } = adminData; 
+    if (!name || !String(employeeId).trim() || !email) {
+      throw new Error("姓名、員工編號和 Email 為必填欄位。");
+    }
+    
+    const sheet = getCaseAdminSheet_();
+    const employeeIdStr = String(employeeId).trim();
 
-    sheet.appendRow([
-        name.trim(), 
-        "'" + employeeIdStr, // 在員工編號前加上單引號
-        email.trim().toLowerCase(), 
-        isApproved === true, 
-        remarks || '' 
-    ]);
-    
-    const lastRow = sheet.getLastRow();
-    sheet.getRange(lastRow, 2).setNumberFormat("@"); // B欄: 員工編號
+    // 【核心修改】寫入的陣列現在包含 7 個元素
+    sheet.appendRow([
+        name.trim(), 
+        "'" + employeeIdStr, 
+        email.trim().toLowerCase(), 
+      affiliatedUnit || '',
+      isGasStationStaff === true,
+        isApproved === true, 
+        remarks || '' 
+    ]);
+    
+    const lastRow = sheet.getLastRow();
+    sheet.getRange(lastRow, 2).setNumberFormat("@"); 
 
-    SpreadsheetApp.flush();
-    clearCaseAdminCache_();
-    return { success: true };
-  } catch (e) {
-    console.error('新增成箱管理員失敗: ' + e.toString());
-    return { success: false, error: e.message };
-  }
+    SpreadsheetApp.flush();
+    clearCaseAdminCache_();
+    return { success: true };
+  } catch (e) {
+    console.error('新增成箱管理員失敗: ' + e.toString());
+    return { success: false, error: e.message };
+  }
 }
 
 /**
- * 更新指定列的成箱管理員資料，並強制設定員工編號格式以保留前導零
- * @param {Object} adminData - { rowNumber, name, employeeId, email, isApproved, remarks }
- * @returns {Object} { success: boolean, error?: string }
- */
+ * (U)pdate - [更新版] 更新指定列的成箱管理員資料
+ */
 function updateCaseAdminData(adminData) {
-  try {
-    const { rowNumber, name, employeeId, email, isApproved, remarks } = adminData; 
-    if (!rowNumber || !name || !String(employeeId).trim() || !email) { 
-      throw new Error("缺少必要更新資訊 (列號、姓名、員工編號、Email)。");
-    }
-    
-    const sheet = getCaseAdminSheet_();
-    const employeeIdStr = String(employeeId).trim();
-    
-    sheet.getRange(rowNumber, 1, 1, 5).setValues([[ 
-        name.trim(), 
-        "'" + employeeIdStr, // 在員工編號前加上單引號
-        email.trim().toLowerCase(), 
-        isApproved === true,
-        remarks || '' 
-    ]]);
+  try {
+    const { rowNumber, name, employeeId, email, affiliatedUnit, isGasStationStaff, isApproved, remarks } = adminData; 
+    if (!rowNumber || !name || !String(employeeId).trim() || !email) { 
+      throw new Error("缺少必要更新資訊。");
+    }
+    
+    const sheet = getCaseAdminSheet_();
+    const employeeIdStr = String(employeeId).trim();
+    
+    // 【核心修改】更新的範圍和內容擴大到 7 欄
+    sheet.getRange(rowNumber, 1, 1, 7).setValues([[ 
+        name.trim(), 
+        "'" + employeeIdStr, 
+        email.trim().toLowerCase(), 
+        affiliatedUnit || '',
+        isGasStationStaff === true,
+        isApproved === true,
+        remarks || '' 
+    ]]);
 
-    sheet.getRange(rowNumber, 2).setNumberFormat("@"); // B欄: 員工編號
+    sheet.getRange(rowNumber, 2).setNumberFormat("@");
 
-    SpreadsheetApp.flush();
-    clearCaseAdminCache_();
-    return { success: true };
-  } catch (e) {
-    console.error('更新成箱管理員失敗 (列號: ' + adminData.rowNumber + '): ' + e.toString());
-    return { success: false, error: e.message };
-  }
+    SpreadsheetApp.flush();
+    clearCaseAdminCache_();
+    return { success: true };
+  } catch (e) {
+    console.error('更新成箱管理員失敗 (列號: ' + adminData.rowNumber + '): ' + e.toString());
+    return { success: false, error: e.message };
+  }
 }
 
 /**
