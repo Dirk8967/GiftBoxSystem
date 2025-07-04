@@ -54,38 +54,38 @@ function addUserData(userData) {
 }
 
 /**
- * (U)pdate - [更新版] 更新指定列的使用者資料
- */
+ * (U)pdate - [更新版] 更新指定列的使用者資料
+ */
 function updateUserData(userData) {
-  try {
-    const { rowNumber, name, employeeId, email, affiliatedUnit, isGasStationStaff, isApproved, remarks } = userData; 
-    if (!rowNumber || !name || !String(employeeId).trim() || !email) { 
-      throw new Error("缺少必要更新資訊。");
-    }
-    
-    const sheet = getAuthSheet_();
-    const employeeIdStr = String(employeeId).trim();
-    
+  try {
+    const { rowNumber, name, employeeId, email, affiliatedUnit, isGasStationStaff, isApproved, remarks } = userData; 
+    if (!rowNumber || !name || !String(employeeId).trim() || !email) { 
+      throw new Error("缺少必要更新資訊。");
+    }
+    
+    const sheet = getAuthSheet_();
+    const employeeIdStr = String(employeeId).trim();
+    
     // 【核心修改】更新的範圍和內容擴大到 7 欄
-    sheet.getRange(rowNumber, 1, 1, 7).setValues([[ 
-        name.trim(), 
-        "'" + employeeIdStr, 
-        email.trim().toLowerCase(), 
+    sheet.getRange(rowNumber, 1, 1, 7).setValues([[ 
+        name.trim(), 
+        "'" + employeeIdStr, 
+        email.trim().toLowerCase(), 
         affiliatedUnit || '',
         isGasStationStaff === true,
-        isApproved === true,
-        remarks || '' 
-    ]]);
+        isApproved === true,
+        remarks || '' 
+    ]]);
 
-    sheet.getRange(rowNumber, 2).setNumberFormat("@");
+    sheet.getRange(rowNumber, 2).setNumberFormat("@");
 
-    SpreadsheetApp.flush();
-    clearApplicantsCache_();
-    return { success: true };
-  } catch (e) {
-    console.error('更新使用者失敗 (列號: ' + userData.rowNumber + '): ' + e.toString());
-    return { success: false, error: e.message };
-  }
+    SpreadsheetApp.flush();
+    clearApplicantsCache_();
+    return { success: true };
+  } catch (e) {
+    console.error('更新使用者失敗 (列號: ' + userData.rowNumber + '): ' + e.toString());
+    return { success: false, error: e.message };
+  }
 }
 
 /**
@@ -115,6 +115,7 @@ function deleteUserData(deleteInfo) {
  * 獲取所有申請者的資料以供後台顯示
  */
 function getApplicantsData() {
+  clearApplicantsCache_();
   const cache = CacheService.getScriptCache();
   const cached = cache.get(APPLICANTS_CACHE_KEY); 
   if (cached != null) {
@@ -153,32 +154,32 @@ function getApplicantsData() {
 }
 
 /**
- * [更新版] 更新試算表中的審核狀態
- */
+ * [更新版] 更新試算表中的審核狀態
+ */
 function updateApprovalStatus(approvalData) {
-  if (!Array.isArray(approvalData)) {
-    return { success: false, error: "提供的資料格式錯誤。" };
-  }
-  try {
-    const sheet = getAuthSheet_(); 
-    let changesMade = 0;
-    approvalData.forEach(function(item) {
-      if (typeof item.rowNumber === 'number' && typeof item.isApproved === 'boolean') {
+  if (!Array.isArray(approvalData)) {
+    return { success: false, error: "提供的資料格式錯誤。" };
+  }
+  try {
+    const sheet = getAuthSheet_(); 
+    let changesMade = 0;
+    approvalData.forEach(function(item) {
+      if (typeof item.rowNumber === 'number' && typeof item.isApproved === 'boolean') {
         // 【核心修改】將寫入的欄位從第 4 欄 (D欄) 改為第 6 欄 (F欄)
-        sheet.getRange(item.rowNumber, 6).setValue(item.isApproved);
-        changesMade++;
-      } else {
-        console.warn('updateApprovalStatus: 收到無效的項目資料', item);
-      }
-    });
+        sheet.getRange(item.rowNumber, 6).setValue(item.isApproved);
+        changesMade++;
+      } else {
+        console.warn('updateApprovalStatus: 收到無效的項目資料', item);
+      }
+    });
 
-    if (changesMade > 0) {
-        SpreadsheetApp.flush();
-        clearApplicantsCache_(); 
-    }
-    return { success: true, message: changesMade > 0 ? '審核狀態已更新。' : '沒有變更被儲存。' };
-  } catch (e) {
-    console.error('更新審核狀態失敗: ' + e.toString());
-    return { success: false, error: e.message };
-  }
+    if (changesMade > 0) {
+        SpreadsheetApp.flush();
+        clearApplicantsCache_(); 
+    }
+    return { success: true, message: changesMade > 0 ? '審核狀態已更新。' : '沒有變更被儲存。' };
+  } catch (e) {
+    console.error('更新審核狀態失敗: ' + e.toString());
+    return { success: false, error: e.message };
+  }
 }
