@@ -45,6 +45,16 @@
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
+
+        .action-button {
+            background-color: #007bff; color: white; border: none; padding: 12px 20px; /* 調整按鈕padding */
+            border-radius: 8px; font-size: 16px; font-weight: 700;
+            cursor: pointer; margin-top: 25px; transition: background-color 0.3s;
+            width: 70%; /* 按鈕寬度設為100% */
+            max-width: 280px; /* 按鈕最大寬度 */
+            box-sizing: border-box;
+
+        }
     </style>
 </head>
 <body>
@@ -55,8 +65,9 @@
             </svg>
         </div>
         <h1 class="title">申請已提交，審核中...</h1>
-        <p class="message">您的授權申請已成功送出，請靜待管理員審核。<br>核准後此頁面將會自動跳轉。</p>
+        <p class="message">您的授權申請已成功送出，請靜待管理員審核。<br></p>
         <p class="status-text" id="status-text">正在等待伺服器回應...</p>
+        <button class="action-button" id="openModalBtn" onclick="window.top.location.href = WEB_APP_URL;" style="display: none">前往訂購系統</button>
     </div>
 
     <script>
@@ -73,11 +84,12 @@
             if (isApproved === true) {
                 // 如果已核准
                 if (statusTextEl) {
-                    statusTextEl.textContent = '權限已核准！請重新整理畫面(F5)...';
+                    statusTextEl.textContent = '權限已核准！請點擊下方按鈕...';
                     statusTextEl.style.color = '#28a745'; // 綠色
                 }
                 // 使用 window.top.location.href 確保跳轉整個頁面，而不是 iframe
-                window.top.location.href = WEB_APP_URL;
+                //window.top.location.href = WEB_APP_URL;
+                document.getElementById('openModalBtn').style.display = 'inline';
             } else {
                 // 如果尚未核准，更新提示文字並準備下一次檢查
                 if (statusTextEl) {
