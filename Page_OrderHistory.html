@@ -1,12 +1,33 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-  </head>
-  <body>
-    <div class="container">
-    <h2>訂購紀錄</h2>
-    <p>此處將會顯示您個人的歷史訂購紀錄。</p>
+<div class="container" id="page-order-history">
+    <div class="history-section">
+        <div class="section-header">
+            <h2>成箱訂購紀錄</h2>
+            <button id="saveCaseHistoryBtn" class="action-btn btn-save" style="display:none;">儲存「成箱」變更</button>
+        </div>
+        <div id="case-order-history-container" class="table-container">
+            <table>
+                <thead>
+                    </thead>
+                <tbody>
+                    <tr><td colspan="12">載入成箱訂購紀錄中...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-  </body>
-</html>
+    
+    <div class="history-section" style="margin-top: 30px;">
+        <div class="section-header">
+            <h2>零星訂購紀錄</h2>
+            <button id="saveLooseHistoryBtn" class="action-btn btn-save" style="display:none;">儲存「零星」變更</button>
+        </div>
+        <div id="loose-order-history-container" class="table-container">
+            <table>
+                <thead>
+                </thead>
+                <tbody>
+                    <tr><td colspan="11">載入零星訂購紀錄中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
