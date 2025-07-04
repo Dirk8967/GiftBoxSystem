@@ -563,6 +563,57 @@
         .summary-table .col-is-arrived {
             min-width: 90px !important;
         }
+
+        /* --- [美化] 訂購紀錄頁面 - 表格內可編輯欄位 --- */
+
+        /* 1. 針對「訂購紀錄」兩個表格中所有輸入框/下拉選單的通用樣式 */
+        .history-section .control-input {
+            width: 100%;
+            height: 36px; /* 統一樣式，讓表格更整齊 */
+            padding: 6px 8px;
+            font-size: 14px;
+            font-family: inherit; /* 繼承表格字體 */
+            color: #212529;
+            
+            /* 預設狀態：淺色背景，透明邊框，看起來像是頁面的一部分 */
+            background-color: #f0f2f5; 
+            border: 1px solid transparent; 
+            
+            border-radius: 4px;
+            box-sizing: border-box; /* 確保 padding 不會撐大儲存格 */
+            
+            /* 為所有狀態變化加上平滑過渡動畫 */
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* 2. 當滑鼠移到可編輯欄位上時，顯示邊框，提示可以點擊 */
+        .history-section .control-input:hover {
+            border-color: #ced4da;
+            background-color: #fff;
+        }
+
+        /* 3. 當使用者點擊輸入框 (獲取焦點) 時的「光暈」效果 */
+        .history-section .control-input:focus {
+            outline: none;
+            border-color: #86b7fe; /* 淺藍色邊框 */
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25); /* 柔和的藍色光暈 */
+        }
+
+        /* 4. 針對下拉選單 (select) 的特殊美化，換上自訂箭頭 */
+        .history-section select.control-input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 0.8em;
+            padding-right: 28px; /* 為箭頭留出空間 */
+        }
+        .history-section .control-select {
+            min-width: 65px !important;
+        }
     </style>
     
 </head>
@@ -575,6 +626,7 @@
                 <button id="navLooseOrder" class="nav-button"><span class="material-symbols-outlined">shopping_cart</span>零星訂購</button>
                 <button id="navCaseSummary" class="nav-button"><span class="material-symbols-outlined">assessment</span>成箱彙總表</button>
                 <button id="navLooseSummary" class="nav-button"><span class="material-symbols-outlined">list_alt</span>零星彙總表</button>
+                <button id="navGrandSummary" class="nav-button"><span class="material-symbols-outlined">query_stats</span>總彙總表</button>
                 <button id="navCaseOrderAdmin" class="nav-button nav-button-admin hidden"><span class="material-symbols-outlined">task_alt</span>成箱訂購管理</button>
                 <div id="navLooseOrderAdmin" class="nav-dropdown hidden">
                     <button class="nav-button nav-button-admin"><span class="material-symbols-outlined">receipt_long</span>零星訂購管理<span class="material-symbols-outlined">arrow_drop_down</span></button>
@@ -902,6 +954,7 @@ window.addEventListener('load', function() {
         document.getElementById('navLooseOrder').addEventListener('click', function(){ showSubPage('Page_LooseOrder', this); });
         document.getElementById('navCaseSummary').addEventListener('click', function(){ showSubPage('Page_CaseSummary', this); });
         document.getElementById('navLooseSummary').addEventListener('click', function(){ showSubPage('Page_LooseSummary', this); });
+        document.getElementById('navGrandSummary').addEventListener('click', function(){ showSubPage('Page_GrandSummary', this); });
         document.getElementById('navCaseOrderAdmin').addEventListener('click', function(){ showSubPage('Page_CaseOrderAdmin', this); });
         
         document.getElementById('navMyProfile').addEventListener('click', function(){ showSubPage('Page_MyProfile', this); });
@@ -1053,10 +1106,13 @@ window.addEventListener('load', function() {
                         if (pageFileName === 'Page_MyProfile') { loadMyProfileData(); } 
                         else if (pageFileName === 'Page_CaseOrder') { loadCaseOrderPageData(); }
                         else if (pageFileName === 'Page_LooseOrder') { loadLooseOrderPageData(); }
+                        else if (pageFileName === 'Page_GrandSummary') { loadGrandSummaryData(); }
                         else if (pageFileName === 'Page_CaseOrderAdmin') { loadCaseOrderAdminCRUDPage(); }
                         else if (pageFileName === 'Page_LooseOrderAdmin') { loadLooseOrderAdminPage(); }
                         else if (pageFileName === 'Page_IOManagement') { loadIoManagementPage(); }
                         else if (pageFileName === 'Page_InventoryManagement') { loadInventoryManagementPage(); }
+                        else if (pageFileName === 'Page_OrderHistory') { loadOrderHistoryPage(); }
+                        else if (pageFileName === 'Page_DeliveryHistory') { loadDeliveryHistoryPage(); }
                     } else {
                         contentArea.innerHTML = htmlContent || '<div class="container"><p style="color:red;">載入頁面時收到無效內容。</p></div>';
                     }
@@ -1543,7 +1599,10 @@ window.addEventListener('load', function() {
                 return;
             }
 
-            const { headers, summary, sites } = data;
+            const { headers, summary, sites, totalAmounts } = data;
+
+            // 【修改點】在表頭最後加入「總金額」
+            const finalHeaders = headers.concat("總金額");
 
             // 創建表格結構
             const tableContainer = document.createElement('div');
@@ -1555,9 +1614,10 @@ window.addEventListener('load', function() {
             
             // 創建表頭
             const headerRow = thead.insertRow();
-            headers.forEach(headerText => {
+            finalHeaders.forEach(headerText => {
                 const th = document.createElement('th');
                 th.textContent = headerText;
+                if(headerText == '總金額') th.className = 'text-center';
                 headerRow.appendChild(th);
             });
 
@@ -1574,7 +1634,17 @@ window.addEventListener('load', function() {
                     dataCell.className = 'text-center';
                     const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
                     dataCell.textContent = quantity > 0 ? quantity : '';
+                    dataCell.dataset.productName = productName;
+                    dataCell.dataset.siteName = siteName;
                 }
+
+                // 【新增】最後一欄：總金額
+                const totalAmountCell = row.insertCell();
+                totalAmountCell.className = 'text-center'; // 金額置中對齊
+                totalAmountCell.style.fontWeight = 'bold'; // 字體加粗
+                const amount = totalAmounts ? (totalAmounts[siteName] || 0) : 0;
+                // 使用 toLocaleString() 將數字格式化，例如 10000 -> 10,000
+                totalAmountCell.textContent = amount > 0 ? amount.toLocaleString('en-US') : ''; 
             });
 
             tableContainer.appendChild(table);
@@ -1615,8 +1685,10 @@ window.addEventListener('load', function() {
               return;
           }
 
-          // const { headers, summary, sites } = data;
-          const { headers, sites, ordered, arrived, inTransit } = data;
+          const { headers, sites, ordered, arrived, inTransit, totalAmounts } = data;
+          // 【核心修改 2】在表頭最後加入「總金額」
+          const finalHeaders = headers.concat("總金額");
+
           // 創建表格結構
             const tableContainer = document.createElement('div');
             tableContainer.className = 'table-container';
@@ -1627,9 +1699,10 @@ window.addEventListener('load', function() {
             
             // 創建表頭
             const headerRow = thead.insertRow();
-            headers.forEach(headerText => {
+            finalHeaders.forEach(headerText => {
                 const th = document.createElement('th');
                 th.textContent = headerText;
+                if(headerText == '總金額') th.className = 'text-center';
                 headerRow.appendChild(th);
             });
 
@@ -1640,13 +1713,6 @@ window.addEventListener('load', function() {
                 siteCell.textContent = siteName;
                 siteCell.style.fontWeight = 'bold';
 
-                // for (let i = 1; i < headers.length; i++) {
-                //     const productName = headers[i];
-                //     const dataCell = row.insertCell();
-                //     dataCell.className = 'text-center';
-                //     const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
-                //     dataCell.textContent = quantity > 0 ? quantity : '';
-                // }
                 for (let i = 1; i < headers.length; i++) {
                     const productName = headers[i];
                     const dataCell = row.insertCell();
@@ -1679,6 +1745,14 @@ window.addEventListener('load', function() {
                     dataCell.dataset.siteName = siteName;
                     dataCell.textContent = orderedQty > 0 ? orderedQty : '';
                 }
+
+                // 【新增】最後一欄：總金額
+                const totalAmountCell = row.insertCell();
+                totalAmountCell.className = 'text-center'; // 金額置中對齊
+                totalAmountCell.style.fontWeight = 'bold'; // 字體加粗
+                const amount = totalAmounts ? (totalAmounts[siteName] || 0) : 0;
+                // 使用 toLocaleString() 將數字格式化，例如 10000 -> 10,000
+                totalAmountCell.textContent = amount > 0 ? amount.toLocaleString('en-US') : ''; 
             });
 
             tableContainer.appendChild(table);
@@ -1704,6 +1778,112 @@ window.addEventListener('load', function() {
                   }
               });
           }
+      }
+
+      /**
+       * 【新增】載入「總彙總表」的資料
+       */
+      function loadGrandSummaryData() {
+          const pageContainer = document.getElementById('page-grand-summary');
+          if (!pageContainer) {
+              // 如果找不到特定頁面的容器，就用通用方式處理
+              const contentArea = document.getElementById('main-content-area');
+              contentArea.innerHTML = '<div class="container" id="page-grand-summary"><p>正在產生總彙總表中...</p></div>';
+          } else {
+              pageContainer.innerHTML = '<p>正在產生總彙總表中...</p>';
+          }
+
+          // 呼叫新的後端函式
+          google.script.run
+              .withSuccessHandler(function(data) {
+                  // 【複用】直接使用通用的 renderSummaryTable 函式來渲染表格
+                  renderSummaryTable(data, '總彙總表', 'page-grand-summary', 'grand-summary-status-msg');
+              })
+              .withFailureHandler(function(err) {
+                  const container = document.getElementById('page-grand-summary');
+                  if (container) {
+                      container.innerHTML = '<h2>總彙總表</h2><p style="color:red;">無法產生彙總表。</p>';
+                  }
+              })
+              .getGrandSummaryData();
+      }
+
+      /**
+       * 【通用版 - 含總金額】將彙總資料渲染成表格
+       * @param {Object} data - 從後端接收的彙總資料物件，應包含 headers, sites, summary, totalAmounts
+      * @param {string} title - 該頁面的主標題，例如 "成箱彙總表"
+      * @param {string} pageContainerId - 要將表格注入的「頁面」容器 ID，例如 "page-case-summary"
+       */
+      function renderSummaryTable(data, title, pageContainerId) {
+          const pageContainer = document.getElementById(pageContainerId);
+          if (!pageContainer) {
+              console.error("renderSummaryTable 錯誤: 找不到頁面容器 #" + pageContainerId);
+              return;
+          }
+
+          // 檢查從後端收到的資料是否有效
+          if (!data || !data.success) {
+            pageContainer.innerHTML = `<h2>${title}</h2><p style="color:red;">` + (data.error || '未知的錯誤') + `</p>`;
+              return;
+          }
+
+          // 從 data 物件中，解構出所有需要的資料
+          const { headers, summary, sites, totalAmounts } = data;
+
+          // 在從後端收到的表頭陣列（商品列表）最後，加上「總金額」這一項
+          const finalHeaders = headers.concat("總金額");
+
+          // 創建表格的外部容器和表格本身
+          const tableContainer = document.createElement('div'); 
+          tableContainer.className = 'summary-table-container table-container';
+          const table = document.createElement('table');
+          table.id = 'summary-table';
+          //table.className = 'summary-table'; // 套用凍結窗格等樣式
+          const thead = table.createTHead();
+          const tbody = table.createTBody();
+          
+          // 步驟 1: 創建表頭 (thead)
+          const headerRow = thead.insertRow();
+          finalHeaders.forEach(headerText => {
+              const th = document.createElement('th');
+              th.textContent = headerText;
+              if(headerText == '總金額') th.className = 'text-center';
+              headerRow.appendChild(th);
+          });
+
+          // 步驟 2: 創建表格內容 (tbody)
+          sites.forEach(siteName => {
+              const row = tbody.insertRow();
+              
+              // 2a. 創建第一欄：站名
+              const siteCell = row.insertCell();
+              siteCell.textContent = siteName;
+
+              // 2b. 遍歷商品，創建中間的數量儲存格
+              for (let i = 1; i < headers.length; i++) {
+                  const productName = headers[i];
+                  const dataCell = row.insertCell();
+                  dataCell.className = 'text-center drill-down-cell';
+                  const quantity = summary[siteName] ? (summary[siteName][productName] || 0) : 0;
+                  dataCell.textContent = quantity > 0 ? quantity : '';
+                  // 為儲存格加上鑽取查詢所需的 data-* 屬性
+                  dataCell.dataset.productName = productName;
+                  dataCell.dataset.siteName = siteName;
+              }
+
+              // 2c. 創建最後一欄：總金額
+              const totalAmountCell = row.insertCell();
+              totalAmountCell.className = 'text-center'; // 套用置中樣式
+              totalAmountCell.style.fontWeight = 'bold';
+              const amount = totalAmounts ? (totalAmounts[siteName] || 0) : 0;
+              // 使用 toLocaleString() 將數字格式化，例如 10000 -> 10,000
+              totalAmountCell.textContent = amount > 0 ? amount.toLocaleString('en-US') : ''; 
+          });
+
+          // 步驟 3: 將組合好的表格放入頁面容器中
+          tableContainer.appendChild(table);
+          pageContainer.innerHTML = `<h2>${title}</h2>`; // 先清空並加入標題
+          pageContainer.appendChild(tableContainer);
       }
 
 
@@ -3181,9 +3361,507 @@ function saveAllPurchaseChanges() {
         .updatePurchaseRecords(changedRecords);
 }
 
-// (請保留您所有其他與此功能無關的函式)
+// ==========================================================
+// ================ 訂購紀錄頁面 (功能完整版) ===============
+// ==========================================================
+let isGasStationUser = false; // 全域變數，儲存使用者角色
+
+/**
+ * 主載入函式：先檢查角色，再獲取兩種訂單資料
+ */
+function loadOrderHistoryPage() {
+    google.script.run
+        .withSuccessHandler(function(roles) {
+            isGasStationUser = roles.isGasStationStaff;
+            
+            // 獲取成箱訂單紀錄
+            google.script.run
+                .withSuccessHandler(response => renderCaseOrderHistoryTable(response.data, isGasStationUser))
+                .withFailureHandler(err => { document.getElementById('case-order-history-container').innerHTML = `<p style="color:red">無法載入成箱紀錄</p>`; })
+                .getCaseOrderHistoryForUser();
+
+            // 獲取零星訂單紀錄
+            google.script.run
+                .withSuccessHandler(response => renderLooseOrderHistoryTable(response.data, isGasStationUser))
+                .withFailureHandler(err => { document.getElementById('loose-order-history-container').innerHTML = `<p style="color:red">無法載入零星紀錄</p>`; })
+                .getLooseOrderHistoryForUser();
+            
+            // 綁定儲存按鈕事件
+            if (isGasStationUser) {
+                document.getElementById('saveCaseHistoryBtn').addEventListener('click', saveCaseOrderHistoryChanges);
+                document.getElementById('saveLooseHistoryBtn').addEventListener('click', saveLooseOrderHistoryChanges);
+            }
+        })
+        .withFailureHandler(err => {
+            document.getElementById('page-order-history').innerHTML = `<p style="color:red">無法驗證使用者角色。</p>`;
+        })
+        .checkUserRoles();
+}
+
+/**
+ * [更穩健版] 渲染「成箱訂購紀錄」表格
+ * @param {Array<Object>} orders - 從後端傳來的訂單物件陣列
+ * @param {boolean} isEditable - 使用者是否為加油站人員
+ */
+function renderCaseOrderHistoryTable(orders, isEditable) {
+    const container = document.getElementById('case-order-history-container');
+    const table = container.querySelector('table');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    const saveBtn = document.getElementById('saveCaseHistoryBtn');
+
+    if (!tbody || !thead || !saveBtn) return;
+
+    // 1. 清空舊內容並產生表頭
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+    const headers = ['訂購人姓名','電話','商品名稱','盒數','總計金額','寄送地點','寄送日期','訂單隸屬站點','已繳費','繳費時間','訂購時間','訂單編號'];
+    thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${headers.length}">您沒有成箱訂購紀錄。</td></tr>`;
+        saveBtn.style.display = 'none';
+        return;
+    }
+
+    // 根據權限決定是否顯示儲存按鈕
+    saveBtn.style.display = isEditable ? 'inline-flex' : 'none';
+
+    // 2. 逐一建立每一列 (tr) 和儲存格 (td)
+    const fragment = document.createDocumentFragment();
+    orders.forEach(order => {
+        const tr = document.createElement('tr');
+        
+        // 輔助函式，用來建立純文字的儲存格
+        const createTextCell = (text) => {
+            const td = document.createElement('td');
+            td.textContent = text || '';
+            return td;
+        };
+        
+        // 產生所有儲存格
+        tr.appendChild(createTextCell(order.name));
+        tr.appendChild(createTextCell(order.phone));
+        tr.appendChild(createTextCell(order.productName));
+        tr.appendChild(createTextCell(order.quantity));
+        tr.appendChild(createTextCell(order.totalAmount));
+        tr.appendChild(createTextCell(order.location));
+        tr.appendChild(createTextCell(order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : ''));
+        tr.appendChild(createTextCell(order.affiliatedSite));
+
+        // 【條件式渲染】已繳費欄位
+        const tdIsPaid = document.createElement('td');
+        if (isEditable) {
+            const select = document.createElement('select');
+            select.className = 'control-input control-select';
+            select.dataset.uuid = order.uuid;
+            select.dataset.field = 'isPaid';
+            select.innerHTML = `
+                <option value="true" ${order.isPaid ? 'selected' : ''}>是</option>
+                <option value="false" ${!order.isPaid ? 'selected' : ''}>否</option>
+            `;
+            tdIsPaid.appendChild(select);
+        } else {
+            tdIsPaid.textContent = order.isPaid ? '是' : '否';
+        }
+        tr.appendChild(tdIsPaid);
+
+        // 【條件式渲染】繳費時間欄位
+        const tdPaymentTime = document.createElement('td');
+        if (isEditable) {
+            const input = document.createElement('input');
+            input.type = 'datetime-local';
+            input.className = 'control-input';
+            input.value = convertUtcToLocalInputString(order.paymentTime); // 使用我們之前的輔助函式
+            input.dataset.uuid = order.uuid;
+            input.dataset.field = 'paymentTime';
+            tdPaymentTime.appendChild(input);
+        } else {
+            tdPaymentTime.textContent = order.paymentTime ? new Date(order.paymentTime).toLocaleString('zh-TW', { hour12: false }) : '';
+        }
+        tr.appendChild(tdPaymentTime);
+
+        // 剩餘的唯讀欄位
+        tr.appendChild(createTextCell(order.orderTime ? new Date(order.orderTime).toLocaleString('zh-TW', { hour12: false }) : ''));
+        tr.appendChild(createTextCell(order.orderId));
+
+        fragment.appendChild(tr);
+    });
+
+    tbody.appendChild(fragment);
+}
+
+/**
+ * [功能完整版] 渲染「零星訂購紀錄」表格
+ * @param {Array<Object>} orders - 從後端傳來的訂單物件陣列
+ * @param {boolean} isEditable - 使用者是否為加油站人員
+ */
+function renderLooseOrderHistoryTable(orders, isEditable) {
+    const container = document.getElementById('loose-order-history-container');
+    const table = container.querySelector('table');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    const saveBtn = document.getElementById('saveLooseHistoryBtn');
+
+    if (!tbody || !thead || !saveBtn) {
+        console.error("renderLooseOrderHistoryTable: Required elements not found.");
+        return;
+    }
+
+    // 1. 清空舊內容並產生表頭
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+    const headers = ['訂購人姓名','電話','商品名稱','盒數','總計金額','寄送地點','已繳費','繳費時間','已取貨','取貨時間','訂購時間'];
+    thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${headers.length}">您沒有零星訂購紀錄。</td></tr>`;
+        saveBtn.style.display = 'none';
+        return;
+    }
+
+    // 根據權限決定是否顯示儲存按鈕
+    saveBtn.style.display = isEditable ? 'inline-flex' : 'none';
+
+    // 2. 逐一建立每一列和儲存格
+    const fragment = document.createDocumentFragment();
+    orders.forEach(order => {
+        const tr = document.createElement('tr');
+        
+        const createTextCell = (text) => {
+            const td = document.createElement('td');
+            td.textContent = text || '';
+            return td;
+        };
+        
+        // --- 產生所有儲存格 ---
+        tr.appendChild(createTextCell(order.name));
+        tr.appendChild(createTextCell(order.phone));
+        tr.appendChild(createTextCell(order.productName));
+        tr.appendChild(createTextCell(order.quantity));
+        tr.appendChild(createTextCell(order.totalAmount));
+        tr.appendChild(createTextCell(order.location));
+
+        // --- 條件式渲染可編輯欄位 ---
+
+        // 已繳費 (H)
+        const tdIsPaid = document.createElement('td');
+        if (isEditable) {
+            const select = document.createElement('select');
+            select.className = 'control-input control-select';
+            select.dataset.uuid = order.uuid;
+            select.dataset.field = 'isPaid';
+            select.innerHTML = `<option value="true" ${order.isPaid ? 'selected':''}>是</option><option value="false" ${!order.isPaid ? 'selected':''}>否</option>`;
+            tdIsPaid.appendChild(select);
+        } else {
+            tdIsPaid.textContent = order.isPaid ? '是' : '否';
+        }
+        tr.appendChild(tdIsPaid);
+
+        // 繳費時間 (I)
+        const tdPaymentTime = document.createElement('td');
+        if (isEditable) {
+            const input = document.createElement('input');
+            input.type = 'datetime-local';
+            input.className = 'control-input';
+            input.value = convertUtcToLocalInputString(order.paymentTime);
+            input.dataset.uuid = order.uuid;
+            input.dataset.field = 'paymentTime';
+            tdPaymentTime.appendChild(input);
+        } else {
+            tdPaymentTime.textContent = order.paymentTime ? new Date(order.paymentTime).toLocaleString('zh-TW', { hour12: false }) : '';
+        }
+        tr.appendChild(tdPaymentTime);
+
+        // 已取貨 (J)
+        const tdIsPickedUp = document.createElement('td');
+        if (isEditable) {
+            const select = document.createElement('select');
+            select.className = 'control-input control-select';
+            select.dataset.uuid = order.uuid;
+            select.dataset.field = 'isPickedUp';
+            select.innerHTML = `<option value="true" ${order.isPickedUp ? 'selected':''}>是</option><option value="false" ${!order.isPickedUp ? 'selected':''}>否</option>`;
+            tdIsPickedUp.appendChild(select);
+        } else {
+            tdIsPickedUp.textContent = order.isPickedUp ? '是' : '否';
+        }
+        tr.appendChild(tdIsPickedUp);
+
+        // 取貨時間 (K)
+        const tdPickupTime = document.createElement('td');
+        if (isEditable) {
+            const input = document.createElement('input');
+            input.type = 'datetime-local';
+            input.className = 'control-input';
+            input.value = convertUtcToLocalInputString(order.pickupTime);
+            input.dataset.uuid = order.uuid;
+            input.dataset.field = 'pickupTime';
+            tdPickupTime.appendChild(input);
+        } else {
+            tdPickupTime.textContent = order.pickupTime ? new Date(order.pickupTime).toLocaleString('zh-TW', { hour12: false }) : '';
+        }
+        tr.appendChild(tdPickupTime);
+        
+        // 訂購時間 (L) - 唯讀
+        tr.appendChild(createTextCell(order.orderTime ? new Date(order.orderTime).toLocaleString('zh-TW', { hour12: false }) : ''));
+
+        fragment.appendChild(tr);
+    });
+
+    tbody.appendChild(fragment);
+}
+
+/**
+ * 儲存「成箱訂購紀錄」表格中的所有變更
+ */
+function saveCaseOrderHistoryChanges() {
+    const recordsToUpdate = [];
+    const changedUuids = new Set(); // 用來追蹤哪些 uuid 的資料被修改過
+
+    // 1. 遍歷所有在「成箱」表格內的可編輯欄位 (透過 `[data-uuid]` 屬性選取)
+    document.querySelectorAll('#case-order-history-container [data-uuid]').forEach(input => {
+        const uuid = input.dataset.uuid;
+        
+        // 如果這個 uuid 還沒被處理過，就在 recordsToUpdate 中為它建立一個新物件
+        if (!changedUuids.has(uuid)) {
+            recordsToUpdate.push({ uuid: uuid });
+            changedUuids.add(uuid);
+        }
+
+        // 找到對應的紀錄物件，並更新該欄位的值
+        const record = recordsToUpdate.find(r => r.uuid === uuid);
+        if (record) {
+            const field = input.dataset.field; // 獲取欄位名稱 ('isPaid' 或 'paymentTime')
+            let value;
+
+            if (input.tagName === 'SELECT') {
+                // 如果是下拉選單，將字串 "true" 轉換為布林值 true
+                value = (input.value === 'true');
+            } else if (input.type === 'datetime-local' && input.value === '') {
+                // 如果日期欄位被使用者清空，我們傳送 null
+                value = null;
+            } else {
+                value = input.value;
+            }
+            record[field] = value;
+        }
+    });
+
+    // 如果沒有任何變更，則提示使用者並中止
+    if (recordsToUpdate.length === 0) {
+        alert("沒有偵測到任何變更。");
+        return;
+    }
+
+    // 禁用按鈕，防止重複提交
+    const saveBtn = document.getElementById('saveCaseHistoryBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '儲存中...';
+
+    // 2. 呼叫後端函式進行批次更新
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                alert("變更已成功儲存！");
+                // 成功後可以選擇重新載入資料以確認
+                // loadOrderHistoryPage(); 
+            } else {
+                alert("儲存失敗：\n" + (response.message || '未知錯誤'));
+            }
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存「成箱」變更';
+        })
+        .withFailureHandler(function(err) {
+            alert("儲存時發生嚴重錯誤：" + err.message);
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存「成箱」變ען';
+        })
+        .updateCaseOrderStatus(recordsToUpdate); // 呼叫對應「成箱」的後端更新函式
+}
+
+/**
+ * 儲存「零星訂購紀錄」表格中的所有變更
+ */
+function saveLooseOrderHistoryChanges() {
+    const recordsToUpdate = [];
+    const changedUuids = new Set(); // 追蹤哪些 uuid 的資料被修改過
+
+    // 遍歷所有可編輯的輸入框/下拉選單
+    document.querySelectorAll('#loose-order-history-container [data-uuid]').forEach(input => {
+        const uuid = input.dataset.uuid;
+        // 如果這個 uuid 還沒被處理過，就建立一個新物件
+        if (!changedUuids.has(uuid)) {
+            recordsToUpdate.push({ uuid: uuid });
+            changedUuids.add(uuid);
+        }
+        // 找到對應的紀錄物件，並更新欄位值
+        const record = recordsToUpdate.find(r => r.uuid === uuid);
+        if (record) {
+            const field = input.dataset.field;
+            let value = (input.type === 'checkbox' || input.tagName === 'SELECT') ? (input.value === 'true') : input.value;
+            // 如果是日期欄位且使用者清空了它，我們傳送 null
+            if(input.type === 'datetime-local' && value === '') {
+                value = null;
+            }
+            record[field] = value;
+        }
+    });
+
+    if (recordsToUpdate.length === 0) {
+        alert("沒有偵測到任何變更。");
+        return;
+    }
+
+    const saveBtn = document.getElementById('saveLooseHistoryBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '儲存中...';
+
+    // 呼叫後端函式進行批次更新
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                alert("變更已成功儲存！");
+                // 可以選擇在成功後重新載入資料以確認
+                // loadOrderHistoryPage(); 
+            } else {
+                alert("儲存失敗：\n" + response.message);
+            }
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存「零星」變更';
+        })
+        .withFailureHandler(function(err) {
+            alert("儲存時發生嚴重錯誤：" + err.message);
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存「零星」變更';
+        })
+        .updateLooseOrderStatus(recordsToUpdate);
+}
+
+// ==========================================================
+// ================ 派送紀錄頁面 (功能完整版) ===============
+// ==========================================================
+
+/**
+ * 主載入函式：獲取並顯示當前派送員的紀錄
+ */
+function loadDeliveryHistoryPage() {
+    const container = document.getElementById('delivery-history-container');
+    const saveBtn = document.getElementById('saveDeliveryHistoryBtn');
+    if (!container || !saveBtn) return;
+    
+    // 綁定儲存按鈕事件
+    saveBtn.addEventListener('click', saveDeliveryHistoryChanges);
+
+    container.querySelector('tbody').innerHTML = `<tr><td colspan="8">載入派送紀錄中...</td></tr>`;
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                renderDeliveryHistoryTable(response.data);
+            } else {
+                container.innerHTML = `<p style="color:red">無法載入派送紀錄: ${response.error}</p>`;
+            }
+        })
+        .withFailureHandler(function(err) {
+            container.innerHTML = `<p style="color:red">讀取派送紀錄時發生錯誤。</p>`;
+        })
+        .getDeliveryHistoryForCourier();
+}
+
+/**
+ * 將派送紀錄渲染成可編輯的表格
+ */
+function renderDeliveryHistoryTable(records) {
+    const table = document.querySelector('#delivery-history-container table');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    if (!tbody || !thead) return;
+
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+    const headers = ['商品名稱','盒數','寄送地點','派送員','派送員信箱','派送時間','已派送完成'];
+    thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+    if (!records || records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${headers.length}">您目前沒有待處理的派送任務。</td></tr>`;
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    records.forEach(record => {
+        const tr = document.createElement('tr');
+        const shippingTimeString = convertUtcToLocalInputString(record.shippingTime);
+        const isCompletedString = String(record.isCompleted === true);
+
+        // 產生表格列，其中「派送時間」和「已派送完成」是可編輯的
+        tr.innerHTML = `
+            <td>${escapeHtml(record.productName)}</td>
+            <td>${escapeHtml(record.quantity)}</td>
+            <td>${escapeHtml(record.location)}</td>
+            <td>${escapeHtml(record.courierName)}</td>
+            <td>${escapeHtml(record.courierEmail)}</td>
+            <td>
+                <input type="datetime-local" class="control-input" value="${shippingTimeString}" data-uuid="${record.uuid}" data-field="shippingTime">
+            </td>
+            <td>
+                <select class="control-input" data-uuid="${record.uuid}" data-field="isCompleted">
+                    <option value="true" ${isCompletedString === 'true' ? 'selected' : ''}>是</option>
+                    <option value="false" ${isCompletedString === 'false' ? 'selected' : ''}>否</option>
+                </select>
+            </td>
+        `;
+        fragment.appendChild(tr);
+    });
+    tbody.appendChild(fragment);
+}
+
+/**
+ * 儲存「派送紀錄」表格中的所有變更
+ */
+function saveDeliveryHistoryChanges() {
+    const recordsToUpdate = [];
+    const changedUuids = new Set();
+
+    document.querySelectorAll('#delivery-history-container [data-uuid]').forEach(input => {
+        const uuid = input.dataset.uuid;
+        if (!changedUuids.has(uuid)) {
+            recordsToUpdate.push({ uuid: uuid });
+            changedUuids.add(uuid);
+        }
+        const record = recordsToUpdate.find(r => r.uuid === uuid);
+        if (record) {
+            const field = input.dataset.field;
+            let value = (input.tagName === 'SELECT') ? (input.value === 'true') : input.value;
+            if(input.type === 'datetime-local' && value === '') { value = null; }
+            record[field] = value;
+        }
+    });
+
+    if (recordsToUpdate.length === 0) {
+        alert("沒有偵測到任何變更。");
+        return;
+    }
+
+    const saveBtn = document.getElementById('saveDeliveryHistoryBtn');
+    saveBtn.disabled = true; saveBtn.textContent = '儲存中...';
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (response.success) {
+                alert("派送狀態已成功更新！");
+            } else {
+                alert("更新失敗：\n" + response.message);
+            }
+            saveBtn.disabled = false; saveBtn.textContent = '儲存變更';
+        })
+        .withFailureHandler(function(err) {
+            alert("更新時發生嚴重錯誤：" + err.message);
+            saveBtn.disabled = false; saveBtn.textContent = '儲存變更';
+        })
+        .updateDeliveryStatus(recordsToUpdate);
+}
 
     </script>
-    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <!-- <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script> -->
 </body>
 </html>
