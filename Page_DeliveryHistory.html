@@ -1,12 +1,18 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-  </head>
-  <body>
-    <div class="container">
-    <h2>派送紀錄</h2>
-    <p>此處將會顯示您個人的歷史派送紀錄。</p>
+<div class="container" id="page-delivery-history">
+    <div class="history-section">
+        <div class="section-header">
+            <h2>我的派送紀錄</h2>
+            <div class="header-actions">
+                <span id="delivery-history-status-msg" class="status-message"></span>
+                <button id="saveDeliveryHistoryBtn" class="action-btn btn-save">儲存變更</button>
+            </div>
+        </div>
+        <div id="delivery-history-container" class="table-container">
+            <table>
+                <thead></thead>
+                <tbody>
+                    <tr><td colspan="7">載入派送紀錄中...</td></tr> </tbody>
+            </table>
+        </div>
     </div>
-  </body>
-</html>
+</div>
