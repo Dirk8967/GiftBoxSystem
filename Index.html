@@ -731,12 +731,12 @@
             <input type="hidden" id="edit-order-uuid">
             
             <div class="modal-form-grid">
-                <div class="form-group"><label for="edit-order-time">訂購時間</label><input type="datetime-local" id="edit-order-time" disabled></div>
+                <div class="form-group"><label for="edit-order-time">訂購時間</label><input type="text" id="edit-order-time" disabled></div>
                 <div class="form-group"><label for="edit-name">姓名</label><input type="text" id="edit-name"></div>
                 <div class="form-group"><label for="edit-phone">電話</label><input type="text" id="edit-phone"></div>
                 <div class="form-group"><label for="edit-product">商品</label><input type="text" id="edit-product" disabled></div>
-                <div class="form-group"><label for="edit-quantity">盒數</label><input type="number" id="edit-quantity" disabled></div>
-                <div class="form-group"><label for="edit-total-amount">總計金額</label><input type="number" id="edit-total-amount" disabled></div>
+                <div class="form-group"><label for="edit-quantity">盒數</label><input type="number" id="edit-quantity" ></div>
+                <div class="form-group"><label for="edit-total-amount">總計金額</label><input type="number" id="edit-total-amount" ></div>
                 <div class="form-group"><label for="edit-location">寄送地點</label><input type="text" id="edit-location"></div>
                 <div class="form-group"><label for="edit-delivery-date">寄送日期</label><input type="date" id="edit-delivery-date"></div>
                 <div class="form-group"><label for="edit-site">隸屬站點</label><input type="text" id="edit-site" disabled></div>
@@ -750,6 +750,7 @@
                 <div class="form-group" style="display: none;"><label for="edit-is-paidtime">付款時間</label><input type="text" id="edit-is-paidtime"></div>
                 <div class="form-group"><label for="edit-operator">操作人員</label><input type="text" id="edit-operator" disabled></div>
                 <div class="form-group" style="display: none;"><label for="edit-operatoremail">操作人員信箱</label><input type="text" id="edit-operatoremail"></div>
+                <div class="form-group"><label for="edit-order-id">訂單編號</label><input type="text" id="edit-order-id" ></div>
             </div>
             
             <div class="modal-actions">
@@ -2126,7 +2127,7 @@ function handleEditOrder(uuid) { // 參數改為 uuid
     // 【核心修改】將 uuid 填入 modal 的隱藏欄位
     document.getElementById('edit-order-uuid').value = orderToEdit.uuid;
     // 注意：Date/Time 欄位的格式需要特別處理才能正確顯示在 input 中
-    document.getElementById('edit-order-time').value = orderToEdit.orderTime ? new Date(orderToEdit.orderTime).toISOString().slice(0, 16) : '';
+    document.getElementById('edit-order-time').value = orderToEdit.orderTime ? new Date(orderToEdit.orderTime).toLocaleString('zh-TW', { hour12: false }) : '';
     document.getElementById('edit-name').value = orderToEdit.name || '';
     document.getElementById('edit-phone').value = orderToEdit.phone || '';
     document.getElementById('edit-product').value = orderToEdit.product || '';
@@ -2140,6 +2141,7 @@ function handleEditOrder(uuid) { // 參數改為 uuid
     document.getElementById('edit-is-paidtime').value = orderToEdit.paidtime || '';
     document.getElementById('edit-operator').value = orderToEdit.operator || '';
     document.getElementById('edit-operatoremail').value = orderToEdit.operatoremail || '';
+    document.getElementById('edit-order-id').value = orderToEdit.orderId || '';
     // 顯示 Modal
     document.getElementById('edit-order-modal').style.display = 'flex';
 }
@@ -2188,7 +2190,6 @@ function saveOrderChanges(event) {
     // 從表單中收集更新後的資料
     const updatedOrder = {
         uuid: document.getElementById('edit-order-uuid').value,
-        // orderId: document.getElementById('edit-order-id').value,
         orderTime: (document.getElementById('edit-order-time').value),
         name: document.getElementById('edit-name').value,
         phone: document.getElementById('edit-phone').value,
@@ -2201,14 +2202,15 @@ function saveOrderChanges(event) {
         isPaid: document.getElementById('edit-is-paid').value === 'true',
         paidtime: document.getElementById('edit-is-paidtime').value,
         operator: document.getElementById('edit-operator').value,
-        operatoremail: document.getElementById('edit-operatoremail').value
+        operatoremail: document.getElementById('edit-operatoremail').value,
+        orderId: document.getElementById('edit-order-id').value
     };
 
     // 從 `updatedOrder` 物件中找到 `orderId`，以便在本地陣列中更新
-    const originalOrder = allAdminOrders.find(o => o.uuid === updatedOrder.uuid);
-    if(originalOrder) {
-        updatedOrder.orderId = originalOrder.orderId;
-    }
+    // const originalOrder = allAdminOrders.find(o => o.uuid === updatedOrder.uuid);
+    // if(originalOrder) {
+    //     updatedOrder.orderId = originalOrder.orderId;
+    // }
 
     const statusMsg = document.getElementById('cao-admin-status-msg');
     if(statusMsg) statusMsg.textContent = `正在儲存訂單 ${updatedOrder.orderId} 的變更...`;
