@@ -448,7 +448,7 @@
                     <label for="caseAdminModalRemarks">備註</label>
                     <textarea id="caseAdminModalRemarks" rows="4"></textarea>
                 </div>
-                <div class="form-group checkbox-group">
+                <div class="form-group checkbox-group" style="display: none">
                     <input type="checkbox" id="caseAdminModalIsGasStationStaff">
                     <label for="caseAdminModalIsGasStationStaff">是否為加油站人員</label>
                 </div>
@@ -900,7 +900,7 @@
                     <td>${escapeHtml(admin.employeeId)}</td>
                     <td>${escapeHtml(admin.email)}</td>
                     <td>${escapeHtml(admin.affiliatedUnit)}</td>
-                    <td style="text-align:center;">${admin.isGasStationStaff ? '是' : '否'}</td>
+                    <td style="text-align:center; display: none">${admin.isGasStationStaff ? '是' : '否'}</td>
                     <td style="text-align:center;"><input type="checkbox" class="status-checkbox" ${admin.isApproved ? 'checked' : ''} disabled></td>
                     <td class="remarks-col">${escapeHtml(admin.remarks)}</td>
                     <td>
