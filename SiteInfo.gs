@@ -44,6 +44,7 @@ function clearSiteInfoCache_() {
  * 獲取所有站點資訊資料
  */
 function getSiteInfoListData() {
+  clearSiteInfoCache_();
   const cache = CacheService.getScriptCache();
   const cached = cache.get(SITE_INFO_CACHE_KEY);
   if (cached != null) {
