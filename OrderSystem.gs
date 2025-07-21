@@ -478,7 +478,7 @@ function getAdminCaseOrders() {
       return [];
     }
 
-    const range = sheet.getRange(2, 1, lastRow - 1, 14);
+    const range = sheet.getRange(2, 1, lastRow - 1, 15);
     const values = range.getValues();
     Logger.log("成功讀取 " + values.length + " 筆資料。");
     
