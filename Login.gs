@@ -2,7 +2,7 @@
 //                            設定區
 // ================================================================= //
 const SPREADSHEET_ID = "1xC1Hb3_V4faqL4xJIrbMO3mUQW_rUclca1xU7MrMLuY";
-const ADMIN_EMAILS = ['jc8v2hz@gmail.com', 'jn8x2kz@gmail.com', 'd4208diversification@gmail.com'];
+const ADMIN_EMAILS = ['jc8v2hz@gmail.com', 'jn8x2kz@gmail.com', 'd4208diversification@gmail.com', 'kelytiger0556@gmail.com'];
 const APPLICANTS_CACHE_KEY = 'allApplicantsData_v3'; 
 const CACHE_DURATION_SECONDS = 300; 
 
