@@ -43,7 +43,7 @@ function addUserData(userData) {
 
     const lastRow = sheet.getLastRow();
     sheet.getRange(lastRow, 2).setNumberFormat("@"); 
-
+    sheet.getRange(lastRow, 3).setNumberFormat("@"); //新增:email欄位排除前導0問題
     SpreadsheetApp.flush();
     clearApplicantsCache_();
     return { success: true };
@@ -78,7 +78,7 @@ function updateUserData(userData) {
     ]]);
 
     sheet.getRange(rowNumber, 2).setNumberFormat("@");
-
+    sheet.getRange(rowNumber, 3).setNumberFormat("@"); //新增:email欄位排除前導0問題
     SpreadsheetApp.flush();
     clearApplicantsCache_();
     return { success: true };
