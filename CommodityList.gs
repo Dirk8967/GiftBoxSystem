@@ -28,32 +28,57 @@ function getProductSheet_() {
   }
 }
 
+
 /**
- * 輔助函式：獲取或建立商品圖片儲存資料夾
+ * 輔助函式：【已修改】直接透過 ID 獲取已分享的商品圖片儲存資料夾
+ * @returns {GoogleAppsScript.Drive.Folder} 資料夾物件
  */
 function getProductImageFolder_() {
+  // --- 請將 'YOUR_SHARED_FOLDER_ID_HERE' 替換為您實際的「商品圖片」資料夾 ID ---
+  const SHARED_IMAGE_FOLDER_ID = "1Wo-L_92LHxmZo64OTtHvZbq3pCLd65ET"; 
+
   try {
-    const productSheetFile = DriveApp.getFileById(PRODUCT_SHEET_ID);
-    const parentFolders = productSheetFile.getParents();
-    if (!parentFolders.hasNext()) {
-        throw new Error("商品資訊試算表沒有父資料夾，無法定位圖片儲存位置。");
-    }
-    const parentFolder = parentFolders.next(); 
-    
-    let imageFolder;
-    const folders = parentFolder.getFoldersByName(PRODUCT_IMAGE_FOLDER_NAME);
-    if (folders.hasNext()) {
-      imageFolder = folders.next();
-    } else {
-      imageFolder = parentFolder.createFolder(PRODUCT_IMAGE_FOLDER_NAME);
-      Logger.log("已建立資料夾: '" + PRODUCT_IMAGE_FOLDER_NAME + "' 於資料夾ID '" + parentFolder.getId() + "'");
+    const imageFolder = DriveApp.getFolderById(SHARED_IMAGE_FOLDER_ID);
+    // 為了確保萬無一失，可以檢查一下資料夾是否存在
+    if (!imageFolder) {
+       throw new Error("無法透過指定的 ID 找到「商品圖片」資料夾。請檢查 ID 是否正確，且執行者是否有權限存取。");
     }
     return imageFolder;
   } catch (e) {
     console.error("getProductImageFolder_ 錯誤: " + e.toString());
-    throw new Error("伺服器錯誤：處理商品圖片資料夾失敗: " + e.message);
+    // 拋出一個對使用者更友善的錯誤訊息
+    throw new Error("伺服器錯誤：無法存取商品圖片儲存位置。請聯繫管理員確認資料夾設定。");
   }
 }
+/**
+ * 輔助函式：獲取或建立商品圖片儲存資料夾
+ */
+// 原先以試算表ID為定位存取在同一個資料夾中的子資料夾
+// function getProductImageFolder_() {
+//   try {
+//     const productSheetFile = DriveApp.getFileById(PRODUCT_SHEET_ID);
+//     const parentFolders = productSheetFile.getParents();
+//     if (!parentFolders.hasNext()) {
+//         throw new Error("商品資訊試算表沒有父資料夾，無法定位圖片儲存位置。");
+//     }
+//     const parentFolder = parentFolders.next(); 
+    
+//     let imageFolder;
+//     const folders = parentFolder.getFoldersByName(PRODUCT_IMAGE_FOLDER_NAME);
+//     if (folders.hasNext()) {
+//       imageFolder = folders.next();
+//     } else {
+//       imageFolder = parentFolder.createFolder(PRODUCT_IMAGE_FOLDER_NAME);
+//       Logger.log("已建立資料夾: '" + PRODUCT_IMAGE_FOLDER_NAME + "' 於資料夾ID '" + parentFolder.getId() + "'");
+//     }
+//     return imageFolder;
+//   } catch (e) {
+//     console.error("getProductImageFolder_ 錯誤: " + e.toString());
+//     throw new Error("伺服器錯誤：處理商品圖片資料夾失敗: " + e.message);
+//   }
+// }
+
+
 
 /**
  * 輔助函式：清除商品資料快取
