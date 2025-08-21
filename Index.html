@@ -59,7 +59,7 @@
         }
         .container { 
             width: 100%; 
-            max-width: 1200px; 
+            max-width: 1600px; 
             margin: 0 auto; 
             background: white; 
             padding: 20px; 
@@ -739,7 +739,8 @@
                 <div class="form-group"><label for="edit-total-amount">總計金額</label><input type="number" id="edit-total-amount" ></div>
                 <div class="form-group"><label for="edit-location">寄送地點</label><input type="text" id="edit-location"></div>
                 <div class="form-group"><label for="edit-delivery-date">寄送日期</label><input type="date" id="edit-delivery-date"></div>
-                <div class="form-group"><label for="edit-site">隸屬站點</label><input type="text" id="edit-site" disabled></div>
+                <div class="form-group"><label for="edit-taxidentificationnumber">統一編號</label><input type="text" id="edit-taxidentificationnumber"></div>
+                <div class="form-group"><label for="edit-site">隸屬站點(格式：站名(站代號)，例:「竹北站(D4248)」)</label><input type="text" id="edit-site"></div>
                 <div class="form-group">
                   <label for="edit-is-paid">已付款</label>
                   <select id="edit-is-paid" class="control-input" disabled>
@@ -1222,9 +1223,9 @@ window.addEventListener('load', function() {
                 function createCell(text, alignClass) { const td = document.createElement('td'); td.textContent = text; if(alignClass) td.className = alignClass; return td; }
                 tr.appendChild(createCell(product.companyName));
                 tr.appendChild(createCell(product.productName));
-                tr.appendChild(createCell(product.sellingPricePerBox, 'text-right'));
-                tr.appendChild(createCell(product.casePricePerBox, 'text-right'));
-                tr.appendChild(createCell(product.totalCasePrice, 'text-right'));
+                tr.appendChild(createCell(product.sellingPricePerBox, 'text-center'));
+                tr.appendChild(createCell(product.casePricePerBox, 'text-center'));
+                tr.appendChild(createCell(product.totalCasePrice, 'text-center'));
                 tr.appendChild(createCell(product.boxesPerCase, 'text-center')); 
                 const tdCanShip = createCell(''); tdCanShip.className = 'text-center';
                 tdCanShip.innerHTML = product.canShipAboveCase ? '<div class="ship-option-yes"><span class="material-symbols-outlined">check_circle</span>是</div>' : '<div class="ship-option-no"><span class="material-symbols-outlined">cancel</span>否</div>';
@@ -1255,7 +1256,8 @@ window.addEventListener('load', function() {
             const ordererPhone = document.getElementById('ordererPhone').value.trim();
             const deliveryLocation = document.getElementById('deliveryLocation').value.trim();
             const deliveryDate = document.getElementById('deliveryDate').value;
-            if(!ordererName || !ordererPhone || !deliveryLocation || !deliveryDate) { alert("請先填寫頁面上方的訂購人姓名、電話、寄送地點和寄送日期！"); return; }
+            const affiliatedSite = document.getElementById('affiliatedSite').value; //[新增]將訂單隸屬站點也列為modal跳出前的檢查項目
+            if(!ordererName || !ordererPhone || !deliveryLocation || !deliveryDate || !affiliatedSite) { alert("請先填寫頁面上方的訂購人姓名、電話、寄送地點、寄送日期及訂單隸屬站點！"); return; }
             const modal = document.getElementById('caseOrderModal');
             if (!modal) { return; }
             document.getElementById('modalOrdererName').textContent = ordererName;
@@ -1308,6 +1310,7 @@ window.addEventListener('load', function() {
             const ordererName = document.getElementById('modalOrdererName').textContent;
             const deliveryDate = document.getElementById('modalDeliveryDate').textContent;
             const affiliatedSite = document.getElementById('affiliatedSite').value.trim(); // 【新增】獲取訂單隸屬站點
+            const taxidentificationnumber = document.getElementById('taxidentificationnumber').value.trim(); // 【新增】獲取統一編號
 
             // 準備確認訊息
             const confirmationMessage = "請確認訂單資訊：\n" +
@@ -1317,6 +1320,7 @@ window.addEventListener('load', function() {
                 "訂單隸屬站點: " + affiliatedSite + "\n" + // 【新增】在確認訊息中顯示
                 "商品名稱: " + currentOrderingProduct.productName + "\n" +
                 "訂購數量: " + selectedQty + " 盒\n" +
+                "統一編號: " + taxidentificationnumber + " \n" +
                 "-------------------------------------\n" +
                 "總計金額: " + totalPrice + " 元\n\n" +
                 "確認無誤後請點擊「確定」送出訂單。";
@@ -1337,7 +1341,8 @@ window.addEventListener('load', function() {
                     location: document.getElementById('modalDeliveryLocation').textContent,
                     date: deliveryDate,
                     caseCount: parseFloat(caseCount),
-                    affiliatedSite: affiliatedSite // 【新增】
+                    affiliatedSite: affiliatedSite, // 【新增】
+                    taxidentificationnumber: taxidentificationnumber
                 };
 
                 // 5. 呼叫後端函式
@@ -1397,7 +1402,7 @@ window.addEventListener('load', function() {
                 // 【修正】根據零星訂購的表頭，渲染對應的欄位和對齊
                 tr.appendChild(createCell(product.companyName, 'text-left'));
                 tr.appendChild(createCell(product.productName, 'text-left'));
-                tr.appendChild(createCell(product.sellingPricePerBox, 'text-right'));
+                tr.appendChild(createCell(product.sellingPricePerBox, 'text-center'));
                 tr.appendChild(createCell(product.boxesPerCase, 'text-center')); 
                 
                 const tdImage = createCell('', 'text-center');
@@ -2061,7 +2066,7 @@ function renderAdminOrdersTable(orders) {
 
     if (!orders || orders.length === 0) {
         statusMsg.textContent = '查無符合條件的訂單資料。';
-        tableBody.innerHTML = '<tr><td colspan="13">查無符合條件的訂單資料。</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="14">查無符合條件的訂單資料。</td></tr>';
         return;
     }
 
@@ -2080,6 +2085,7 @@ function renderAdminOrdersTable(orders) {
             <td>${escapeHtml(order.totalAmount || '')}</td>
             <td>${escapeHtml(order.location || '')}</td>
             <td>${order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : ''}</td>
+            <td>${escapeHtml(order.taxidentificationnumber || '')}</td>
             <td>${escapeHtml(order.site || '')}</td>
             <td>${escapeHtml(order.isPaid ? '是': '否')}</td>
             <td>${escapeHtml(order.operator || '')}</td>
@@ -2135,6 +2141,7 @@ function handleEditOrder(uuid) { // 參數改為 uuid
     document.getElementById('edit-total-amount').value = orderToEdit.totalAmount || '';
     document.getElementById('edit-location').value = orderToEdit.location || '';
     document.getElementById('edit-delivery-date').value = orderToEdit.deliveryDate ? new Date(orderToEdit.deliveryDate).toISOString().slice(0, 10) : '';
+    document.getElementById('edit-taxidentificationnumber').value = orderToEdit.taxidentificationnumber || '';
     document.getElementById('edit-site').value = orderToEdit.site || '';
     // 我們將其轉換為字串 "true" 或 "false" 來匹配 <option> 的 value
     document.getElementById('edit-is-paid').value = String(orderToEdit.isPaid === true);
@@ -2198,6 +2205,7 @@ function saveOrderChanges(event) {
         totalAmount: document.getElementById('edit-total-amount').value,
         location: document.getElementById('edit-location').value,
         deliveryDate: (document.getElementById('edit-delivery-date').value),
+        taxidentificationnumber: document.getElementById('edit-taxidentificationnumber').value,
         site: document.getElementById('edit-site').value,
         isPaid: document.getElementById('edit-is-paid').value === 'true',
         paidtime: document.getElementById('edit-is-paidtime').value,
