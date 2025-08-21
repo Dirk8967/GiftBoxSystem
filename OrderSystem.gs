@@ -110,26 +110,30 @@ function submitCaseOrderToServer(orderData) {
 
     const phoneStr = String(orderData.phone || '').trim();
     const phoneValueToWrite = phoneStr ? "'" + phoneStr : ""; 
+    const taxidentificationnumberStr = String(orderData.taxidentificationnumber || '').trim();
+    const taxidentificationnumberValueToWrite = taxidentificationnumberStr ? "'" + taxidentificationnumberStr : ""; 
 
-    // 【修正】依照新的 15 欄位格式準備要寫入的資料列 (A 到 O)
+
+    // 【修正】依照新的 16 欄位格式準備要寫入的資料列 (A 到 P)
     const rowData = [
-      newUuid,                    // A欄: UUID
-      orderData.name,             // B欄: 訂購人姓名
-      phoneValueToWrite,          // C欄: 訂購人電話
-      orderData.productName,      // D欄: 商品名稱
-      orderData.quantity,         // E欄: 盒數
-      orderData.totalPrice,       // F欄: 總計金額
-      orderData.location,         // G欄: 寄送地點
-      orderData.date,             // H欄: 寄送日期
-      orderData.affiliatedSite,   // I欄: 訂單隸屬站點
-      false,                      // J欄: 固定填入 FALSE
-      '',                         // K欄: 空白
-      orderTimestamp,             // L欄: 訂購時間
-      operatorName,               // M欄: 操作人員姓名
-      operatorEmail,              // N欄: 操作人員信箱
-      ''                          // O欄: 空白
+      newUuid,                            // A欄: UUID
+      orderData.name,                     // B欄: 訂購人姓名
+      phoneValueToWrite,                  // C欄: 訂購人電話
+      orderData.productName,              // D欄: 商品名稱
+      orderData.quantity,                 // E欄: 盒數
+      orderData.totalPrice,               // F欄: 總計金額
+      orderData.location,                 // G欄: 寄送地點
+      orderData.date,                     // H欄: 寄送日期
+      taxidentificationnumberValueToWrite,// I欄: 統一編號
+      orderData.affiliatedSite,           // J欄: 訂單隸屬站點
+      false,                              // K欄: 固定填入 FALSE
+      '',                                 // L欄: 空白
+      orderTimestamp,                     // M欄: 訂購時間
+      operatorName,                       // N欄: 操作人員姓名
+      operatorEmail,                      // O欄: 操作人員信箱
+      ''                                  // P欄: 空白
     ];
-
+    
     targetSheet.appendRow(rowData);
     SpreadsheetApp.flush(); 
 
@@ -140,7 +144,9 @@ function submitCaseOrderToServer(orderData) {
     }
     // 未來如果隸屬站點也需要強制文字，可在此處加入
     // targetSheet.getRange(lastRow, 8).setNumberFormat("@"); 
-    
+     
+    targetSheet.getRange(lastRow, 9).setNumberFormat("@"); // 統一編號強制設定為純文字
+
     return { success: true };
   } catch (e) {
     console.error("submitCaseOrderToServer 錯誤: " + e.toString());
@@ -236,12 +242,12 @@ function getCaseOrderSummaryData() {
 
     if (orderSheet.getLastRow() >= 2) {
       // 讀取範圍擴大到 F 欄，以包含總計金額
-      const orders = orderSheet.getRange("D2:I" + orderSheet.getLastRow()).getValues(); // D:商品, E:盒數, F:總金額, I:站點
+      const orders = orderSheet.getRange("D2:J" + orderSheet.getLastRow()).getValues(); // D:商品, E:盒數, F:總金額, J:站點
       orders.forEach(order => {
         const productName = order[0]; // D
         const quantity = order[1];    // E
         const totalAmount = order[2]; // F: 總計金額
-        let affiliatedSite = order[5]; // I: 訂單隸屬站點
+        let affiliatedSite = order[6]; // J: 訂單隸屬站點
 
         if (affiliatedSite && typeof affiliatedSite === 'string') {
           affiliatedSite = affiliatedSite.split('(')[0].trim();
@@ -397,12 +403,12 @@ function getGrandSummaryData() {
 
     // 4.1 處理「成箱訂單」
     if (caseOrderSheet.getLastRow() >= 2) {
-      const caseOrders = caseOrderSheet.getRange("A2:I" + caseOrderSheet.getLastRow()).getValues();
+      const caseOrders = caseOrderSheet.getRange("A2:J" + caseOrderSheet.getLastRow()).getValues();
       caseOrders.forEach(order => {
         const productName = order[3]; // D欄
         const quantity = order[4];    // E欄
         const totalAmount = order[5]; // F欄
-        let affiliatedSite = order[8]; // I欄
+        let affiliatedSite = order[9]; // J欄
 
         if (affiliatedSite && typeof affiliatedSite === 'string') {
           affiliatedSite = affiliatedSite.split('(')[0].trim();
@@ -486,7 +492,7 @@ function getAdminCaseOrders() {
     const orders = values.map(row => {
       return {
         uuid: row[0],       // A 欄: UUID
-        orderTime: row[11], // L 欄: 訂購時間
+        orderTime: row[12], // L 欄: 訂購時間
         name: row[1],       // B 欄: 姓名
         phone: row[2],      // C 欄: 電話
         product: row[3],    // D 欄: 商品
@@ -494,12 +500,13 @@ function getAdminCaseOrders() {
         totalAmount: row[5],// F 欄: 總金額
         location: row[6],   // G 欄: 寄送地點
         deliveryDate: row[7], // H 欄: 寄送日期
-        site: row[8],       // I 欄: 隸屬站點
-        isPaid: row[9],     // J 欄: 已付款
-        paidtime: row[10],  // K 欄: 繳費時間(新增)
-        operator: row[12],  // M 欄: 操作人員
-        operatoremail: row[13], // N 欄: 操作人員信箱(新增)
-        orderId: row[14]    // O 欄: 訂單編號
+        taxidentificationnumber: row[8],  //I欄: 統一編號
+        site: row[9],       // J 欄: 隸屬站點
+        isPaid: row[10],     // K 欄: 已付款
+        paidtime: row[11],  // L 欄: 繳費時間(新增)
+        operator: row[13],  // N 欄: 操作人員
+        operatoremail: row[14], // O 欄: 操作人員信箱(新增)
+        orderId: row[15]    // P 欄: 訂單編號
       };
     });
     return JSON.stringify(orders);
@@ -621,7 +628,7 @@ function updateOrder(orderData) {
         throw new Error("在試算表中找不到訂單編號: " + orderId);
     }
     
-    // 準備要寫入的整列資料，現在是 18 欄
+    // 準備要寫入的整列資料，現在是 19 欄
     const newRowData = [
         orderData.uuid,       // A: UUID (從傳入的物件中獲取)
         orderData.name,       // B: 姓名
@@ -631,19 +638,20 @@ function updateOrder(orderData) {
         orderData.totalAmount,// F: 總金額
         orderData.location,   // G: 寄送地點
         orderData.deliveryDate, // H: 寄送日期
-        orderData.site,       // I: 隸屬站點
-        orderData.isPaid,     // J: 已付款
-        orderData.paidtime,   // K: 付款時間
-        orderData.orderTime,  // L: 訂購時間
-        orderData.operator,   // M: 操作人員
-        orderData.operatoremail, // N: 操作人員信箱
-        orderData.orderId,    // O: 訂單編號
-        currentUserName,      // P: 【新增】修改者姓名
-        currentUserEmail,     // Q: 【新增】修改者信箱
-        formattedTime         // R: 【新增】修改時間
+        orderData.taxidentificationnumber, // I: 統一編號
+        orderData.site,       // J: 隸屬站點
+        orderData.isPaid,     // K: 已付款
+        orderData.paidtime,   // L: 付款時間
+        orderData.orderTime,  // M: 訂購時間
+        orderData.operator,   // N: 操作人員
+        orderData.operatoremail, // O: 操作人員信箱
+        orderData.orderId,    // P: 訂單編號
+        currentUserName,      // Q: 【新增】修改者姓名
+        currentUserEmail,     // R: 【新增】修改者信箱
+        formattedTime         // S: 【新增】修改時間
     ];
 
-    sheet.getRange(rowIndex, 1, 1, 18).setValues([newRowData]);
+    sheet.getRange(rowIndex, 1, 1, 19).setValues([newRowData]);
     
     return { success: true };
   } catch (e) {
