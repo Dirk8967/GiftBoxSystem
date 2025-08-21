@@ -1,6 +1,14 @@
 // 【新增】訂單與庫存試算表的 ID
 const ORDER_INVENTORY_SHEET_ID = "1tsj99qTZO0XunzYKNeJQw3GuCeTLneipOeiS6dnUjtg";
 
+// 【修改重點】定義連結與 QR Code 圖片網址
+const systemUrl = "https://script.google.com/macros/s/AKfycbwHPLiBefexrqsswnBJo6cbzHpePMsr78WfflKCBpOsUIClHIbZTzIg1TqMmnsTvdGZ/exec";
+const manualUrl = "https://sites.google.com/view/d4208giftbasket";
+
+// 使用免費 API 來生成 QR Code，並對 URL 進行編碼以確保正確性
+const systemQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(systemUrl)}`;
+const manualQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(manualUrl)}`;
+
 // ================================================================= //
 //                       訂購系統 - 後端邏輯
 // ================================================================= //
@@ -147,6 +155,111 @@ function submitCaseOrderToServer(orderData) {
      
     targetSheet.getRange(lastRow, 9).setNumberFormat("@"); // 統一編號強制設定為純文字
 
+    // 寄通知信給使用者
+    
+    // 【修改重點】取出電話和統編，並移除可能存在的前導單引號
+    let phoneNumber = phoneValueToWrite || ''; // 如果沒提供，則為空字串
+    if (phoneNumber && phoneNumber.startsWith("'")) {
+      phoneNumber = phoneNumber.substring(1);
+    }
+
+    let taxId = taxidentificationnumberValueToWrite || ''; // 如果沒提供，則為空字串
+    if (taxId && taxId.startsWith("'")) {
+      taxId = taxId.substring(1);
+    }
+
+    // 使用樣板字串（`...`）來建立多行 HTML，這樣更清晰易讀。
+    const htmlBody = `
+      <html>
+        <head>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+            .container { width: 100%; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+            .header { font-size: 24px; color: #333; margin-bottom: 20px; text-align: center; }
+            .details-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .details-table th, .details-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+            .details-table th { background-color: #f7f7f7; }
+            .products-table { width: 100%; border-collapse: collapse; }
+            .products-table th, .products-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+            .products-table th { background-color: #f2f2f2; }
+            .footer { margin-top: 30px; font-size: 12px; color: #777; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+            /* 新增 QR Code 區塊的樣式 */
+            .qr-section { display: flex; justify-content: space-around; align-items: flex-start; margin-top: 20px; }
+            .qr-item { text-align: center; font-size: 14px; }
+            .qr-item img { margin-top: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">禮盒系統 訂單確認信</div>
+            <p> ${operatorName} 您好,</p>
+            <p>感謝您的訂購！您的訂單已成功建立，以下是您的訂單詳細資訊：</p>
+            
+            <table class="details-table">
+              <tr><th>訂購日期</th><td>${orderTimestamp}</td></tr>
+              <tr><th>訂購人姓名</th><td>${orderData.name}</td></tr>
+              <tr><th>訂購人電話</th><td>${phoneNumber}</td></tr>
+              <tr><th>總金額</th><td>NT$ ${orderData.totalPrice}</td></tr>
+              <tr><th>寄送地址</th><td>${orderData.location}</td></tr>
+              <tr><th>寄送日期</th><td>${orderData.date}</td></tr>
+              <tr><th>統一編號</th><td>${taxId}</td></tr>
+              <tr><th>訂單隸屬站點</th><td>${orderData.affiliatedSite}</td></tr>
+            </table>
+
+            <h3>訂購商品明細</h3>
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>商品名稱</th>
+                  <th>數量</th>
+                  <th>單價</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${orderData.productName}</td>
+                  <td>${orderData.quantity}</td>
+                  <td>NT$ ${(orderData.totalPrice / orderData.quantity)}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <p>我們將會盡快為您處理訂單，感謝您的耐心等候。</p>
+            <div class="footer">
+              <div class="qr-section">
+                <div class="qr-item">
+                  <a href="${systemUrl}" target="_blank">禮盒系統</a>
+                  <br>
+                  <img src="${systemQrUrl}" alt="禮盒系統 QR Code">
+                </div>
+                <div class="qr-item">
+                  <a href="${manualUrl}" target="_blank">禮盒系統使用手冊</a>
+                  <br>
+                  <img src="${manualQrUrl}" alt="使用手冊 QR Code">
+                </div>
+              </div>
+              <p style="margin-top: 20px;">此為系統自動發送的通知信件，請勿直接回覆。</p>
+              <p>禮盒系統 © 新竹零售中心</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // 設定郵件選項並寄送
+    // MailApp.sendEmail() 支援一個選項物件，讓我們可以傳送 HTML 郵件
+    const mailOptions = {
+      to: operatorEmail,
+      subject: `【禮盒系統】您的訂單已確認`,
+      htmlBody: htmlBody,
+      name: '新竹零售多角化管理', // 寄件人名稱，會顯示在收件人的信箱中
+      replyTo: Session.getActiveUser().getEmail().replace(/@/, '+noreply@')
+    };
+
+    MailApp.sendEmail(mailOptions);
+
+    // 信件段落結束
+
     return { success: true };
   } catch (e) {
     console.error("submitCaseOrderToServer 錯誤: " + e.toString());
@@ -208,6 +321,104 @@ function submitLooseOrderToServer(orderData) {
     if (phoneStr) {
         targetSheet.getRange(lastRow, 3).setNumberFormat("@"); // 強制 C 欄為文字
     }
+
+
+    // 寄通知信給使用者
+    
+    // 【修改重點】取出電話，並移除可能存在的前導單引號
+    let phoneNumber = phoneValueToWrite || ''; // 如果沒提供，則為空字串
+    if (phoneNumber && phoneNumber.startsWith("'")) {
+      phoneNumber = phoneNumber.substring(1);
+    }
+
+    // 使用樣板字串（`...`）來建立多行 HTML，這樣更清晰易讀。
+    const htmlBody = `
+      <html>
+        <head>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+            .container { width: 100%; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+            .header { font-size: 24px; color: #333; margin-bottom: 20px; text-align: center; }
+            .details-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .details-table th, .details-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+            .details-table th { background-color: #f7f7f7; }
+            .products-table { width: 100%; border-collapse: collapse; }
+            .products-table th, .products-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+            .products-table th { background-color: #f2f2f2; }
+            .footer { margin-top: 30px; font-size: 12px; color: #777; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+            /* 新增 QR Code 區塊的樣式 */
+            .qr-section { display: flex; justify-content: space-around; align-items: flex-start; margin-top: 20px; }
+            .qr-item { text-align: center; font-size: 14px; }
+            .qr-item img { margin-top: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">禮盒系統 訂單確認信</div>
+            <p> ${operatorName} 您好,</p>
+            <p>感謝您的訂購！您的訂單已成功建立，以下是您的訂單詳細資訊：</p>
+            
+            <table class="details-table">
+              <tr><th>訂購日期</th><td>${orderTimestamp}</td></tr>
+              <tr><th>訂購人姓名</th><td>${orderData.name}</td></tr>
+              <tr><th>訂購人電話</th><td>${phoneNumber}</td></tr>
+              <tr><th>總金額</th><td>NT$ ${orderData.totalPrice}</td></tr>
+              <tr><th>寄送地點</th><td>${orderData.location}</td></tr>
+            </table>
+
+            <h3>訂購商品明細</h3>
+            <table class="products-table">
+              <thead>
+                <tr>
+                  <th>商品名稱</th>
+                  <th>數量</th>
+                  <th>單價</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${orderData.productName}</td>
+                  <td>${orderData.quantity}</td>
+                  <td>NT$ ${(orderData.totalPrice / orderData.quantity)}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <p>我們將會盡快為您處理訂單，感謝您的耐心等候。</p>
+            <div class="footer">
+              <div class="qr-section">
+                <div class="qr-item">
+                  <a href="${systemUrl}" target="_blank">禮盒系統</a>
+                  <br>
+                  <img src="${systemQrUrl}" alt="禮盒系統 QR Code">
+                </div>
+                <div class="qr-item">
+                  <a href="${manualUrl}" target="_blank">禮盒系統使用手冊</a>
+                  <br>
+                  <img src="${manualQrUrl}" alt="使用手冊 QR Code">
+                </div>
+              </div>
+              <p style="margin-top: 20px;">此為系統自動發送的通知信件，請勿直接回覆。</p>
+              <p>禮盒系統 © 新竹零售中心</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // 設定郵件選項並寄送
+    // MailApp.sendEmail() 支援一個選項物件，讓我們可以傳送 HTML 郵件
+    const mailOptions = {
+      to: operatorEmail,
+      subject: `【禮盒系統】您的訂單已確認`,
+      htmlBody: htmlBody,
+      name: '新竹零售多角化管理', // 寄件人名稱，會顯示在收件人的信箱中
+      replyTo: Session.getActiveUser().getEmail().replace(/@/, '+noreply@')
+    };
+
+    MailApp.sendEmail(mailOptions);
+
+    // 信件段落結束
     
     return { success: true };
   } catch (e) {
@@ -1026,6 +1237,83 @@ function addNewShipment(shipmentData) {
     ];
     
     sheet.appendRow(newRowData);
+
+    // 寄通知信給使用者
+    
+
+
+    // 使用樣板字串（`...`）來建立多行 HTML，這樣更清晰易讀。
+    const htmlBody = `
+      <html>
+        <head>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+            .container { width: 100%; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+            .header { font-size: 24px; color: #333; margin-bottom: 20px; text-align: center; }
+            .details-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .details-table th, .details-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+            .details-table th { background-color: #f7f7f7; }
+            .products-table { width: 100%; border-collapse: collapse; }
+            .products-table th, .products-table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+            .products-table th { background-color: #f2f2f2; }
+            .footer { margin-top: 30px; font-size: 12px; color: #777; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }
+            /* 新增 QR Code 區塊的樣式 */
+            .qr-section { display: flex; justify-content: space-around; align-items: flex-start; margin-top: 20px; }
+            .qr-item { text-align: center; font-size: 14px; }
+            .qr-item img { margin-top: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">禮盒系統 派送通知信</div>
+            <p> ${shipmentData.courierName} 您好,</p>
+            <p>感謝您加入派送的行列！您的送貨單已成功建立，以下是您的送貨詳細資訊：</p>
+            
+            <table class="details-table">
+              <tr><th>商品名稱</th><td>${shipmentData.productName}</td></tr>
+              <tr><th>商品數量</th><td>${shipmentData.quantity}</td></tr>
+              <tr><th>送貨地點</th><td>${shipmentData.location}</td></tr>
+              <tr><th>派送員</th><td>${shipmentData.courierName}</td></tr>
+              <tr><th>派送單建立時間</th><td>${adminTime}</td></tr>
+            </table>
+            
+            <p>請盡快處理訂單，感謝您的派送。</p>
+            <div class="footer">
+              <div class="qr-section">
+                <div class="qr-item">
+                  <a href="${systemUrl}" target="_blank">禮盒系統</a>
+                  <br>
+                  <img src="${systemQrUrl}" alt="禮盒系統 QR Code">
+                </div>
+                <div class="qr-item">
+                  <a href="${manualUrl}" target="_blank">禮盒系統使用手冊</a>
+                  <br>
+                  <img src="${manualQrUrl}" alt="使用手冊 QR Code">
+                </div>
+              </div>
+              <p style="margin-top: 20px;">此為系統自動發送的通知信件，請勿直接回覆。</p>
+              <p>禮盒系統 © 新竹零售中心</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    // 設定郵件選項並寄送
+    // MailApp.sendEmail() 支援一個選項物件，讓我們可以傳送 HTML 郵件
+    const mailOptions = {
+      to: courierEmail,
+      subject: `【禮盒系統】您的派送單已建立`,
+      htmlBody: htmlBody,
+      name: '新竹零售多角化管理', // 寄件人名稱，會顯示在收件人的信箱中
+      replyTo: Session.getActiveUser().getEmail().replace(/@/, '+noreply@')
+    };
+
+    MailApp.sendEmail(mailOptions);
+
+    // 信件段落結束
+
+
     return { success: true };
 
   } catch (e) {
