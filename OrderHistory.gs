@@ -87,11 +87,11 @@ function updateCaseOrderStatus(updates) {
     updates.forEach(update => {
       const rowIndex = allData.findIndex(row => row[0] === update.uuid); // A欄是UUID
       if (rowIndex !== -1) {
-        allData[rowIndex][9] = update.isPaid; // J欄: 已繳費
-        allData[rowIndex][10] = update.paymentTime ? new Date(update.paymentTime) : null; // K欄: 繳費時間
-        // allData[rowIndex][14] = adminName;  // O欄
-        // allData[rowIndex][15] = adminEmail; // P欄
-        // allData[rowIndex][16] = adminTime;  // Q欄
+        allData[rowIndex][10] = update.isPaid; // K欄: 已繳費
+        allData[rowIndex][11] = update.paymentTime ? new Date(update.paymentTime) : null; // L欄: 繳費時間
+        // allData[rowIndex][16] = adminName;  // Q欄
+        // allData[rowIndex][17] = adminEmail; // R欄
+        // allData[rowIndex][18] = adminTime;  // S欄
       }
     });
 
