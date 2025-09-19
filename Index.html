@@ -3425,7 +3425,7 @@ function renderCaseOrderHistoryTable(orders, isEditable) {
     // 1. 清空舊內容並產生表頭
     thead.innerHTML = '';
     tbody.innerHTML = '';
-    const headers = ['訂購人姓名','電話','商品名稱','盒數','總計金額','寄送地點','寄送日期','訂單隸屬站點','已繳費','繳費時間','訂購時間','訂單編號'];
+    const headers = ['訂購人姓名','電話','商品名稱','盒數','總計金額','寄送地點','寄送日期','統一編號','訂單隸屬站點','已繳費','繳費時間','訂購時間','訂單編號'];
     thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
 
     if (!orders || orders.length === 0) {
@@ -3457,6 +3457,7 @@ function renderCaseOrderHistoryTable(orders, isEditable) {
         tr.appendChild(createTextCell(order.totalAmount));
         tr.appendChild(createTextCell(order.location));
         tr.appendChild(createTextCell(order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : ''));
+        tr.appendChild(createTextCell(order.taxidentificationnumber));
         tr.appendChild(createTextCell(order.affiliatedSite));
 
         // 【條件式渲染】已繳費欄位
